@@ -44,13 +44,32 @@ Aqui está a parte que difere mais do que vimos nos outros agentes. Em vez de um
 O Gemini Desktop é potente, mas **não opera no seu sistema como agente** no mesmo sentido do Claude Cowork ou do Codex Desktop. Ele lê arquivos locais e compartilha tela, mas não cria/edita arquivos do seu projeto, não roda comandos no terminal, não faz commits no Git. Para esse tipo de trabalho com Gemini, você precisa do **Gemini CLI** (terminal) ou do **Gemini Code Assist** (dentro de uma IDE). O "balcão único" que o Claude Desktop oferece **não existe** no ecossistema Gemini hoje.
 :::
 
+## AI Studio: playground para experimentar e prototipar
+
+[`aistudio.google.com`](https://aistudio.google.com) é um produto distinto dos pontos de acesso listados acima, voltado para quem quer **experimentar com o Gemini de forma mais técnica** antes de integrar em código próprio. Não é uma interface para uso conversacional cotidiano (esse papel é do `gemini.google.com`, item "Web" acima) — é uma ferramenta para **prototipagem e construção**.
+
+O que diferencia, no contexto deste curso:
+
+- **Painel "Configurações de execução"** que expõe parâmetros normalmente escondidos (temperatura, top-p, max tokens, configurações de segurança, output estruturado, *function calling*, execução de código).
+- **Botão "Receber código"** que gera código pronto em Python, JavaScript, etc. para você usar a Gemini API em scripts R/Python do seu projeto.
+- **Modos especiais separados** — Chat, Live API (transmissão em tempo real), Veo (geração de vídeo), Nano Banana (geração de imagens), Lyria (geração de música), texto-voz, *embeddings*. Para pesquisa em saúde, o destaque mais imediato é Veo e Nano Banana para gerar material didático/visual, e Live API para protótipos de avaliação de fala.
+- **Modo "criador" de apps *full-stack*** baseado em descrição em linguagem natural — a Google chama esse modo literalmente de **"vibe coding no modo criador"**, no mesmo espírito da tese central deste curso.
+- **Onde se obtém a chave de API do Gemini** — útil se você quiser usar o Gemini em scripts R/Python (via SDK ou chamada HTTP direta) sem depender do CLI ou do Code Assist.
+
+Para o pesquisador-iniciante, o AI Studio **não substitui o uso diário** do Gemini Desktop ou do `gemini.google.com`. Vale conhecer e abrir quando você quiser: (a) testar como um *prompt* se comporta sob temperatura mais baixa antes de colocar em produção, (b) gerar código de integração API, ou (c) experimentar geração de imagem/vídeo/áudio sem instalar nada localmente.
+
+::: {.callout-tip}
+## Para obter sua chave de API Gemini
+[`aistudio.google.com/apikey`](https://aistudio.google.com/apikey) — o atalho direto. Você loga com sua conta Google, cria uma chave gratuita e usa em *scripts* ou no Gemini CLI (em vez do fluxo OAuth padrão). Atenção: chaves de API são **credenciais sensíveis** — não comite em repositórios públicos. Use variável de ambiente (`GEMINI_API_KEY`) ou arquivo `.env` no `.gitignore`.
+:::
+
 ## Gemini × Claude × Codex: diferenças que importam
 
 | Aspecto | Gemini (Google) | Claude (Anthropic) | Codex (OpenAI) |
 |---|---|---|---|
 | Modelo padrão | Gemini 2.5 Pro / Flash | Claude Opus / Sonnet | GPT-5 |
 | Acesso | Conta Google (Free / Workspace / AI Pro) ou API | Conta Anthropic (Free / Pro / Max) ou API | Conta ChatGPT (Plus / Pro / Business / Enterprise / Edu) ou API |
-| Pontos de acesso | Desktop (só macOS), web, mobile, Workspace, CLI, Code Assist | Claude Desktop unificado (Chat + Cowork + Code), CLI standalone | App Desktop, web, extensão de IDE, CLI |
+| Pontos de acesso | Desktop (só macOS), web, mobile, Workspace, AI Studio, CLI, Code Assist | Claude Desktop unificado (Chat + Cowork + Code), CLI standalone | App Desktop, web, extensão de IDE, CLI |
 | Modo agêntico para trabalho **não-coding** | Não há equivalente direto ao Cowork | Modo dedicado **Cowork** dentro do Desktop | Embutido no app Desktop |
 | CLI open source? | **Sim** (único entre os três) | Não | Não |
 | Cota gratuita | **Generosa** com conta Google pessoal — 60 req/min, 1000 req/dia (Flash, desde março/2026) | Limitada no plano Free | Compartilhada com cota do ChatGPT |

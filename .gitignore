@@ -43,3 +43,5 @@ __pycache__/
 # ─── Específico deste projeto ───
 /OLD_FILES/
 /references/PDFs/
+
+**/*.quarto_ipynb
