@@ -8,27 +8,26 @@ sidebar: false
 
 Este site nasceu de um convite. No início de 2026, o **Prof. Dr. Fábio Lopes Rocha** — psiquiatra, professor, mentor — me convidou para dar uma aula sobre análise de dados para o serviço de **residência em psiquiatria da FHEMIG** (Fundação Hospitalar do Estado de Minas Gerais). A pauta inicial era pequena — uma aula, uma manhã. O que acabou saindo foi este curso completo.
 
-A razão da escala envolveu dois acasos felizes que se encontraram na hora certa. Primeiro: eu acabava de terminar meu primeiro aplicativo de iPhone, escrito do zero usando *vibe coding* — descrevendo em português o que queria, deixando a IA escrever o código. Estava recém-publicado na Apple Store, e a experiência tinha sido transformadora. Em poucas semanas, sem ser desenvolvedor profissional, eu tinha um app funcionando, com publicação real numa loja real. Segundo: eu estudo **R desde 2015**, escrevi o *Manual Básico da Linguagem R* [@alvarenga2024manualr] em 2024, e há quase uma década observo de perto como o R poderia ser o padrão de análise de dados nas universidades médicas brasileiras — sem nunca chegar a sê-lo de fato.
+Esse projeto nasceu de dois acasos felizes que se encontraram na hora certa. Primeiro: eu acabava de terminar meu primeiro aplicativo de iPhone, escrito do zero usando *vibe coding* — descrevendo em português o que queria, deixando a IA escrever o código. Estava recém-publicado na Apple Store, e a experiência tinha sido transformadora. Em poucas semanas, sem ser desenvolvedor profissional, eu tinha um app funcionando, com publicação real numa loja real. Segundo: eu estudo **R desde 2015**, escrevi o *Manual Básico da Linguagem R* [@alvarenga2024manualr] em 2024, e há quase uma década observo de perto como o R poderia ser o padrão de análise de dados nas universidades médicas brasileiras — sem nunca chegar a sê-lo de fato.
 
-A combinação dessas duas coisas — a técnica do vibe coding recém-disponível na minha rotina + uma frustração antiga sobre a barreira de adoção do R em medicina — produziu o argumento que sustenta este curso, e que vale a pena explicitar antes de qualquer outra coisa.
+## O R e Python como instrumentos para pesquisa
 
-## O argumento
+Sempre achei que o R ou Python pudessem se tornar o padrão de análise de dados nas universidades médicas. As razões eram conhecidas: São gratuitos, abertos, mais poderosos softwares proprietários, com comunidade ativa de bioestatísticos e epidemiologistas. 
 
-Sempre desejei que o R fosse o padrão de análise de dados nas universidades médicas. As razões eram conhecidas: R é gratuito, aberto, mais poderoso que SPSS ou SAS, com comunidade ativa de bioestatísticos e epidemiologistas. Mas a realidade nas faculdades de medicina foi outra — SPSS continuou dominando, R ficou restrito a nichos. Por quê?
+Mas **a curva de aprendizado** era enorme. Estudantes de medicina têm carga horária massiva, internato extenuante, residência implacável. Aprender uma linguagem de programação, mesmo amigável como R ou Python, exige tempo e disposição que jovens médicos pesquisadores raramente têm. Quando o professor de iniciação científica diz "use esse software", o estudante usa esse software — e a faculdade paga a licença anual cara. O resultado, na prática, é uma **pulverização** desnecessária. Durante uma trajetória acadêmica de cinco a sete anos, um mesmo estudante passa por três, quatro, cinco *softwares* diferentes — porque cada professor de cada laboratório ensina o seu, e cada nova iniciacçõa científica envolve uma ferramenta nova. O estudante aprende todos superficialmente, não domina nenhum direito, e atrita contra a curva de aprendizado de cada um. Tempo perdido em coisa que poderia ser uma só ferramenta dominada bem.
 
-A resposta é prática: **a curva de aprendizado**. Estudantes de medicina têm carga horária massiva, internato extenuante, residência implacável. Aprender uma linguagem de programação, mesmo amigável como R, exige tempo e disposição que jovens médicos pesquisadores raramente têm. Quando o professor de iniciação científica diz "use SPSS", o estudante usa SPSS — e a faculdade paga a licença anual cara. O resultado, na prática, é uma **pulverização** desnecessária. Durante uma trajetória acadêmica de cinco a sete anos, um mesmo estudante passa por três, quatro, cinco *softwares* diferentes — porque cada professor de cada laboratório ensina o seu, e cada IC envolve uma ferramenta nova. O estudante aprende todos superficialmente, não domina nenhum direito, e atrita contra a curva de aprendizado de cada um. Tempo perdido em coisa que poderia ser uma só ferramenta dominada bem.
+Os LLMs e a possibilidade de **gerar código a partir de descrição em linguagem natural** mudam essa equação. A barreira da curva de aprendizado não desaparece, mas é rebaixada de "anos de prática" para "semanas de familiaridade". O estudante de medicina hoje pode descrever em português o que quer fazer (*"compare a pressão arterial entre os dois grupos com teste t e gere a tabela formatada para artigo"*) e receber código R ou Python funcionando em segundos. Isso destrava a entrada de R e Python como tecnologias acessíveis a quem não é programador profissional — incluindo o pesquisador da área da saúde que tem outras prioridades.
 
-Os LLMs e a possibilidade de **gerar código a partir de descrição em linguagem natural** mudam essa equação. A barreira da curva de aprendizado não desaparece, mas é rebaixada de "anos de prática" para "semanas de familiaridade". O estudante de medicina hoje pode descrever em português o que quer fazer (*"compare a pressão arterial entre os dois grupos com teste t e gere a tabela formatada para artigo"*) e receber código R funcionando em segundos. Isso destrava a entrada de R e Python como tecnologias acessíveis a quem não é programador profissional — incluindo o pesquisador da área da saúde que tem outras prioridades cognitivas.
+As consequências institucionais:
 
-As consequências institucionais são sérias e merecem ser ditas em voz alta:
+- **Redução de custos.** Universidades não precisam mais arcar com licenças anuais de softwares proprietários. Para uma instituição com centenas de estudantes e dezenas de pesquisadores, a economia chega a centenas de milhares de reais por ano.  
 
-- **Redução de custos.** Universidades não precisam mais arcar com licenças anuais de SPSS, SAS e similares. Para uma instituição com centenas de estudantes e dezenas de pesquisadores, a economia chega a centenas de milhares de reais por ano — recurso que pode ir para outras coisas.
-- **Padronização.** Adoção sistemática de R e Python como ambiente único elimina a pulverização atual. O estudante aprende **um ambiente** e o domina.
-- **Reprodutibilidade.** Análises em R e Python são código texto, versionável, auditável, recuperável. Análises em SPSS são cliques perdidos no tempo — irreproduzíveis depois de meses, quanto mais anos.
+- **Padronização.** Adoção sistemática de R e Python como ambiente único elimina a pulverização atual. O estudante aprende **um ambiente** e o domina.    
 
-Vibe coding, R, Python, Quarto, Git, GitHub — todos esses ingredientes existem há algum tempo. **A novidade é a IA tornando-os acessíveis sem o longo aprendizado de programação como pré-requisito**. Isso é o que este curso documenta e propõe.
+- **Reprodutibilidade.** Análises em R e Python são código texto, versionável, auditável, recuperável. Análises em muitos outros softwares são feitas cliques, sequencias irreproduzíveis depois de meses, quanto mais anos.  
 
-## Para quem é este curso
+
+## Para quem é este material
 
 Foi escrito pensando em **professores universitários da área da saúde** — porque professores são multiplicadores, e mudar a prática nas faculdades começa por convencer os mentores. Por extensão, serve também aos estudantes que esses professores formam: graduandos em iniciação científica, residentes (em qualquer especialidade — medicina, psicologia, enfermagem, fisioterapia, farmácia, odontologia), mestrandos, doutorandos, pós-doutorandos.
 
@@ -38,14 +37,17 @@ O pré-requisito é **vontade de aprender uma forma nova de fazer pesquisa**. N�
 
 Para calibrar expectativas:
 
-- **Não é um curso de programação.** Não vai te transformar em desenvolvedor de R ou Python. Ensina a *usar* essas linguagens via IA.
-- **Não é exaustivo sobre R ou Python.** Para tratamento aprofundado, o curso aponta para o *Manual Básico da Linguagem R* do autor [@alvarenga2024manualr] e para recursos curados de Python.
-- **Não substitui um livro de bioestatística.** Quem decide qual teste estatístico aplicar continua sendo você (com apoio de literatura ou estatístico humano). A IA implementa o teste; ela não escolhe o método metodologicamente correto.
+- **Não é um curso de programação.** Não vai te transformar em desenvolvedor de R ou Python. Ensina a *usar* essas linguagens via IA.  
+
+- **Não é exaustivo sobre R ou Python.** Para tratamento aprofundado, o curso aponta para o *Manual Básico da Linguagem R* do autor [@alvarenga2024manualr] e para recursos curados de Python.  
+
+- **Não substitui um livro de bioestatística.** Quem decide qual teste estatístico aplicar continua sendo você (com apoio de literatura ou estatístico humano). A IA implementa o teste; ela não escolhe o método metodologicamente correto.  
+
 - **Não é sobre vibe coding em geral.** É sobre vibe coding **aplicado especificamente a pesquisa em saúde** — com exemplos do domínio, vocabulário do domínio, e considerações específicas (LGPD, dados de pacientes, recomendações ICMJE).
 
 ## Ciência aberta
 
-Este curso é **gratuito, aberto, redistribuível**. Todo o material está disponível publicamente em [henriquealvarenga.com](https://henriquealvarenga.com), com fonte versionada no GitHub. Você pode usar para qualquer fim — incluindo como base para suas próprias aulas e materiais didáticos. A coerência entre **defender ciência aberta e praticar ciência aberta** é parte do argumento.
+Este curso é **gratuito, aberto, redistribuível**. Todo o material está disponível publicamente em [https://henriquealvarenga.com/vibe-coding](https://henriquealvarenga.com/vibe-coding), com fonte versionada no GitHub. Você pode usar para qualquer fim — incluindo como base para suas próprias aulas e materiais didáticos. 
 
 ## Como foi construído
 
@@ -60,7 +62,7 @@ Conforme as recomendações do **ICMJE** (*International Committee of Medical Jo
 
 ::: {.callout-warning}
 ## Aviso importante: este material ainda não foi inteiramente revisado
-Capítulos foram escritos em ritmo intenso, e nem todos passaram por leitura cuidadosa de erro, ambiguidade ou inconsistência. Conteúdo factual foi verificado em fontes primárias sempre que possível (é projeto acadêmico — referências importam), mas erros podem ter passado.
+Capítulos foram escritos em ritmo intenso, e nem todos passaram por leitura cuidadosa de erro, ambiguidade ou inconsistência.
 :::
 
 Se você encontrar:
@@ -75,17 +77,16 @@ Se você encontrar:
 
 Para reportar:
 
-- **Issue no GitHub:** *[link do repositório a ser preenchido pelo autor]*
-- **Email:** *[endereço de contato a ser preenchido pelo autor]*
+- **Issue no GitHub:** *[https://github.com/henriquealvarenga/vibe-coding.git]*
+- **Email:** *[<henriquealvarenga@gmail.com>]*
 
 ## Agradecimentos
 
 Ao **Prof. Dr. Fábio Lopes Rocha** — psiquiatra, professor, mentor e amigo — pelo convite que catalisou tudo isto. Sem aquela aula proposta para o serviço de residência em psiquiatria da FHEMIG, este curso simplesmente não existiria.
 
-A todos os **leitores** deste material, presentes e futuros — quem usa, quem critica, quem reporta erros, quem propõe melhorias, quem leva o que aprende para suas próprias salas de aula. O destino deste material está na sua leitura.
 
 — **Henrique Alvarenga da Silva**\
-2026
+13 de maio de 2026
 
 ---
 
