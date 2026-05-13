@@ -1,0 +1,115 @@
+---
+title: "Quando a IA falha"
+sidebar: bloco-limites
+---
+
+Os três blocos anteriores deste módulo apresentaram a IA pelo lado luminoso: o que ela faz bem, como dialogar com ela, que padrões de prompt funcionam. Este bloco é o complemento necessário — **onde ela falha, e por que falhar de IA é diferente de falhar de outra ferramenta**.
+
+A diferença é que a falha de IA muitas vezes **não parece falha**. Quando uma planilha trava, você vê o erro. Quando um modelo estatístico não converge, ele te avisa. Quando a IA "falha", ela frequentemente entrega resposta confiante, bem formatada, com aparência de correta — só que com algo errado escondido dentro. Em pesquisa, esse tipo de falha silenciosa é o mais perigoso.
+
+Este capítulo abre o bloco mapeando os três modos principais de falha que importam em pesquisa científica: **alucinação**, **viés** e **limites de contexto**. Os capítulos seguintes do bloco aprofundam o que fazer diante de cada um.
+
+## Alucinação
+
+"Alucinação" é o nome consagrado para o fenômeno em que a IA produz texto que **soa plausível mas não corresponde a fato verificável**. Não é mentira intencional (a IA não tem intenção); é um produto direto de como modelos de linguagem funcionam.
+
+### Por que acontece
+
+Modelos como GPT, Claude e Gemini são treinados para prever a próxima palavra mais provável dado um contexto [@vaswani2017attention; @brown2020language]. Eles não têm acesso a base de fatos consultável; eles têm padrões estatísticos sobre como o texto humano se distribui. Quando você pede uma referência bibliográfica, o modelo gera o texto que **mais se parece com uma referência bibliográfica plausível** — autor, ano, título, periódico, DOI — sem nenhuma garantia de que aquele paper exista.
+
+O resultado: artigos inventados com nomes de autores reais, periódicos reais, e DOIs com formato correto que apontam para nada. Em pesquisa, isso é catastrófico.
+
+### Como reconhecer
+
+Sinais típicos de alucinação em saída de IA:
+
+- **Citações suspeitas.** Referência com autor, ano e periódico — mas o DOI não resolve, ou o paper não aparece em PubMed/Scopus/Google Scholar.
+- **Estatísticas precisas demais.** "67,3% dos pacientes com X apresentam Y." Origem? Frequentemente: nenhuma.
+- **Quotes diretos.** Texto entre aspas atribuído a autor real, sem fonte verificável. Em casos extremos, atribui frase a alguém que jamais a disse.
+- **Detalhes técnicos inventados.** Nomes de pacotes que não existem, funções que não estão na biblioteca citada, parâmetros com nomes parecidos mas trocados.
+
+@luccioni2024mind discute em profundidade como LLMs lidam (mal) com fatos verificáveis e o quanto isso compromete o uso deles em pesquisa sem checagem manual.
+
+### Como mitigar
+
+A regra é simples e inegociável: **toda afirmação factual produzida por IA precisa ser verificada antes de entrar em manuscrito**. Não basta o texto soar bem; é preciso confirmar com fonte primária (paper, base oficial, documentação canônica).
+
+Os capítulos M1-B1-04 (Prompts) e o próximo (Validação obrigatória) tratam disso em detalhe.
+
+## Viés
+
+Viés é diferente de alucinação. Alucinação é informação errada. **Viés é informação enviesada — pode estar correta no que afirma, mas distorcida no que omite ou enfatiza**. Em IA, viés vem dos dados de treinamento e das escolhas de modelagem.
+
+### Tipos relevantes em pesquisa em saúde
+
+@chen2023algorithmic mapeia o problema em medicina:
+
+| Tipo de viés | O que é | Exemplo em saúde |
+|---|---|---|
+| Representativo | Dados de treinamento sub-representam populações específicas | Modelos treinados majoritariamente em pacientes brancos europeus performam pior em outras populações |
+| Histórico | Dados refletem desigualdades estruturais do passado | Algoritmo de risco cardiovascular calibrado em coortes que excluíam mulheres |
+| Mensuração | Variáveis-proxy capturam coisas diferentes em grupos diferentes | Custo histórico de cuidado como proxy de necessidade de cuidado — subestima necessidade em populações que historicamente recebem menos cuidado |
+| Avaliação | Métricas padrão escondem desempenho desigual entre subgrupos | Acurácia agregada alta, mas baixa em minorias |
+
+### Por que importa especificamente em pesquisa médica
+
+Pesquisa em saúde usa IA cada vez mais para: triagem de literatura, geração de hipótese, sugestão de variáveis confundidoras, redação. Se a IA herda viés do treinamento, ela transfere esse viés silenciosamente para o seu trabalho. Um exemplo concreto: peça à IA para listar fatores de risco para uma doença; ela vai trazer a lista que aparece com mais frequência na literatura — frequentemente reproduzindo lacunas históricas (ex.: subestimar fatores de risco específicos a mulheres em doenças cardiovasculares).
+
+### Como mitigar
+
+Três práticas:
+
+1. **Diversifique fontes.** Não use IA como única fonte para revisão; combine com base científica indexada e literatura peer-reviewed.
+2. **Pergunte sobre o que pode estar faltando.** *"Que populações tipicamente são sub-representadas nesse tipo de estudo?"* — força a IA a explicitar lacunas que ela teria omitido.
+3. **Reconheça o limite.** A IA não substitui revisão crítica humana sobre representatividade; ela acelera, mas não certifica.
+
+## Limites de contexto
+
+A terceira falha é mais técnica: modelos têm **janela de contexto** finita. Tudo que entra (texto do prompt, documentos colados, histórico da conversa) ocupa espaço nessa janela. Quando o conteúdo passa do limite, partes mais antigas saem, e a IA literalmente "esquece" o início.
+
+### Implicação prática
+
+Em conversas longas (mais de algumas dezenas de trocas), você pode notar:
+
+- A IA esquece convenções estabelecidas no início (*"esqueceu que era para usar tidyverse"*).
+- A IA contradiz informação dada antes (*"você disse que n=487, agora você está usando 423 — explica?"*).
+- A IA repete pergunta que já tinha sido respondida.
+
+Isso **não é estupidez** do modelo — é o contexto disponível ter sido truncado. O modelo não tem mais acesso àquele trecho.
+
+### Como mitigar
+
+- **Conversas curtas e focadas.** Uma sessão = uma tarefa. Quando muda de tópico, abra nova conversa.
+- **Resuma quando ficar comprida.** Periodicamente, peça à IA para sintetizar onde estamos; o resumo passa a ocupar menos espaço que o histórico cru.
+- **Use AGENTS.md (M1-B2-05).** Convenções persistentes vão ali, não no histórico — ficam sempre visíveis ao modelo, sem consumir contexto da conversa.
+- **Em tarefas longas, salve estado.** Se precisar interromper análise, peça à IA para gerar um arquivo `STATE.md` resumindo o que foi feito; você reabre na próxima sessão e cola o arquivo.
+
+## A falha mais perigosa: a que parece sucesso
+
+Os três modos acima — alucinação, viés, contexto truncado — têm em comum uma característica preocupante: **a saída costuma ter aparência polida**. Resposta confiante, bem formatada, com terminologia correta. É o oposto do erro que pisca alarme em vermelho.
+
+@takita2025systematic, em meta-análise comparando IA generativa e médicos em desempenho diagnóstico, encontra exatamente esse padrão: a IA acerta com frequência alta em casos típicos, mas erra em casos atípicos com a mesma confiança superficial — o que, em contexto clínico, é mais perigoso que erro hesitante.
+
+Em pesquisa, a tradução é: **nunca aceite resultado de IA sem checagem ativa**, especialmente quando o resultado parece exatamente o que você esperava. A confiança da IA não é evidência da correção dela.
+
+::: {.callout-warning}
+## A IA está calibrada para soar útil, não para soar honesta
+Modelos atuais são treinados (entre outras coisas) com feedback humano que recompensa respostas que **parecem úteis**. Isso cria uma inclinação sistemática: dizer "não sei" é raro. A IA preenche lacuna com algo verossímil em vez de admitir limite.
+
+Você precisa, em pesquisa, **explicitamente convidar** a IA a admitir incerteza: *"Se você não tem certeza, diga 'não sei' em vez de chutar"*; *"Se essa referência não estiver verificada, marque como 'não verificada'"*.
+
+Mesmo assim, esperar 100% de honestidade epistêmica do modelo é otimismo. **A salvaguarda final é checagem humana**.
+:::
+
+## Conexão com os capítulos seguintes
+
+Os dois capítulos seguintes do bloco endereçam, na ordem, **a prática interna** e **a regra externa**:
+
+- **02 · Validação e responsabilidade humana** — as duas regras operacionais: validar tudo que a IA produz e não delegar decisão metodológica.
+- **03 · Considerações éticas e regulatórias** — LGPD, ICMJE, declaração de uso de IA em manuscritos, e equidade de acesso.
+
+A leitura desses dois capítulos não é opcional para quem usa IA em pesquisa séria. Os blocos anteriores ensinam *como* usar; este bloco ensina *quando recuar*.
+
+## O que vem a seguir
+
+→ [02 · Validação e responsabilidade humana](02-validacao-responsabilidade.qmd)

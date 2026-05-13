@@ -1,0 +1,223 @@
+---
+title: "Planejamento do projeto"
+---
+
+A tentação maior em qualquer projeto que envolve dados é **abrir o R e começar a explorar**. Você baixa o dataset, faz `head()`, vê as colunas, dispara um histograma, descobre algo interessante, escreve mais código, gera mais figuras, e três horas depois tem dezenas de arquivos sem estrutura, dúvidas sobre quais foram filtros aplicados, e nenhum manuscrito por escrever. Esse é o anti-padrão clássico.
+
+A solução é simples mas exige disciplina: **planejar antes de executar**. Capítulo curto, mas central. As decisões aqui economizam horas — e tornam o trabalho que vem depois bem mais fluído.
+
+## Os quatro artefatos do planejamento
+
+Em ordem de criação:
+
+1. **Pergunta de pesquisa formalizada** (já formulada no capítulo anterior — agora ela vira documento).
+2. **Estrutura de pastas inicial** com placeholders.
+3. **`AGENTS.md`** específico do projeto.
+4. **Plano estatístico pré-especificado** (SAP — *Statistical Analysis Plan*).
+
+Esses quatro artefatos ficam **commitados no Git** antes de qualquer linha de análise ser escrita. Funcionam como contrato com você-do-futuro.
+
+## Artefato 1: pergunta de pesquisa em arquivo
+
+Um único arquivo `PESQUISA.md` na raiz com a estrutura mínima:
+
+```markdown
+# Pergunta de pesquisa
+
+Qual a prevalência de hipertensão arterial estágio 2 (PAS ≥ 140 ou PAD ≥ 90)
+em adultos brasileiros 40-64 anos, segundo a Pesquisa Nacional de Saúde 2019,
+estratificada por região (Norte/Nordeste/Sudeste/Sul/Centro-Oeste) e sexo?
+
+# Hipóteses
+
+- H1: Prevalência maior em homens que em mulheres.
+- H2: Prevalência maior nas regiões Sul e Sudeste.
+- H3: Prevalência cresce com a idade (>50 anos > 40-49 anos).
+
+# Dataset
+
+PNS 2019 (IBGE) — microdata pública.
+Pacote R: `PNSIBGE`.
+Variáveis-chave: P00104 (PAS), P00105 (PAD), C006 (sexo), C008 (idade), V0001 (região).
+
+# Critérios de inclusão
+
+- Adultos 40 a 64 anos.
+- Com medida válida de PA (não-NA, não-implausível).
+
+# Critérios de exclusão
+
+- PAS < 60 ou > 250 (implausíveis).
+- Sem informação de sexo ou região.
+```
+
+Esse arquivo fica visível no GitHub, é a primeira coisa que qualquer leitor — incluindo seus alunos — abre quando chegar no repositório. **Forma o leitor sobre o que esperar do projeto antes mesmo de olhar código**.
+
+## Artefato 2: estrutura de pastas
+
+A estrutura padrão que vimos no Bloco *Dados* (M3-B2-08) e na seção sobre compendium (M4-B2-03), aplicada ao Capstone:
+
+```bash
+capstone-prevalencia-has/
+├── README.md
+├── PESQUISA.md
+├── LICENSE
+├── CITATION.cff
+├── AGENTS.md
+├── _quarto.yml
+├── renv.lock           ← (após renv::init())
+├── .gitignore
+├── data/
+│   ├── raw/            ← intocável, dados originais
+│   ├── processed/      ← gerado por scripts/
+│   └── data-dictionary.md
+├── R/
+│   └── utils.R         ← funções reusáveis
+├── analysis/
+│   ├── 01-limpeza.qmd
+│   ├── 02-descritiva.qmd
+│   └── 03-resultados.qmd
+├── output/
+│   ├── tabelas/
+│   └── figuras/
+└── manuscrito.qmd
+```
+
+Crie tudo de uma vez no terminal:
+
+```bash
+mkdir -p capstone-prevalencia-has/{data/raw,data/processed,R,analysis,output/tabelas,output/figuras}
+cd capstone-prevalencia-has
+touch README.md PESQUISA.md LICENSE CITATION.cff AGENTS.md _quarto.yml .gitignore manuscrito.qmd
+echo "data/raw/" >> .gitignore
+echo "data/processed/" >> .gitignore
+echo "_freeze/" >> .gitignore
+
+git init
+git add .
+git commit -m "feat: estrutura inicial do projeto"
+```
+
+Em três minutos, esqueleto pronto. Os arquivos vazios garantem que a estrutura **aparece no GitHub** assim que você fizer o primeiro push (Git ignora pastas vazias, mas detecta arquivos vazios).
+
+## Artefato 3: AGENTS.md específico do Capstone
+
+O `AGENTS.md` (capítulo M1-B2-05) traz contrato persistente com agentes de IA. Para Capstone, é o arquivo que **garante coerência ao longo de várias sessões de vibe coding** — você não precisa repetir convenções a cada conversa.
+
+Modelo mínimo para um Capstone de epidemiologia:
+
+```markdown
+# AGENTS.md — Projeto Capstone
+
+## Contexto
+
+Análise de prevalência de hipertensão arterial estágio 2 em adultos brasileiros
+40-64 anos, com dados públicos da PNS 2019 (IBGE). Material didático para
+disciplina de Epidemiologia Clínica.
+
+## Linguagem e estilo
+
+- R com tidyverse (preferência por `dplyr` sobre base R quando equivalente).
+- Sempre `set.seed(12345)` em métodos com aleatoriedade.
+- Pipes `|>` (R nativo), não `%>%`.
+- Indentação com 2 espaços, sem tabs.
+- Comentários em português, concisos.
+
+## Convenções estatísticas
+
+- Nível de significância: alpha = 0.05.
+- IC: 95%.
+- Comparações entre 2 grupos: teste t de Welch (não assume variância igual);
+  Mann-Whitney se distribuição não-normal.
+- Comparações entre 3+ grupos: ANOVA + Tukey HSD.
+- Múltiplas comparações: ajuste por Bonferroni.
+- Tabelas formatadas com `gtsummary`.
+- Gráficos com `ggplot2`, paleta colorblind-safe (`viridis`).
+
+## Convenções do projeto
+
+- `dados/raw/` é somente leitura (não modificar nem reescrever).
+- Scripts numerados em ordem de execução: 01-, 02-, 03-.
+- Cada figura final salva em `output/figuras/` com nome descritivo.
+- Cada tabela final salva em `output/tabelas/`.
+- Mensagens de commit em português, formato Conventional Commits.
+
+## Restrições
+
+- Não comite dados em `data/raw/` ou `data/processed/`.
+- Não rode `git push --force`, `git reset --hard`, ou comandos destrutivos sem aprovação.
+- Não invente referências bibliográficas — projeto acadêmico exige verificação.
+- Não inclua dados identificáveis em prompts ou commits.
+```
+
+Esse arquivo, lido pelos agentes em cada sessão, garante que **todas as decisões implícitas que você teria que repetir** já estão registradas.
+
+## Artefato 4: SAP — plano estatístico pré-especificado
+
+Em pesquisa séria, especialmente RCTs, há um documento chamado **SAP** (*Statistical Analysis Plan*) escrito **antes** de tocar nos dados. O SAP descreve **quais análises serão feitas** — e isso protege contra *p-hacking* (rodar várias análises e reportar só as significativas).
+
+Para Capstone, um SAP simplificado já tem valor pedagógico enorme. Crie `SAP.md` na raiz:
+
+```markdown
+# Plano Estatístico Pré-Especificado (SAP)
+
+## Análise primária
+
+**Objetivo:** estimar prevalência de hipertensão arterial estágio 2 em adultos
+brasileiros 40-64 anos, segundo PNS 2019.
+
+**Definição operacional do desfecho:** PAS ≥ 140 mmHg OU PAD ≥ 90 mmHg na
+medida única realizada na PNS.
+
+**Análise:** prevalência bruta (n com HAS / n total na faixa etária) com IC 95%
+binomial exato. Estratificação por região (5 categorias) e sexo (2 categorias).
+
+## Análises secundárias
+
+- Prevalência por faixa etária quinquenal (40-44, 45-49, 50-54, 55-59, 60-64).
+- Prevalência por nível educacional (3 categorias: até fundamental, médio, superior).
+
+## Análise sensibilidade
+
+- Repetir análise primária excluindo casos com PAS > 200 ou PAD > 130
+  (implausíveis ou outliers extremos).
+- Repetir análise considerando apenas pacientes não em uso de antihipertensivo
+  (variável Q006).
+
+## O que NÃO será feito
+
+- Modelagem multivariada (esse é exercício didático, não estudo causal).
+- Análise de subgrupos não pré-especificados.
+- Comparação com cortes etários ou regiões fora dos pré-especificados.
+
+## Software
+
+- R 4.4.2.
+- Pacotes: PNSIBGE, dplyr, gtsummary, ggplot2 (versões registradas em renv.lock).
+- Quarto 1.5.x para renderização.
+```
+
+Esse arquivo é **essencialmente um pré-registro de análise** — gesto de honestidade científica que muda a credibilidade do trabalho.
+
+::: {.callout-tip}
+## Pré-registro adicional opcional
+Para Capstone que será usado como exemplo de boas práticas em sala, vale o gesto adicional de **registrar o SAP no OSF** ([osf.io](https://osf.io)) com timestamp imutável. Aluno verá: "professor pré-registrou SAP, depositou no OSF, então pode mostrar que a análise foi como planejada — não foi ajustada para chegar no resultado bonito". Esse exemplo concreto vale mais que cinco aulas teóricas sobre p-hacking.
+:::
+
+## Conexão com IA
+
+Agentes ajudam nos quatro artefatos:
+
+**1. Esqueleto de PESQUISA.md.** Você descreve em PT-BR, agente formaliza em estrutura padronizada.
+
+**2. Geração de estrutura de pastas.** Comandos `mkdir`, `touch`, `git init`, `gitignore` — agente entrega script completo em segundos.
+
+**3. AGENTS.md a partir de descrição.** Você descreve as convenções do seu lab/disciplina; agente formata em AGENTS.md coerente.
+
+**4. SAP draft.** Mais delicado — agente propõe SAP a partir da pergunta de pesquisa, mas **decisões metodológicas precisam ser revisadas por humano** (capítulo M3-B3-14). Use o draft como ponto de partida, não como produto final.
+
+## O que vem a seguir
+
+Plano fixo, estrutura criada, contrato com agentes formalizado, SAP escrito. Hora de executar. O próximo capítulo é o **núcleo prático do Capstone** — vibe coding aplicado para conduzir a análise da pergunta de pesquisa até as figuras finais.
+
+→ [04 · Execução com vibe coding](04-execucao.qmd)

@@ -1,0 +1,55 @@
+---
+title: "Shells"
+---
+
+No capítulo anterior estabelecemos a distinção entre **terminal** (a janela) e **shell** (o programa que interpreta os comandos). Aqui o foco é o segundo: quais shells existem, qual o seu Mac ou Windows usa hoje, e por que essa pergunta faz menos diferença do que parece.
+
+## Shells no Mac e no Linux
+
+Até 2019, o shell padrão do macOS era o **bash** (Bourne Again Shell), criado por Brian Fox em 1989 [@gnubash] como parte do projeto GNU. Bash dominou o mundo Unix por trinta anos — todo manual, todo tutorial, toda documentação de servidor pressupunha bash. Em distribuições Linux ele continua como padrão na maior parte dos casos (Ubuntu, Debian, Fedora, etc.).
+
+A partir do macOS Catalina (10.15), em outubro de 2019, a Apple mudou o padrão para o **zsh** (Z Shell) [@apple2019zsh; @zsh]. A razão alegada foi licenciamento — o bash mais recente está sob GPLv3, que a Apple evita por motivos comerciais — mas o zsh também é genuinamente melhor em vários pontos: autocompletar mais inteligente, correção de erros de digitação, plugins, temas visuais (com frameworks como `oh-my-zsh`).
+
+Para o uso cotidiano e para tudo que faremos neste curso, **bash e zsh funcionam de forma idêntica**: os comandos básicos (`ls`, `cd`, `pwd`, `cp`, `mv`, `rm`, `grep`, `cat`, etc.) são os mesmos. As diferenças aparecem em scripts complexos e em recursos de produtividade, não no dia a dia.
+
+Uma forma simples de identificar qual shell você está usando é olhar o **prompt** (o que aparece antes do cursor):
+
+- **zsh**: termina com `%`
+  ```
+  seu-usuario@seu-mac ~ %
+  ```
+- **bash**: termina com `$`
+  ```
+  seu-usuario@seu-mac ~ $
+  ```
+
+Se você encontrar um tutorial antigo escrito para bash, os comandos vão funcionar no zsh sem ajuste. O contrário (zsh-isms num bash) é raro mas pode acontecer — quase sempre envolve recursos avançados que não vamos usar no curso.
+
+::: {.callout-note}
+## Outros shells que você pode encontrar
+Em alguns ambientes você vai esbarrar em outros shells. **fish** (Friendly Interactive Shell) é popular entre desenvolvedores que valorizam ergonomia, mas tem sintaxe ligeiramente incompatível com bash — não copie scripts entre os dois sem revisar. **dash** é o shell minimalista usado pelo `/bin/sh` em vários sistemas Linux por motivos de velocidade. Para o curso, basta saber que existem; o padrão Mac/Linux que você vai usar é zsh ou bash.
+:::
+
+## Shells no Windows
+
+No Windows a situação é diferente — há três interpretadores convivendo:
+
+| Shell | Origem | Sintaxe |
+|---|---|---|
+| **Prompt de Comando (`cmd`)** | Herdeiro do MS-DOS dos anos 1980 | Própria, simples, limitada (`dir`, `copy`, `del`, `cd`) |
+| **PowerShell** | Microsoft, 2006 | Própria, moderna, orientada a objetos. Padrão em Windows 10+. |
+| **Git Bash** | Vem com a instalação do Git | Bash compilado para Windows — usa os mesmos comandos do Mac/Linux |
+
+A distinção tem consequência prática: **um tutorial escrito para Mac/Linux não funciona automaticamente no `cmd` ou no PowerShell**. `ls` no `cmd` é `dir`. `cp` é `copy`. `rm -r` é `rmdir /S`. As traduções existem, mas são diferentes. Por isso, neste curso, vamos sempre apresentar o comando para Mac/Linux e — quando a versão Windows for diferente — também a equivalente para `cmd` ou PowerShell.
+
+Se você está no Windows e quer evitar essa dor de tradução, há um caminho fácil: **instalar o Git para Windows**, que inclui o **Git Bash**. Com ele, os comandos passam a ser idênticos aos do Mac/Linux, e você pode seguir tutoriais sem adaptação.
+
+## E os agentes de IA?
+
+A maioria dos agentes de IA mais poderosos de hoje (Claude Code, Codex CLI, Gemini CLI — Bloco anterior) **roda no terminal**. Quando você os invoca, eles operam com o shell que está disponível: zsh no Mac, bash no Linux, PowerShell ou Git Bash no Windows. Os agentes lidam bem com qualquer um deles — adaptam os comandos que geram à plataforma — mas o princípio vale: para usar agentes CLI com fluência, é preciso ter o terminal funcionando.
+
+## O que vem a seguir
+
+Você já sabe o que é terminal, o que é shell, e quais shells você provavelmente está usando. O próximo passo é abrir o terminal pela primeira vez e olhar essa janela com calma — entender o que aquele texto inicial significa e quais aplicativos servem em cada sistema.
+
+→ [03 · Abrindo o Terminal](03-abrindo-terminal.qmd)

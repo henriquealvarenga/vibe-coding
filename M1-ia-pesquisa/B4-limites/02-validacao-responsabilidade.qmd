@@ -1,0 +1,115 @@
+---
+title: "Validação e responsabilidade humana"
+---
+
+O capítulo anterior mapeou três modos de falha da IA — alucinação, viés, limites de contexto. Saber que a IA falha é metade do problema; saber **o que fazer diante disso** é a outra metade. Este capítulo trata das duas regras operacionais que precisam estar internalizadas em quem usa IA em pesquisa científica.
+
+A primeira é tática: **valide tudo**, sem exceção. A segunda é principiológica: **decisão metodológica continua humana**, não delegável.
+
+As duas regras se reforçam. Validar é o que pega erro depois que a IA produz; decidir metodologia é o que evita pedir à IA o que ela não deve fazer. Quem só valida sem cuidar de metodologia descobre erro tarde demais; quem só cuida de metodologia sem validar fica refém de saídas plausíveis com erros silenciosos.
+
+## Regra 1 — Validação é obrigatória, não opcional
+
+Receber código que roda **não é o mesmo** que receber código correto. Receber tabela bem formatada **não é o mesmo** que receber tabela com números certos. Receber referência com formato impecável **não é o mesmo** que receber referência verificada. Em pesquisa, o que distingue trabalho sério é exatamente essa dobradiça entre output e validação.
+
+### Checklist mínimo
+
+Independentemente do que a IA produziu, três checagens deveriam virar reflexo:
+
+| O que validar | Como | Por quê |
+|---|---|---|
+| Toda referência bibliográfica | DOI resolve? Paper aparece em PubMed/Scopus? Autores conferem? | Alucinação de citação é o erro mais frequente e mais embaraçoso |
+| Todo número (n, média, p-valor) | Bate com `summary()` original? Direção do efeito faz sentido? | Truncamento de dados, filtros silenciosos e erros de cálculo são comuns |
+| Toda afirmação factual com origem implícita | "Estudos mostram que X" — quais estudos? | IA preenche lacuna com plausibilidade; sem fonte, presuma alucinação |
+| Todo bloco de código | Roda? Produz resultado esperado em casos de teste? | Código que aparenta correto pode ter bug sutil (índice off-by-one, NA tratado errado) |
+| Toda tabela ou figura final | Conferência com os dados-fonte | Formatação polida não é evidência de números corretos |
+
+Esse checklist parece exagerado até a primeira vez que você recebe `[@smith2019fictitious]` em texto pronto e descobre, ao tentar inserir no Zotero, que o paper não existe.
+
+### Pedindo à IA para validar
+
+Você pode (e deve) pedir explicitamente à IA para validar antes de entregar:
+
+> *"Antes de me mandar o resultado final, valide: confirme que o n_total bate com n_intervencao + n_controle, que não há NA inesperado nas variáveis-chave, e que a direção do efeito é coerente com a hipótese."*
+
+A IA roda essas verificações como código e te entrega resultado já checado. Isso ajuda muito. Mas atenção a uma armadilha: **a IA às vezes "diz" que validou sem ter validado**. @luccioni2024mind documenta esse padrão em modelos atuais — eles podem afirmar que executaram uma checagem e reportar resultado plausível, sem nenhuma execução real por baixo.
+
+A salvaguarda contra isso é tão simples quanto incômoda: **rode você mesmo a checagem crítica**. Pelo menos uma vez. Idealmente, sempre que o número for entrar em manuscrito.
+
+### Validar não é desconfiança da ferramenta — é responsabilidade do método
+
+Em pesquisa quantitativa, validação não é gesto de desconfiança específico contra IA. É princípio do método científico: *"every measurement must be checked"*. Antes de IA, você já validava resultado de pacote estatístico (rodava casos de teste, comparava com cálculo manual em amostra pequena, conferia direção do efeito). A IA só **reforça** a importância dessa prática — porque ela falha de maneiras menos óbvias que um pacote estatístico.
+
+::: {.callout-tip}
+## Sanity check em três números
+Para qualquer análise, três números merecem checagem ativa antes de aceitar:
+
+1. **n.** Quantas observações entraram no resultado? Bate com o esperado?
+2. **Direção.** Se a hipótese previa redução, o resultado mostra redução? (Não importa se significativo — direção primeiro.)
+3. **Magnitude.** A magnitude do efeito faz sentido clinicamente/biologicamente? Resultado que parece "bom demais" frequentemente é bug.
+
+Se os três passam, você ainda precisa validar o resto. Mas se algum dos três falha, pare imediatamente — não corrija; investigue.
+:::
+
+## Regra 2 — Decisão metodológica continua humana
+
+A segunda regra é menos técnica e mais filosófica, mas igualmente operacional. **A IA é melhor implementando do que decidindo**. Você decide; ela executa.
+
+A separação importa porque pesquisa científica não é só execução — é uma sequência de decisões metodológicas que, somadas, formam o que chamamos de "método". Cada decisão tem consequência epistemológica: o que vale como evidência, o que conta como amostra, qual teste é adequado, quais variáveis ajustar.
+
+### Onde a IA é genuinamente útil (executar)
+
+Tarefas que a IA executa bem, com supervisão modesta:
+
+- Escrever código a partir de descrição clara do que fazer ("filtre adultos > 65, calcule mediana de idade por grupo").
+- Reformatar dados (wide ↔ long, recodificações, parsing de datas).
+- Gerar visualizações conforme instrução ("gráfico de barras com IC 95%, paleta viridis, salvar em 300dpi").
+- Redigir trechos com instrução de tom (introdução de seção a partir de bullet points; legenda de figura a partir de descrição).
+- Sugerir estrutura de funções, nomes de variáveis, organização de pastas.
+- Encontrar bug em mensagem de erro que você cola.
+
+Em todos esses casos, **você sabe o que precisa ser feito**; a IA traduz para código/texto.
+
+### Onde a IA é perigosa (decidir)
+
+Tarefas em que pedir à IA para "decidir" é abdicação de responsabilidade metodológica:
+
+- **Escolher o teste estatístico.** Teste t? Welch? Mann-Whitney? Mista? A escolha depende de pressuposto, desenho, amostra — coisas que **você** entende sobre seus dados, e a IA inferiria por padrão da literatura.
+- **Selecionar variáveis confundidoras.** Causalidade não se descobre por correlação ou *stepwise*; se descobre por raciocínio sobre o DAG do problema. A IA não tem o DAG; você tem.
+- **Definir critérios de inclusão/exclusão.** Esses critérios materializam a pergunta de pesquisa. A IA pode sugerir, mas a decisão final é metodológica.
+- **Decidir como tratar dados faltantes.** Imputar? Múltipla? Apenas casos completos? Cada escolha tem consequência sobre validade interna; a decisão depende do mecanismo de missingness, que **você** investiga.
+- **Escolher unidade de análise em estudos hierárquicos.** Paciente vs. consulta vs. instituição muda tudo; é decisão estrutural, não computacional.
+
+@chen2023algorithmic e @obermeyer2019dissecting trazem casos concretos do que acontece quando essa linha é cruzada — algoritmos que herdaram decisão metodológica enviesada e produziram desigualdades clínicas mensuráveis. Em ambos os casos, o problema não foi código com bug; foi **decisão metodológica delegada** a um sistema que não tinha responsabilidade epistêmica para fazê-la.
+
+### Onde fica a linha
+
+Uma heurística útil: **se você não souber justificar a escolha em uma defesa de tese ou para um revisor, não delegue**. Se a pergunta for "*por que você usou esse teste?*" e sua resposta for "*porque a IA sugeriu*", você falhou metodologicamente — independentemente de o teste ter sido o certo por sorte.
+
+A inversão correta: você decide por que aquele teste é o adequado (com base na literatura, no desenho, na natureza dos dados); então peça à IA para implementá-lo. A justificativa fica no manuscrito; a execução fica no script.
+
+::: {.callout-warning}
+## Pesquisa séria não delega justificação
+Em uma seção de Métodos bem escrita, cada escolha tem **um por quê** apoiado em literatura, desenho ou pressuposto explícito. Esse "por quê" é o que distingue ciência rigorosa de aplicação cega de procedimento.
+
+A IA pode escrever a seção de Métodos para você — formatando, estruturando, sugerindo verbos. Mas ela **não pode** justificar metodologicamente as suas escolhas, porque ela não fez essas escolhas. Você fez. Quem assina o manuscrito é você. Quem responde ao revisor é você.
+
+Esse princípio aparece de forma explícita também em @takita2025systematic e nas diretrizes do @who2024llm sobre uso de IA em saúde.
+:::
+
+## As duas regras juntas, na prática
+
+No fluxo real de uma análise, as duas regras operam em momentos diferentes:
+
+1. **Antes de pedir à IA**, você decidiu metodologia: pergunta de pesquisa, desenho, variáveis, critérios, testes. Esse é o terreno da Regra 2.
+2. **Ao pedir à IA**, você descreve o que decidiu e pede execução (código, tabela, figura, texto).
+3. **Ao receber da IA**, você valida tudo. Esse é o terreno da Regra 1.
+4. **Antes de aceitar**, você confere os números, as referências, a coerência com a hipótese. A IA pode ter validado por dentro, mas a confirmação manual final é sua.
+
+As duas regras juntas formam o contrato mínimo de uso responsável. Sem elas, vibe coding em pesquisa vira atalho perigoso. Com elas, vibe coding vira ferramenta científica séria — porque a responsabilidade humana fica preservada onde precisa ficar.
+
+## O que vem a seguir
+
+As duas regras deste capítulo lidam com a **prática interna** — o que você precisa fazer quando trabalha com IA. O próximo capítulo trata da **regra externa**: o que LGPD, ICMJE e periódicos científicos esperam de quem usa IA em pesquisa, e como você comunica isso de forma transparente em manuscritos e apresentações.
+
+→ [03 · Considerações éticas e regulatórias](03-etica-regulacao.qmd)

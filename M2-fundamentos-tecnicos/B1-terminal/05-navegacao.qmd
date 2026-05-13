@@ -1,0 +1,113 @@
+---
+title: "Navegação no sistema de arquivos"
+---
+
+Você abre o terminal e quer rodar um script de análise que está em `~/Documents/projeto-coorte/scripts/analise.R`. Antes de rodar qualquer coisa, três perguntas básicas: onde estou agora? O que tem aqui? Como chego até a pasta certa? Os primeiros comandos que todo mundo aprende respondem exatamente essas três perguntas.
+
+## Onde estou? — `pwd`
+
+```bash
+pwd                 # Mac/Linux: print working directory
+cd                  # Windows cmd: sem argumentos, mostra o diretório atual
+```
+
+Mostra o caminho completo da pasta onde você está. É o comando que você roda **toda vez que abrir o terminal e ficar em dúvida** — e isso vai acontecer mais do que parece. Funciona como uma bússola: antes de copiar, mover ou deletar arquivo, confirme onde você está.
+
+```bash
+$ pwd
+/Users/henrique/Documents/projeto-coorte
+```
+
+## O que tem aqui? — `ls`
+
+```bash
+ls                  # Mac/Linux: lista arquivos da pasta atual
+dir                 # Windows: equivalente
+```
+
+Mostra o conteúdo da pasta atual:
+
+```bash
+$ ls
+README.md  dados/  scripts/  output/
+```
+
+As versões com mais informação:
+
+```bash
+ls -l               # formato longo (permissões, tamanho, data)
+ls -a               # inclui arquivos ocultos (que começam com ".")
+ls -la              # combina os dois (mais usado)
+ls -lh              # tamanho em formato humano (KB, MB, GB)
+ls -lah             # combinação completa
+
+dir /a              # Windows: arquivos ocultos
+dir /s              # Windows: incluir subpastas
+```
+
+A versão `ls -la` é provavelmente o segundo comando mais digitado depois do próprio `ls`. Lista tudo, mostra permissões, tamanhos, datas, e revela arquivos invisíveis como `.gitignore`, `.Rprofile`, `.DS_Store` (que sempre estão lá, mesmo quando você não vê).
+
+## Como chego lá? — `cd`
+
+```bash
+cd Documents             # Mac/Linux: entra na pasta "Documents" do diretório atual
+cd Documents             # Windows: idem
+```
+
+`cd` é **change directory** — muda a pasta atual.
+
+Variações úteis:
+
+```bash
+cd ..                    # sobe uma pasta (vai para a "pasta-pai")
+cd ../..                 # sobe duas
+cd                       # sem argumento: volta para a home (~)
+cd ~                     # equivalente: explicita a home
+cd /                     # vai para a raiz do sistema (Mac/Linux)
+cd -                     # volta para a pasta anterior (a que você estava antes)
+```
+
+Exemplos práticos:
+
+```bash
+cd ~/Documents/projeto-coorte    # caminho absoluto a partir da home
+cd scripts                       # entra em scripts (relativo ao atual)
+cd ../dados                      # sobe um nível e entra em dados
+cd /tmp                          # vai para /tmp (caminho absoluto Mac/Linux)
+```
+
+A diferença entre **caminho absoluto** (começa em `/` ou `~`) e **caminho relativo** (parte de onde você está) é importante o bastante para ter capítulo próprio — é o próximo.
+
+::: {.callout-tip}
+## Tab: o atalho que muda a vida
+Pressione `Tab` enquanto digita um nome de pasta ou arquivo. O terminal **autocompleta** com base no que existe na pasta atual. Se houver várias possibilidades, pressione `Tab` duas vezes para ver as opções.
+
+Exemplo: você está em `~/Documents` e quer entrar em `projeto-coorte`. Em vez de digitar tudo, digite `cd pro` e aperte `Tab` — vira `cd projeto-coorte/` automaticamente. Quanto mais profunda a estrutura de pastas, mais Tab economiza. Se houver `projeto-coorte` e `projeto-controle`, dois Tabs mostram ambos e você desempata digitando a próxima letra.
+
+Use Tab obsessivamente. É de longe o atalho que mais reduz erro de digitação no terminal.
+:::
+
+## Combinando os três
+
+Numa sessão típica de trabalho, esses três comandos se intercalam o tempo todo:
+
+```bash
+$ pwd
+/Users/henrique
+$ cd Documents/projeto-coorte
+$ pwd
+/Users/henrique/Documents/projeto-coorte
+$ ls
+README.md  dados/  scripts/  output/
+$ cd scripts
+$ ls
+analise.R  limpeza.R  utils.R
+```
+
+Em três comandos você foi do nada para o lugar certo, conferiu o conteúdo, e está pronto para rodar o script. Esse é o ritmo básico do trabalho no terminal — sempre intercalando `pwd`, `ls`, `cd` para manter orientação espacial no sistema de arquivos.
+
+## O que vem a seguir
+
+Você sabe se mover entre pastas. Mas várias situações exigem entender a diferença entre "uma pasta a partir daqui" e "uma pasta a partir da raiz do disco" — entre **caminho relativo** e **caminho absoluto**. É a fonte de erro mais frequente no início, e o próximo capítulo trata exclusivamente disso.
+
+→ [06 · Caminhos absolutos e relativos](06-caminhos.qmd)

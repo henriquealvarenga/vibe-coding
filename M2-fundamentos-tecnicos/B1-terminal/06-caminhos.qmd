@@ -1,0 +1,105 @@
+---
+title: "Caminhos absolutos e relativos"
+---
+
+Você está numa pasta de scripts e quer rodar um script de análise que lê um CSV. No script, está escrito:
+
+```r
+dados <- read.csv("dados/coorte.csv")
+```
+
+Roda e dá erro: *"cannot open file 'dados/coorte.csv': No such file or directory"*. Mas você jura que o arquivo existe. Existe — só não está onde o script está procurando.
+
+Esse erro é provavelmente o mais comum no aprendizado de terminal e de programação. A solução não é decorar onde cada arquivo está; é entender como caminhos funcionam, por que existem dois tipos, e quando cada um é apropriado.
+
+## Os dois tipos
+
+Existem **dois jeitos** de descrever onde um arquivo está no sistema, e a diferença entre eles é responsável pela maioria dos erros do tipo "file not found" que aparecem no início.
+
+### Caminho absoluto
+
+Começa na **raiz do sistema** e descreve o caminho completo até o arquivo. Independe de onde você está no momento.
+
+```bash
+/Users/henrique/Documents/projeto-coorte/dados/coorte.csv      # Mac
+/home/henrique/Documents/projeto-coorte/dados/coorte.csv       # Linux
+C:\Users\henrique\Documents\projeto-coorte\dados\coorte.csv    # Windows
+```
+
+A primeira `/` (Mac/Linux) ou `C:\` (Windows) é a raiz. Tudo depois é a hierarquia até o arquivo. Caminho absoluto é como um endereço completo: "Avenida Paulista, 1000, São Paulo, SP, Brasil". Funciona de qualquer lugar.
+
+### Caminho relativo
+
+Começa **a partir da sua localização atual** (`pwd`). Não menciona a raiz.
+
+```bash
+dados/coorte.csv                # se você está em /Users/henrique/Documents/projeto-coorte
+../dados/coorte.csv             # se você está em /Users/henrique/Documents/projeto-coorte/scripts
+./dados/coorte.csv              # equivalente ao primeiro (o ./ é redundante mas explícito)
+```
+
+Caminho relativo é como uma indicação local: "duas quadras pra frente, vire à direita". Só funciona se a pessoa souber de onde está partindo.
+
+## Símbolos especiais
+
+Quatro símbolos cobrem 90% do uso de caminhos no dia a dia:
+
+| Símbolo | Significado |
+|---|---|
+| `.` | A **pasta atual** (a mesma onde você está) |
+| `..` | A **pasta-pai** (um nível acima) |
+| `~` | A **pasta home** do usuário (`/Users/henrique` no Mac, `/home/henrique` no Linux) |
+| `/` | A **raiz** do sistema (Mac/Linux). No Windows, `\` é o separador, mas o conceito de raiz é por unidade: `C:\`, `D:\`, etc. |
+
+Combinações úteis:
+
+```bash
+cd ..                  # sobe uma pasta
+cd ../..               # sobe duas
+cd ../../outra-pasta   # sobe duas e entra em outra-pasta
+cd ~                   # vai para a home
+cd ~/Documents         # caminho a partir da home (absoluto, mas usando ~)
+```
+
+## Por que isso causa erro
+
+A confusão clássica acontece quando você roda um comando ou script que usa caminho relativo, **mas você não está na pasta que o caminho assume**. Voltando ao exemplo do início:
+
+O script `analise.R` foi escrito assumindo que ele rodaria a partir da raiz do projeto:
+
+```r
+dados <- read.csv("dados/coorte.csv")    # caminho relativo
+```
+
+O autor estava em `~/Documents/projeto-coorte` quando rodou. Aí você abre o terminal, entra em `~/Documents/projeto-coorte/scripts`, e roda o script de lá. Agora `dados/coorte.csv` significa `~/Documents/projeto-coorte/scripts/dados/coorte.csv` — pasta que não existe.
+
+A solução tem três variações, todas válidas:
+
+1. **`cd` para a pasta certa antes de rodar o script.** Trabalho mínimo, funciona sempre.
+2. **Reescrever o script com caminho absoluto.** Funciona, mas torna o script não-portável (caminho `/Users/henrique/...` não existe na máquina de outra pessoa).
+3. **Usar caminho relativo bem pensado dentro do script.** Em R, por exemplo, o pacote `here` resolve automaticamente o "raiz do projeto" e os caminhos a partir dele.
+
+A escolha depende do contexto, mas a regra geral é: **caminho absoluto para uso interativo no terminal, caminho relativo (a partir de raiz do projeto bem definida) dentro de scripts e código que vai ser compartilhado**.
+
+## Onde caminhos aparecem fora do terminal
+
+Você vai ver caminhos relativos e absolutos em vários outros lugares ao longo do curso:
+
+- **No `_quarto.yml`** (capítulo M3-B1-02 Quarto): `bibliography: references/references.bib` — caminho relativo a partir da raiz do projeto.
+- **Em `.gitignore`** (M4-B1 Git): padrões que descrevem caminhos relativos para o Git ignorar.
+- **Em scripts R/Python** (Módulo 2): `read.csv("dados/...")`, `pd.read_csv("dados/...")` — caminhos relativos ao diretório de trabalho atual da sessão.
+- **Na configuração de uma IDE** (M2-B2 Ambientes): a IDE define um "diretório do projeto" para que caminhos relativos sejam consistentes.
+- **Em `links` no `.qmd`**: `[Próximo capítulo](../B2-ambientes/02-positron.qmd)` — caminho relativo entre páginas.
+
+Essa onipresença é a razão pela qual o conceito vale um capítulo isolado: depois que você o internaliza, vários erros de "não funciona aqui mas funciona ali" deixam de ser misteriosos.
+
+::: {.callout-tip}
+## Hábito que economiza horas: rode `pwd` antes de duvidar
+Quando algo "não está funcionando" e envolve arquivo, antes de qualquer outra coisa: `pwd`. Confirme onde você está. Em 8 de cada 10 casos, o problema é que você está num lugar diferente do que pensava. O terminal não esconde sua localização — ele só exige que você confira de vez em quando.
+:::
+
+## O que vem a seguir
+
+Sabendo se mover entre pastas e descrever caminhos, o próximo passo é **fazer coisas com os arquivos** que você encontra: criar, copiar, mover, renomear, remover. É o capítulo seguinte.
+
+→ [07 · Manipulação de arquivos e pastas](07-manipulacao-arquivos.qmd)

@@ -1,0 +1,168 @@
+---
+title: "Convenções de nomeação e extensões de arquivo"
+---
+
+Imagine que você acabou de criar um arquivo chamado `Análise Final v2 (2).R` no Desktop. O Positron abriu, o código rodou, deu certo. Quando você compartilha com um colega, ele responde: "não consigo importar esse arquivo no Quarto". Quando você publica o site, metade dos links retorna 404. E o agente de IA, ao olhar o projeto, sugere "renomear todos os arquivos para um padrão consistente".
+
+Convenções de nomeação são o tipo de regra "boba demais para ensinar e cara demais para ignorar". Este capítulo cobre as três que mais economizam tempo no fluxo do curso.
+
+## Antes da tabela: o que esses nomes esquisitos querem dizer
+
+A comunidade de programação batizou os jeitos de juntar palavras num identificador com **metáforas visuais** — você lê o nome e enxerga o formato. Os principais que aparecem no curso:
+
+| Nome | Como fica | De onde vem o nome |
+|---|---|---|
+| **snake_case** | `idade_anos_paciente` | As palavras coladas por sublinhado lembram o corpo comprido de uma cobra. |
+| **kebab-case** | `idade-anos-paciente` | Palavras espetadas por hífens, como pedaços de carne num espeto de churrasco (*kebab*). |
+| **UPPER_SNAKE_CASE** | `IDADE_MIN_INCLUSAO` | Variante "gritada" do *snake_case* — também conhecida como *SCREAMING_SNAKE_CASE*. |
+| **camelCase** | `idadeAnosPaciente` | A primeira letra é minúscula, e cada palavra seguinte começa com maiúscula — formando "corcovas" como as de um camelo. Convenção dominante em Java e JavaScript. |
+| **PascalCase** | `IdadeAnosPaciente` | Como *camelCase*, mas com a primeira letra também maiúscula. Vem da linguagem Pascal. |
+
+Não há campo neutro: todo arquivo, variável, função ou coluna de dataframe que você criar vai usar **algum** desses estilos — vale a pena escolher conscientemente. O resto deste capítulo justifica a escolha do curso.
+
+## As três convenções que importam
+
+| Estilo | Visual | Onde usar |
+|---|---|---|
+| **kebab-case** | `analise-sobrevida.qmd` | Arquivos `.qmd` (viram URLs no site) |
+| **snake_case** | `analise_sobrevida.R` | Arquivos `.R`, `.py`, `.ipynb`; variáveis; funções; colunas de dataframe; chaves BibTeX |
+| **UPPER_SNAKE_CASE** | `IDADE_MIN_INCLUSAO` | Constantes (parâmetros que não mudam em runtime) |
+
+A escolha entre kebab e snake **não é estética** — ela tem origem técnica que se traduz em "o que quebra se eu errar".
+
+### Por que `kebab-case` para arquivos `.qmd`
+
+Cada arquivo `.qmd` deste site vira uma URL: `analise-sobrevida.qmd` → `https://seusite.com/analise-sobrevida.html`. URLs com espaços ou caracteres acentuados precisam ser *encodadas* (espaço vira `%20`, `ç` vira `%C3%A7`), o que produz links visualmente quebrados e propensos a corromper em copia-cola entre apps de mensagem.
+
+A norma POSIX [@ieee2017posix] define o **Portable Filename Character Set** com apenas letras ASCII, dígitos, ponto, sublinhado e hífen — qualquer coisa fora disso é território de problemas em algum sistema. Hífen é preferível a sublinhado em URL por convenção do ecossistema web (mais legível em endereços longos e tratado melhor por mecanismos de busca).
+
+### Por que `snake_case` para `.R` e `.py`
+
+Em **Python**, hífen no nome do arquivo **quebra a importação**:
+
+``` python
+# Arquivo: analise-sobrevida.py
+import analise-sobrevida   # SyntaxError: o "-" é interpretado como subtração
+```
+
+A solução é usar sublinhado:
+
+``` python
+# Arquivo: analise_sobrevida.py
+import analise_sobrevida   # OK
+```
+
+O PEP 8, guia oficial de estilo do Python, é explícito quanto a nomes de módulo: devem ser curtos, em letras minúsculas, com sublinhado para separar palavras se isso melhorar a legibilidade [@vanrossum2001pep8].
+
+Em **R**, hífen funciona na nomeação do arquivo (você pode chamá-lo de `analise-sobrevida.R` e o R lê), mas o tidyverse style guide — referência prática da maior parte dos pacotes modernos de R — recomenda sublinhado para nomes de variáveis e funções [@wickham2024tidystyle], e a coerência entre nome de arquivo e nome de objeto que o arquivo contém vale o esforço.
+
+### Variáveis, funções e colunas de dataframe
+
+Sempre `snake_case`:
+
+``` r
+# R
+idade_anos <- 45                       # variável
+calcular_imc <- function(peso, altura) # função
+df$pressao_arterial                    # coluna de dataframe
+```
+
+``` python
+# Python
+idade_anos = 45                        # variável
+def calcular_imc(peso, altura): ...    # função
+df["pressao_arterial"]                 # coluna de DataFrame
+```
+
+A justificativa para colunas de dataframe vai além de gosto. *Tidy data*, princípio publicado por @wickham2014tidy, organiza dados de forma que cada variável é uma coluna; nomes de coluna em `snake_case` minúsculo preservam a possibilidade de referenciar a coluna sem aspas em chamadas tidyverse (`mutate(df, idade_decadas = idade_anos / 10)`), o que exige que o nome seja um identificador R válido — sem espaços, hífens ou acentos. Em Python, o `pandas` aceita qualquer string como nome de coluna, mas você perde a sintaxe `df.idade_anos` e fica preso a `df["idade anos"]` se houver espaço.
+
+### Constantes
+
+Para parâmetros que não mudam durante a execução do script (limiares estatísticos, *seeds*, critérios de inclusão), a convenção é `UPPER_SNAKE_CASE`:
+
+``` r
+ALPHA_NIVEL <- 0.05
+IDADE_MIN_INCLUSAO <- 18
+SEED <- 42
+```
+
+A maiúscula sinaliza ao leitor (humano e agente de IA): "isto não é variável de cálculo intermediário; é parâmetro do estudo". O ideal é externalizá-las para um único arquivo `config.yml` ou `_variables.yml` (capítulo 09 deste bloco).
+
+## Chaves BibTeX no `references.bib`
+
+Cada referência num arquivo `.bib` recebe uma chave única — o identificador que você usa em `[@chave]` para citar no texto. A chave não aparece no PDF/HTML final (é interna), mas o `references.bib` deste curso tem dezenas de entradas, e a inconsistência entre estilos vira ruído quando você precisa achar uma referência específica para revisar ou citar.
+
+A convenção mais comum em projetos científicos é **sobrenome do primeiro autor + ano + primeira palavra significativa do título**, tudo em minúsculas:
+
+``` bibtex
+@article{wickham2014tidy, ...}
+@article{wilson2017good, ...}
+@book{ousterhout2018philosophy, ...}
+@misc{bryan2015naming, ...}
+```
+
+Esse é o padrão que o **Better BibTeX** (extensão do Zotero recomendada em M0-B1-04) gera automaticamente, e é a convenção dominante no `references.bib` deste site.
+
+Por que importa, ainda que seja "só" estético:
+
+- **Você lê a chave e sabe o que é.** `wickham2014tidy` se identifica de imediato; `ref042` ou `tidyData` (sem ano) exigem abrir a entrada para descobrir.
+- **Ordenação alfabética útil.** Entradas do mesmo autor ficam agrupadas naturalmente: `wickham2014tidy`, `wickham2016ggplot2`, `wickham2023r4ds`, `wickham2024tidystyle`.
+- **Conflitos óbvios.** Se você precisar citar dois Wickham 2014, basta acrescentar mais letras ao termo (`wickham2014tidy` × `wickham2014advanced`). Em chaves arbitrárias o conflito passa despercebido até o BibTeX reclamar.
+- **Agentes acertam melhor.** Quando você pede ao Claude "verifique se `[@wickham2024tidystyle]` está correto", a chave já carrega informação semântica — em chaves opacas (`zotero_42`, `paperA`), o agente perde tempo procurando.
+
+**Antipadrão clássico:** chaves vindas do nome do PDF baixado (ex.: `Wickham_TidyData_2014_FinalDraft_v3`). Acontece ao importar do Zotero sem configurar a geração de chave. Vale dedicar 5 minutos uma vez para ajustar **Zotero → Better BibTeX → Citation Key Format** para algo como `[auth:lower][year][shorttitle3_3:lower:nopunct]`.
+
+## Antipadrões a evitar
+
+Estes nomes funcionam, mas geram retrabalho — e qualquer agente de IA bem treinado sugere refatoração se encontrá-los:
+
+- **Espaços e acentos:** `Análise Final.R`. Quebra em terminal (precisa escapar com `\` ou aspas), quebra em URL, gera bug em encoding diferente (capítulo 10 deste bloco).
+- **Sufixos de versão:** `script_v2.R`, `analise_final.R`, `analise_FINAL_DEFINITIVO_v3.R`. Versionamento é responsabilidade do Git, não do nome do arquivo. O bloco de Git (M4-B1) dedica espaço a por que essa prática é sintoma de ausência de controle de versão.
+- **Maiúsculas no meio:** `analiseSobrevida.R`. Estilo *camelCase* é convenção de Java/JavaScript; em R/Python destoa, e é incompatível com `snake_case` no resto do código.
+- **Datas no nome (na maioria dos casos):** `analise_2026-04-30.R`. Se for *snapshot* intencional, ok; se for muleta de versionamento, idem ao item anterior.
+- **Nomes que descrevem implementação, não intenção:** `script1.R`, `temp.py`, `nova_versao.qmd`. Bom nome responde "o que esse arquivo faz?" — não "qual é a história de revisão dele?". @ousterhout2018philosophy dedica o capítulo *Choosing Names* do livro *A Philosophy of Software Design* a essa proposição.
+
+@wilson2017good, em *Good Enough Practices in Scientific Computing*, lista "use consistent naming, notation, and style" entre as práticas mínimas para ciência reprodutível em qualquer linguagem.
+
+## A armadilha case-insensitive (e o 404 silencioso)
+
+::: {.callout-warning}
+## macOS e Windows enganam você
+Por padrão, **macOS** (com sistemas de arquivos APFS e HFS+) e **Windows** (com NTFS) são *case-insensitive mas case-preserving*: você pode salvar um arquivo como `Claude.qmd`, e o sistema lembra do "C" maiúsculo, mas considera `claude.qmd` o mesmo arquivo.
+
+**Linux** (ext4, padrão de praticamente todos os servidores web — incluindo GitHub Pages, que hospedará este site) é **case-sensitive**: `Claude.qmd` e `claude.qmd` são arquivos diferentes, com URLs diferentes.
+
+O que isso significa na prática: você cria o arquivo no Mac como `Claude.qmd`, faz um link `[capítulo](claude.qmd)` em outro lugar do site, tudo funciona localmente. Quando publica, o link retorna 404 — porque no Linux do servidor o arquivo se chama `Claude.qmd` e o link aponta para `claude.qmd`.
+
+**Solução:** use minúsculas desde o início para todos os arquivos `.qmd`. Sem exceção.
+:::
+
+@bryan2015naming, em uma das apresentações mais influentes sobre o tema na comunidade de ciência de dados, resume a regra geral em três princípios: nomes *machine-readable* (sem espaços, sem caracteres especiais), *human-readable* (descrevem conteúdo) e *plays well with default ordering* (zero-padding, datas em ISO 8601 quando aplicável).
+
+## Extensões mais comuns no fluxo do curso
+
+| Extensão | O que é | Onde aparece |
+|---|---|---|
+| `.qmd` | Documento Quarto | Todo capítulo deste site |
+| `.R` | Script R | Análise estatística, scripts utilitários |
+| `.py` | Script Python | Análise, automação |
+| `.ipynb` | Jupyter Notebook | Alternativa ao `.qmd` para Python |
+| `.md` | Markdown puro | `README.md`, `AGENTS.md`, documentação |
+| `.yml` / `.yaml` | YAML | `_quarto.yml`, GitHub Actions, configuração (capítulo 07) |
+| `.toml` | TOML | `pyproject.toml`, configuração Python moderna |
+| `.lock` | Lockfile de dependências | `renv.lock`, `uv.lock` (capítulo 08) |
+| `.csv` / `.tsv` | Dados tabulares texto | Datasets simples, exportações |
+| `.json` | JSON | APIs, configurações, dados aninhados |
+| `.parquet` | Dados colunar binário | Dataset grande, *big data* |
+| `.sqlite` | Banco SQLite | Dataset relacional pequeno, embarcado |
+| `.bib` | BibTeX | `references/references.bib` deste curso |
+
+## Conexão com `AGENTS.md`
+
+A maior parte das regras deste capítulo já está formalizada na seção *Convenções de nomeação* do `AGENTS.md` deste projeto (M1-B2-05). Ao ler esse arquivo no início de cada conversa, agentes como Claude, Codex e Gemini aplicam as regras automaticamente — sugerem nomes corretos, alertam quando você cria um arquivo fora do padrão, e ajudam a refatorar quando você herda código que não segue convenção.
+
+## O que vem a seguir
+
+A próxima convenção parece ainda mais "óbvia demais para ser ensinada" — e é exatamente por isso que vale ter um capítulo curto sobre ela: como você (e o agente de IA) deve **comentar código**.
+
+→ [03 · Comentários](03-comentarios.qmd)

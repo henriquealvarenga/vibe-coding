@@ -1,0 +1,146 @@
+---
+title: "Documentar uso de IA"
+---
+
+Quando IA passa a ser parte do seu fluxo de trabalho, surge uma pergunta concreta: **como contar isso?** Para o seu caderno de pesquisa, para o orientador, para o revisor, para o editor da revista. Este capítulo é prático: foca **o que registrar e onde**.
+
+## Por que documentar
+
+Três motivos pragmáticos:
+
+1. **Reprodutibilidade.** Sem registro de qual modelo, em qual versão, com qual prompt, **outra pessoa não consegue reproduzir** o que você fez. Mesmo você, daqui a 6 meses, esquecerá. Em pesquisa, isso é falha metodológica.
+2. **Exigência editorial.** A maior parte das revistas científicas em 2026 — Lancet, NEJM, JAMA, Nature, PLOS, BMJ e outras — exige declaração formal de uso de IA em manuscritos. Omitir é causa de **rejeição** ou, em casos descobertos depois, **retratação**.
+3. **Transparência ética.** Mesmo onde a revista não exige, declarar protege você de acusações de má conduta e mantém a comunicação com leitores e revisores honesta.
+
+## Dois níveis de registro
+
+Há uma distinção importante que organiza o capítulo:
+
+- **Registro interno** — o que você guarda no seu projeto, para si mesmo e para reprodutibilidade futura. **Sempre vale a pena.**
+- **Declaração externa** — o que você comunica em uma publicação ou apresentação. **Depende da revista, do tipo de uso, e da política institucional.**
+
+Vamos olhar cada um.
+
+## Registro interno: o que guardar
+
+Para qualquer projeto onde você usa IA, mantenha um pequeno arquivo de log — pode ser `documentation/uso-ia.md` (lembra da estrutura do capítulo de Prompts?). Cinco coisas valem registro:
+
+### 1. Modelo
+
+O nome **completo** do modelo, não apenas a marca. Exemplos:
+
+- ✅ `Claude Opus 4.7 (1M context)`
+- ✅ `GPT-5`
+- ✅ `Gemini 2.5 Pro`
+- ❌ "Claude" / "ChatGPT" / "IA" — vagos demais.
+
+### 2. Versão e data
+
+Modelos evoluem **silenciosamente**, especialmente quando acessados via app. Mesmo que a marca não mude o número de versão, o comportamento pode mudar de uma semana para a outra. Por isso:
+
+- **Registre a versão exata** quando acessível (`claude-opus-4-7` na API) **ou**
+- **Registre a data exata** do uso (`uso em 2026-05-12`) — se acessou por app, é o melhor que dá.
+
+### 3. Prompt e contexto
+
+Guarde o **prompt principal** que você usou — ou pelo menos o esqueleto dele. Se o prompt é longo (como o exemplo do capítulo anterior), salve em arquivo separado: `documentation/prompts/01-arquitetura-projeto.md`.
+
+Também registre **arquivos enviados como contexto**: "anexei `data/raw/coorte.csv` e `protocolo.pdf` ao prompt".
+
+### 4. O que veio do modelo × o que foi editado por você
+
+Esse é o ponto mais negligenciado. Anote, em cada uso, o nível de **edição humana** sobre o output:
+
+- "Texto inteiro gerado pelo modelo, sem edição."
+- "Estrutura gerada pelo modelo; edição substancial de tom e exemplos."
+- "Apenas usado como brainstorm; nada do output entrou no projeto."
+- "Código sugerido pelo modelo, testado e ajustado por mim."
+
+Esse registro é o que separa "minha contribuição" de "contribuição da IA" — e vai aparecer na declaração externa, em métodos ou agradecimentos, dependendo da revista.
+
+### 5. Função / tipo de uso
+
+Categorize o uso. Algumas categorias úteis em pesquisa:
+
+| Categoria | Exemplo |
+|---|---|
+| **Edição de língua** | Revisão de gramática, tradução, ajuste de fluência em inglês |
+| **Brainstorm conceitual** | Discussão inicial sobre desenho de estudo, possíveis variáveis |
+| **Geração de código** | Scripts em R/Python para limpeza ou análise |
+| **Sumarização** | Resumir artigos para revisão de literatura |
+| **Análise metodológica** | IA aplicada **como método**: classificação de respostas, extração de dados estruturados |
+
+A última categoria é a mais sensível em termos de declaração — quando IA é parte do método, ela precisa ser descrita com rigor de método.
+
+### Exemplo de log mínimo
+
+```markdown
+# Uso de IA no projeto
+
+## 2026-05-12 — Estrutura inicial do projeto Quarto
+- Modelo: Claude Opus 4.7 (1M context)
+- Acesso: Claude Code (CLI)
+- Prompt: `prompts/01-arquitetura-projeto.md`
+- Contexto enviado: nenhum arquivo
+- Output: árvore de pastas + README + _quarto.yml + .gitignore
+- Edição humana: ajustei `documentation/` em vez de `docs/` (default Quarto);
+  reescrevi o README à mão.
+- Categoria: brainstorm/geração de código
+
+## 2026-05-15 — Tabela 1
+- Modelo: Claude Sonnet 4.6 (via Claude Code)
+- Acesso: Claude Code, API
+- Prompt: `prompts/03-tabela1.md`
+- Contexto enviado: `data/raw/coorte.csv` (anonimizado, ver capítulo LGPD)
+- Output: script `R/analysis/01-tabela1.R`
+- Edição humana: ajustei o teste de Mann-Whitney que ele aplicou em uma
+  variável que era, na verdade, ordinal categórica.
+- Categoria: geração de código + análise metodológica
+```
+
+Esse arquivo cresce ao longo do projeto. **Pode ser feito a posteriori**, mas é mais fácil quando atualizado a cada uso (5 minutos de registro economizam 2 horas de tentar lembrar depois).
+
+## Declaração externa: como citar em publicação
+
+Aqui as regras dependem de **onde** você publica. Mas há um padrão comum, baseado nas diretrizes do **ICMJE** (*International Committee of Medical Journal Editors*) — referência da maior parte das revistas médicas:
+
+### Princípios universais
+
+1. **IA não é autora.** Em todas as diretrizes editoriais relevantes em 2026, IA generativa **não pode ser listada como autor**. A razão: autoria implica responsabilidade pelo conteúdo, e IA não pode assumir responsabilidade.
+2. **Uso deve ser declarado.** Se IA participou da produção do manuscrito de qualquer forma — edição de língua, escrita, geração de código, análise metodológica — isso deve ser declarado.
+3. **Onde declarar depende do tipo de uso:**
+   - **Methods** se a IA foi parte da **metodologia** do estudo (classificou respostas, sumarizou artigos, gerou dados sintéticos).
+   - **Acknowledgments** se foi auxiliar **editorial** (revisão de língua, ajuste de fluência, brainstorm não metodológico).
+
+### Exemplos de declaração
+
+**Para uso editorial (Acknowledgments):**
+
+> *"Os autores utilizaram o Claude Opus 4.7 (Anthropic) para revisão de língua e ajuste de fluência do texto em inglês. Todo o conteúdo científico foi concebido, redigido e revisado pelos autores."*
+
+**Para uso metodológico (Methods):**
+
+> *"A extração de dados clínicos a partir dos prontuários foi auxiliada pelo modelo Claude Opus 4.7 (Anthropic), versão acessada em maio de 2026. O prompt utilizado encontra-se no Material Suplementar (Apêndice S2). Todas as extrações foram revisadas manualmente por dois pesquisadores, com discrepâncias resolvidas por consenso."*
+
+Note as diferenças: a declaração metodológica é mais longa, inclui versão, prompt em apêndice, e descreve o controle humano. **A declaração editorial é mais curta**, mas igualmente honesta sobre o uso.
+
+### Diretrizes específicas a conhecer
+
+- **ICMJE** ([icmje.org](https://www.icmje.org)) — Recomendações atualizadas em 2024-2025 incluem seção sobre IA generativa. Referência para a maioria das revistas médicas.
+- **CONSORT-AI / TRIPOD-AI / STARD-AI** — Extensões dos checklists clássicos para estudos que **usam IA como intervenção ou método**. Se o seu estudo é sobre IA aplicada (modelo de classificação, ferramenta de diagnóstico), **deve seguir essas extensões**.
+- **Política da revista alvo** — Antes de submeter, **leia** a política da revista específica. Cada uma tem nuances (alguma exige modelo + prompt em supplementary; outra aceita apenas declaração genérica).
+
+## Checklist antes de submeter
+
+Antes de enviar o manuscrito, confira:
+
+- [ ] **Houve uso de IA?** Mesmo edição de fluência conta.
+- [ ] **Está declarado em algum lugar do manuscrito?** Methods (se metodológico) ou Acknowledgments (se editorial).
+- [ ] **Modelo e versão estão especificados?**
+- [ ] **Para uso metodológico**, o prompt principal está em material suplementar?
+- [ ] **A política específica da revista alvo foi lida?**
+- [ ] **Você ainda tem o registro interno do projeto** (`documentation/uso-ia.md`)? Pode ser solicitado por revisores.
+
+## O que vem a seguir
+
+Você cuidou do **depois**: como registrar e declarar uso de IA. O próximo capítulo cuida do **antes**: **que dados você pode mandar para a IA**, em pesquisa médica que envolve informações de pacientes — o tema da **LGPD**.

@@ -1,0 +1,112 @@
+---
+title: "Arquivos invisíveis e como vê-los"
+---
+
+Você clona um repositório do GitHub ou abre o projeto deste curso pela primeira vez. Olha no Finder do Mac, ou no Explorer do Windows, e vê os capítulos `.qmd`, as pastas dos Módulos, as imagens. Não vê o `.gitignore`. Não vê a pasta `.git/` (que é o repositório inteiro!). Não vê o `.quarto/` que armazena cache. Não vê o `.Rprofile` que configura o R quando ele inicia.
+
+Eles existem. O sistema operacional só não está mostrando.
+
+## A convenção do ponto
+
+Em **sistemas Unix** (Linux, macOS) e por convenção em **Windows**, qualquer arquivo ou pasta cujo nome começa com **`.` (ponto)** é tratado como **oculto**: existe, ocupa espaço, é lido pelas ferramentas que o procuram, mas o explorador de arquivos padrão esconde por padrão.
+
+A ideia é separar o que é **conteúdo do projeto** (você quer ver) do que é **configuração ou estado** (existe para a ferramenta funcionar; mostrar polui sua vista).
+
+## Os "dotfiles" que você vai encontrar no curso
+
+| Arquivo / pasta | O que é | Por que existe |
+|---|---|---|
+| `.git/` | Pasta com o repositório Git inteiro (histórico de commits, branches, configuração local) | Cuidado: apagar essa pasta destrói o histórico de versionamento |
+| `.gitignore` | Lista de arquivos/pastas que o Git deve **ignorar** (não versionar) | Evita commitar dados sensíveis, arquivos temporários, lockfiles binários |
+| `.gitattributes` | Regras de tratamento de arquivos pelo Git (ex.: como lidar com line endings) | Padroniza comportamento entre macOS, Windows, Linux |
+| `.Rprofile` | Script R que executa toda vez que o R inicia no projeto | Carrega pacotes, configura `options()` |
+| `.Renviron` | Variáveis de ambiente do R | Caminhos, chaves de API, idioma |
+| `.env` | Variáveis de ambiente (segredos, chaves de API) | **Nunca** versionar — sempre listar no `.gitignore` |
+| `.quarto/` | Cache interno do Quarto durante render | Pode apagar à vontade — é regenerada |
+| `.venv/` ou `venv/` | Ambiente virtual de Python | Isola pacotes Python por projeto |
+| `.vscode/` | Configurações específicas do projeto para VS Code/Positron | Útil compartilhar; não compartilhar segredos |
+| `.DS_Store` | Metadados de visualização criados pelo Finder do macOS | **Sempre** colocar no `.gitignore` — polui repositórios sem trazer valor |
+| `.ipynb_checkpoints/` | *Checkpoints* automáticos do Jupyter | Lixo — colocar no `.gitignore` |
+
+::: {.callout-warning}
+## Não confundir oculto com inexistente
+Arquivo oculto **não é arquivo deletado**. Está lá. Outras ferramentas (Git, R, Python, agentes de IA) **veem normalmente** — a invisibilidade é só para você no explorador de arquivos. Se você apagar um `.gitignore` "porque achou que estava sobrando", quebra todo o controle de versionamento subsequente.
+:::
+
+## Como mostrar arquivos ocultos
+
+### macOS (Finder)
+
+Atalho: **`Cmd + Shift + .`** (Command, Shift e ponto).
+
+É um *toggle* — aperta uma vez para mostrar, aperta de novo para esconder. Funciona em qualquer janela do Finder e nas caixas de diálogo "Abrir/Salvar". Vale memorizar: é o atalho mais útil deste capítulo.
+
+Os arquivos ocultos aparecem em cinza-claro para diferenciar dos visíveis.
+
+### Windows (Explorador de Arquivos)
+
+Versões recentes (Windows 11): aba **Exibir → Mostrar → Itens ocultos**.
+
+Versões anteriores (Windows 10): aba **Exibir** na faixa superior, marcar a caixa **"Itens ocultos"**.
+
+### Linux (gerenciadores gráficos)
+
+Atalho universal: **`Ctrl + H`** na maioria dos gerenciadores (Files/Nautilus do GNOME, Dolphin do KDE, Thunar do XFCE).
+
+### Terminal (qualquer sistema)
+
+O comando `ls` por padrão esconde dotfiles. Para ver tudo, use a opção `-a` (de *all*):
+
+``` bash
+ls         # mostra só arquivos visíveis
+ls -a      # mostra TUDO, inclusive os começados com .
+ls -la     # mostra tudo, formato detalhado (permissões, tamanho, data)
+```
+
+Esse foi o assunto do bloco *Terminal* (M2-B1-08). Aqui está só de lembrete.
+
+### Positron, VS Code e RStudio
+
+**Boa notícia:** os IDEs deste curso já mostram dotfiles **por padrão** no painel de arquivos lateral. Você não precisa fazer nada — abrir o projeto no Positron já te dá visão completa do que existe na pasta.
+
+É um dos motivos para abrir projeto pela árvore do IDE em vez de pelo Finder/Explorer: você vê tudo que existe.
+
+## Caso especial: `AGENTS.md` é "visível mas escondido"
+
+O `AGENTS.md` na raiz deste projeto **não tem ponto no início** — então o Finder mostra normalmente. Mesmo assim, ele **não aparece no site renderizado**: a configuração `render: ["**/*.qmd", "!planejamento/**", ...]` no `_quarto.yml` só inclui arquivos `.qmd`. Tudo que é `.md` (incluindo `AGENTS.md`, `README.md`) é ignorado pelo render.
+
+Resumo:
+
+- **Para o sistema operacional**, `AGENTS.md` é arquivo normal.
+- **Para o Git**, `AGENTS.md` é arquivo normal — entra em commits, aparece no GitHub.
+- **Para o site Quarto renderizado**, `AGENTS.md` é invisível — nenhum visitante do site vê seu conteúdo a menos que olhe o repositório no GitHub.
+- **Para os agentes de IA** (Claude Code, Codex, Gemini CLI), `AGENTS.md` é o **arquivo mais importante do projeto** — é o primeiro que eles leem ao iniciar uma conversa.
+
+A "invisibilidade" do `AGENTS.md` está em uma camada diferente da do `.gitignore` — uma é convenção do *site*, a outra é convenção do *sistema operacional* — mas o efeito prático é parecido: o aluno precisa saber que o arquivo existe e onde fica, mesmo sem vê-lo nos lugares óbvios.
+
+## Armadilhas comuns
+
+**1. "Apagar a pasta `.git/` para deixar o projeto mais limpo".** Apaga o repositório inteiro. Histórico, branches, configuração — tudo. Sem volta (a menos que você tenha *push* em remoto recente). **Nunca apague.**
+
+**2. Versionar segredos no `.env`.** O arquivo `.env` guarda chaves de API, senhas, tokens. Se ele entrar num *commit*, qualquer pessoa que acesse o repositório vê. Solução: adicione `.env` ao `.gitignore` **antes** do primeiro commit.
+
+**3. Modificar `.Rprofile` sem entender o que está fazendo.** Esse arquivo roda toda vez que o R inicia. Erro nele pode impedir o R de subir. Se acontecer, edite pelo terminal (`nano .Rprofile`), não pelo R.
+
+**4. `.DS_Store` espalhados pelo repositório.** Só macOS gera esses arquivos. Para colaborador no Windows ou Linux, eles parecem lixo aleatório. Adicionar `.DS_Store` ao `.gitignore` global do seu sistema resolve para todos os projetos:
+
+``` bash
+git config --global core.excludesfile ~/.gitignore_global
+echo ".DS_Store" >> ~/.gitignore_global
+```
+
+## Conexão com IA
+
+Agentes de IA (Claude Code, Codex CLI, Gemini CLI) **enxergam dotfiles normalmente**. Eles leem `.gitignore` para entender o que ignorar, leem `AGENTS.md` para entender as regras do projeto, leem `.Rprofile` para entender a configuração do R no início da sessão. A "invisibilidade" do explorador de arquivos não se aplica a eles.
+
+Isso é vantagem: você não precisa explicar ao agente "olha, tem um `.gitignore` aqui" — ele já viu. Mas também é responsabilidade: se o `AGENTS.md` está mal escrito ou tem regra antiga que não vale mais, o agente vai aplicar essa regra antiga sem questionar. Mantenha os dotfiles do projeto atualizados.
+
+## O que vem a seguir
+
+Vários dos arquivos deste capítulo (`_quarto.yml`, GitHub Actions, parte do cabeçalho dos `.qmd`) são escritos numa linguagem de configuração específica que merece capítulo próprio: **YAML**, que aparece em quase todo lugar moderno onde se configura algo.
+
+→ [07 · YAML em todo lugar](07-yaml.qmd)

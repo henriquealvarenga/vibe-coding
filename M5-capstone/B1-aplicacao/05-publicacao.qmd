@@ -1,0 +1,269 @@
+---
+title: "Publicação reprodutível do projeto"
+---
+
+Análise pronta, manuscrito redigido, repositório versionado localmente. **Falta a etapa que torna o trabalho descobrível, citável, e preservado a longo prazo**: publicar. Este capítulo aplica diretamente o que vimos no Bloco *Reprodutibilidade* (M4-B2) ao seu Capstone — sem repetir conceitos, mas mostrando os passos exatos na sequência apropriada.
+
+A meta da publicação do Capstone:
+
+1. Repositório **público no GitHub** com tudo (exceto dados sensíveis em `data/raw/`).
+2. **Site Quarto navegável** publicado via GitHub Pages, servindo como portal do projeto.
+3. **Snapshot no Zenodo com DOI** permanente para arquivamento institucional.
+4. **README e CITATION.cff** que orientam quem chega ao repositório.
+
+Vamos pelos cinco passos práticos.
+
+## Passo 1: Tornar o repositório público
+
+Durante o desenvolvimento do Capstone, o repositório provavelmente esteve **privado** — porque você não tinha controle total sobre o que estava commitando, e dados em desenvolvimento podem ter conteúdo problemático.
+
+Antes de tornar público, **revise tudo** que vai pra fora:
+
+- [ ] **Nenhum dado em `data/raw/`** (deve estar gitignored — confira).
+- [ ] **Nenhum identificador**: CPF, prontuário, nome, data de nascimento, mesmo em arquivos de teste ou comentários.
+- [ ] **Nenhum *secret***: tokens de API, senhas, chaves SSH em arquivos de configuração.
+- [ ] **Histórico inteiro do Git limpo** — não basta apagar do estado atual; o Git guarda histórico. Se você commitou algo sensível em algum momento, mesmo que tenha removido depois, ainda está no histórico. Use `git log -p` para auditar.
+
+Em caso de dúvida sobre histórico, peça ao agente:
+
+> *"Audite todo o histórico do Git deste repositório. Há sinais de dados sensíveis, identificadores ou *secrets* em algum commit? Liste arquivos e commits problemáticos."*
+
+Se houver, considere `git filter-repo` para reescrita histórica — mas com cuidado (capítulo M4-B1-04 cobre os perigos).
+
+Quando o repositório estiver limpo:
+
+```bash
+gh repo edit --visibility public
+```
+
+Ou via interface web do GitHub: Settings → General → Change visibility → Make public.
+
+## Passo 2: Publicar como site Quarto
+
+Vimos em M4-B1-06. Em síntese:
+
+**No `_quarto.yml`:**
+
+```yaml
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "Capstone: Prevalência de HAS na PNS 2019"
+  navbar:
+    left:
+      - href: index.qmd
+      - href: PESQUISA.md
+      - href: SAP.md
+      - href: analysis/01-limpeza.qmd
+        text: "Limpeza"
+      - href: analysis/02-analise.qmd
+        text: "Análise"
+      - href: manuscrito.qmd
+        text: "Manuscrito"
+```
+
+**Render local + push:**
+
+```bash
+quarto publish gh-pages
+```
+
+Em poucos minutos, site fica acessível em `https://usuario.github.io/capstone-prevalencia-has/`.
+
+Para projetos com domínio próprio configurado (por exemplo, todo seu trabalho fica em `henriquealvarenga.com/capstone-...`), siga os passos de domínio próprio do M4-B1-06.
+
+## Passo 3: README sólido
+
+O README é a primeira coisa que qualquer pessoa lê ao chegar no repositório. Ele tem que **orientar em 30 segundos**: o que é o projeto, como rodar, onde encontrar o quê.
+
+Estrutura que funciona:
+
+````markdown
+# Capstone: Prevalência de HAS estágio 2 na PNS 2019
+
+Material didático e análise reprodutível para a disciplina de
+Epidemiologia Clínica da [Instituição].
+
+**Site navegável:** [usuario.github.io/capstone-prevalencia-has](https://...)\
+**Manuscrito:** [PDF do relatório](manuscrito.pdf)\
+**DOI (versão arquivada):** [10.5281/zenodo.XXXXXXX](https://doi.org/10.5281/zenodo.XXXXXXX)
+
+## O que tem aqui
+
+Este compendium contém:
+
+- Análise transversal da PNS 2019 sobre prevalência de HAS estágio 2
+  em adultos 40-64 anos.
+- Código reprodutível em R (com `renv` para garantir versões).
+- Manuscrito em formato de artigo, com tabelas e figuras geradas
+  automaticamente a partir dos dados.
+- Slides para uso em aula.
+
+## Como reproduzir
+
+```bash
+# Clone o repositório
+git clone https://github.com/usuario/capstone-prevalencia-has.git
+cd capstone-prevalencia-has
+
+# Restaure o ambiente R
+Rscript -e 'renv::restore()'
+
+# Rode a análise
+quarto render
+```
+
+## Estrutura de pastas
+
+(árvore de pastas)
+
+## Citação
+
+Se você usar este material, cite como (...)
+
+## Uso pedagógico
+
+Este material é projetado para uso em aula de epidemiologia.
+Ver `docs/plano-didatico.md` para sugestões.
+
+## Licença
+
+Código sob licença MIT. Texto e figuras sob CC BY 4.0.
+````
+
+Boas práticas: emojis usados com moderação para indicar links; instruções de reprodução em **três comandos** que cabem na cabeça; citação visível. Para Capstone com objetivo didático, **menção explícita ao plano de uso pedagógico** diferencia.
+
+## Passo 4: CITATION.cff e .zenodo.json
+
+Vimos em M4-B2-04 e M4-B2-05. Em resumo:
+
+**`CITATION.cff`:**
+
+```yaml
+cff-version: 1.2.0
+message: "Se você usar este compendium, por favor cite como abaixo."
+type: software
+title: "Capstone: Prevalência de HAS estágio 2 na PNS 2019"
+authors:
+  - family-names: "Alvarenga da Silva"
+    given-names: "Henrique"
+    orcid: "https://orcid.org/0000-0001-2345-6789"
+version: "1.0.0"
+date-released: "2026-05-15"
+doi: "10.5281/zenodo.XXXXXXX"
+license: MIT
+repository-code: "https://github.com/usuario/capstone-prevalencia-has"
+keywords:
+  - epidemiologia
+  - hipertensão
+  - PNS
+  - reprodutibilidade
+  - vibe coding
+  - material didático
+```
+
+**`.zenodo.json`:**
+
+```json
+{
+  "title": "Capstone: Prevalência de HAS estágio 2 na PNS 2019",
+  "description": "Compêndio reprodutível para uso didático.",
+  "creators": [
+    {
+      "name": "Alvarenga da Silva, Henrique",
+      "orcid": "0000-0001-2345-6789",
+      "affiliation": "Universidade Federal de São João del-Rei"
+    }
+  ],
+  "license": "MIT",
+  "upload_type": "software",
+  "keywords": ["epidemiology", "hypertension", "reproducibility", "teaching"],
+  "language": "por"
+}
+```
+
+Esses dois arquivos commitados no GitHub fazem com que: (a) o GitHub passe a oferecer botão "Cite this repository" automaticamente; (b) Zenodo importe metadados ricos no momento da release.
+
+## Passo 5: Release no GitHub → DOI no Zenodo
+
+Quando o projeto estiver **finalizado** (não "perfeito" — finalizado para versão 1.0):
+
+```bash
+git tag v1.0.0 -m "Versão final do Capstone"
+git push origin v1.0.0
+
+gh release create v1.0.0 \
+  --title "v1.0.0 — Versão final do Capstone" \
+  --notes "Compêndio reprodutível do Capstone. Inclui análise completa,
+manuscrito, e plano didático. Para uso em aula e como referência."
+```
+
+Em poucos minutos, **Zenodo cria automaticamente o registro com DOI**. Algo como `10.5281/zenodo.1234567`. Atualize o README e o CITATION.cff com o DOI emitido (ou deixe os placeholders se já está apontando para o "DOI conceito" do Zenodo).
+
+::: {.callout-tip}
+## DOI específico vs. DOI conceito
+Lembre-se da distinção do M4-B2-05:
+
+- **DOI específico** (ex.: `10.5281/zenodo.1234567`) — aponta para versão 1.0.0 exata.
+- **DOI conceito** (ex.: `10.5281/zenodo.1234566`) — aponta sempre para a versão mais recente.
+
+No README, exiba o **DOI conceito** (em badge — Zenodo gera Markdown pronto). Em qualquer publicação derivada deste Capstone (artigo final, slides para congresso), cite o **DOI específico** da versão usada.
+:::
+
+## Passo 6: Finalizar com plano didático
+
+Como este Capstone tem propósito didático, vale documentar **explicitamente como você vai usá-lo**. Crie `docs/plano-didatico.md`:
+
+```markdown
+# Plano didático
+
+Este compêndio será usado na disciplina XYZ, na seguinte forma:
+
+## Aula 1: Conceitos de prevalência (1 hora)
+
+- **Antes da aula:** alunos leem este compêndio. Especialmente o
+  PESQUISA.md e o início do manuscrito (Introdução).
+- **Em aula:** discussão sobre por que dados públicos da PNS são
+  adequados para estimar prevalência. Limitações.
+
+## Aula 2: Reprodutibilidade computacional (1 hora)
+
+- **Atividade:** alunos clonam o repositório no laboratório de
+  informática, restauram o ambiente R via `renv::restore()`,
+  rodam o pipeline, comparam números com os do manuscrito.
+- **Discussão:** o que torna isso possível. Por que análise em
+  SPSS não permite o mesmo.
+
+## Aula 3: Vibe coding (2 horas)
+
+- **Atividade:** alunos abrem Cowork no projeto, pedem para o
+  agente "estratificar a prevalência por estado em vez de região".
+  Validam resultado.
+
+## Avaliação
+
+- Os alunos farão um mini-Capstone próprio com dataset escolhido
+  individualmente, em formato compendium reproduzível.
+```
+
+Esse documento transforma o Capstone de "exercício pessoal" em **infraestrutura de docência**. É o que diferencia o seu trabalho de um trabalho final isolado — ele tem **vida didática planejada**.
+
+## Conexão com IA
+
+Agentes ajudam em vários pontos da publicação:
+
+**1. Auditoria de histórico Git para dados sensíveis** (mencionada acima).
+
+**2. Geração de README a partir do projeto.** *"Crie README seguindo modelo do livro do autor [@alvarenga2025github], com seções: visão geral, como rodar, estrutura de pastas, citação, plano didático, licença."* — agente lê o repo, gera README coerente.
+
+**3. Verificação cruzada antes de publicar.** *"Faça checklist final antes de eu tornar repositório público: lockfiles ok? CITATION.cff completo? README sem placeholders? Licenças coerentes?"* — agente identifica lacunas.
+
+**4. Plano didático.** Você descreve o curso/disciplina; agente sugere atividades concretas baseadas no compêndio. Você revisa e adapta.
+
+## O que vem a seguir
+
+Capstone publicado, com DOI, com plano didático. **Falta uma última etapa**: refletir. O capítulo final do curso é a **retrospectiva** — o que você aprendeu, o que mudou, como esse trabalho se conecta com o resto da sua carreira, e como você pretende multiplicar o impacto adiante.
+
+→ [06 · Retrospectiva](06-retrospectiva.qmd)

@@ -1,0 +1,162 @@
+---
+title: "JSON"
+---
+
+Você cita um artigo num `.qmd`, e o Quarto consulta o `.bib`, que está organizado em estrutura hierárquica de tipos, autores e campos. Você publica o site no GitHub Pages, e o servidor responde a cada navegador com metadados em estrutura aninhada. Você usa o Zotero, e ele sincroniza referências entre máquinas trocando dados encadeados pela web. Em todos esses casos, na camada que você não vê, **um formato de troca de dados está movimentando informação aninhada de um sistema para outro**: o JSON.
+
+Diferente do CSV (que é tabela retangular) e do Excel (que é planilha), JSON foi projetado para representar **estruturas de dados arbitrariamente complexas** — listas dentro de listas, objetos com propriedades aninhadas, hierarquia. É o formato dominante de troca de dados na web e em APIs modernas. Vale conhecer mesmo que sua análise raramente precise produzir JSON diretamente — porque você vai consumir muito JSON sem perceber.
+
+## A história: de notação JavaScript a padrão da web
+
+JSON é a sigla para **JavaScript Object Notation** — *notação de objetos JavaScript*. O nome conta a origem: o formato é, literalmente, **a sintaxe que JavaScript usa para definir objetos**, extraída e padronizada como formato independente de linguagem.
+
+A história começa no início dos anos 2000. **Douglas Crockford** — engenheiro de software então na Yahoo!, autor do livro influente *JavaScript: The Good Parts* — propôs em 2001 usar a notação literal de objetos do JavaScript como formato de troca de dados entre cliente (navegador) e servidor. Na época, a opção dominante para troca de dados na web era **XML** — verboso, formal, com schema, namespaces, e overhead substancial. Crockford observou que o JavaScript já tinha uma sintaxe nativa para descrever objetos estruturados, e que um servidor podia simplesmente devolver essa sintaxe como string que o navegador interpretava trivialmente.
+
+A ideia era radical em sua simplicidade. Em XML, descrever um paciente exigia algo como:
+
+``` xml
+<paciente>
+  <id>42</id>
+  <nome>Maria Silva</nome>
+  <idade>67</idade>
+  <medicamentos>
+    <medicamento>Losartana</medicamento>
+    <medicamento>Metformina</medicamento>
+  </medicamentos>
+</paciente>
+```
+
+A versão JSON:
+
+``` json
+{
+  "id": 42,
+  "nome": "Maria Silva",
+  "idade": 67,
+  "medicamentos": ["Losartana", "Metformina"]
+}
+```
+
+Mais curto, mais legível, processável diretamente pelo navegador sem parser separado. JSON foi adotado rapidamente — primeiro pela comunidade de desenvolvedores web no auge da era AJAX (~2005-2010), depois como padrão de fato para APIs RESTful, e em poucos anos como formato dominante para troca de dados em qualquer contexto não-XML.
+
+A formalização institucional veio depois, no padrão de "estabilização tardia" que vimos com CSV. **RFC 4627** em 2006, depois **RFC 7159** em 2014, finalmente **RFC 8259** em 2017 [@bray2017json] — versão atual, escrita por Tim Bray, que define o formato definitivo. Em paralelo, o ECMA publicou o **ECMA-404** (também adotado como **ISO/IEC 21778**) [@ecma2017json] como especificação formal independente. JSON é, hoje, simultaneamente padrão IETF, ECMA e ISO.
+
+## A sintaxe em uma página
+
+JSON tem só seis tipos de valor possíveis:
+
+| Tipo | Exemplo |
+|---|---|
+| **Objeto** | `{"chave": "valor"}` |
+| **Array** | `[1, 2, 3]` |
+| **String** | `"texto entre aspas duplas"` |
+| **Número** | `42` ou `3.14` (sempre ponto decimal, nunca vírgula) |
+| **Booleano** | `true` ou `false` |
+| **Nulo** | `null` |
+
+Tudo no JSON é alguma combinação desses seis. Um objeto pode conter outros objetos, ou arrays, ou ambos, em qualquer profundidade. Exemplo realista de uma resposta de API hospitalar:
+
+``` json
+{
+  "cohort_id": "PMA-2026-001",
+  "n_patients": 487,
+  "demographics": {
+    "mean_age": 58.3,
+    "female_pct": 0.62
+  },
+  "patients": [
+    {"id": 1, "age": 42, "groups": ["intervention"]},
+    {"id": 2, "age": 67, "groups": ["control", "diabetic"]},
+    {"id": 3, "age": 55, "groups": ["intervention", "hypertensive"]}
+  ],
+  "extracted_at": "2026-05-04T14:32:00Z"
+}
+```
+
+Note três coisas: **objetos** `{...}` têm pares chave-valor; **arrays** `[...]` são listas ordenadas; o objeto `demographics` é aninhado dentro do objeto principal. Essa capacidade de aninhamento é a razão pela qual JSON consegue representar dados que CSV não consegue diretamente.
+
+::: {.callout-note}
+## JSON é estrito sobre detalhes que você esperaria que fossem flexíveis
+JSON tem regras inflexíveis que pegam iniciante:
+
+- **Strings só com aspas duplas** (`"texto"`), nunca simples (`'texto'` é JavaScript válido mas JSON inválido).
+- **Chaves de objeto sempre entre aspas duplas** (`"chave": valor`, não `chave: valor`).
+- **Sem vírgula final** (*trailing comma*) em arrays ou objetos. `[1, 2, 3,]` é JSON inválido.
+- **Números só com ponto decimal**, nunca vírgula. `3.14` está certo, `3,14` é inválido.
+- **Sem comentários.** JSON puro não permite `//` nem `/* */`. Variantes como **JSON5** e **JSONC** existem para resolver isso, mas não são JSON estrito.
+
+Validadores online ([jsonlint.com](https://jsonlint.com)) catam esses erros em segundos. Em R, `jsonlite::validate()`. Em Python, `json.loads()` levanta exceção descritiva.
+:::
+
+## Onde JSON aparece em pesquisa
+
+Ao contrário de CSV/Excel, JSON raramente é o formato em que **você** salva dados de pesquisa diretamente — é mais frequente que apareça **transparentemente** em vários lugares:
+
+- **APIs de bancos de dados públicos.** PubMed, ClinicalTrials.gov, OpenFDA, REDCap, e a maioria das APIs científicas modernas devolvem JSON. Quando você usa `httr2` em R ou `requests` em Python para buscar dados, a resposta é JSON que precisa ser convertida para data frame.
+- **Configuração de ferramentas.** `package.json` (Node), `composer.json` (PHP), `tsconfig.json` (TypeScript) — onipresente como formato de configuração.
+- **Internamente no Quarto e Pandoc.** Quando você renderiza um `.qmd`, o Pandoc passa o documento por uma representação intermediária em JSON (chamada AST — *Abstract Syntax Tree*) antes de gerar HTML/PDF/DOCX. Filtros customizados de Pandoc operam sobre esse JSON.
+- **Bibliotecas Zotero/Mendeley.** Sincronização entre máquinas troca metadados de referência em JSON (ou variantes como CSL-JSON).
+- **Notebooks Jupyter (`.ipynb`).** O formato `.ipynb` é literalmente JSON estruturado, com células de código e markdown como objetos aninhados.
+- **JSON-LD** (JSON for Linked Data). Variante usada em web semântica e schema.org, padronizada pelo W3C, que adiciona contexto semântico a JSON puro. Aparece em metadados de artigos científicos, em datasets do FAIR data, e em dados estruturados para SEO.
+
+## Lendo JSON em R e Python
+
+Em R, a biblioteca canônica é **`jsonlite`**:
+
+```r
+library(jsonlite)
+
+# Lê de arquivo
+dados <- fromJSON("dados/coorte.json")
+
+# Converte JSON aninhado para data frame quando possível
+str(dados)  # vai mostrar estrutura — pode ter listas dentro
+
+# Para dados retangulares "achatados":
+flatten(dados$patients)
+```
+
+Em Python, **`json`** é da biblioteca-padrão; **`pandas`** integra:
+
+```python
+import json
+import pandas as pd
+
+# Lê de arquivo, retorna dict / list aninhado
+with open("dados/coorte.json") as f:
+    dados = json.load(f)
+
+# Converte estrutura aninhada para DataFrame quando possível
+pd.json_normalize(dados["patients"])
+```
+
+A operação central que vai ser exigida com frequência é **achatar** (*flatten*) JSON aninhado para data frame retangular — porque a maior parte das análises estatísticas opera sobre tabelas, não sobre árvores. Tanto `flatten()` em R quanto `pd.json_normalize()` em Python fazem isso, mas exigem decisões sobre como tratar arrays (uma linha por item? uma coluna por posição?). Para JSON com hierarquia simples isso é direto; para hierarquia profunda com listas dentro de listas, vira problema próprio.
+
+## Quando produzir JSON na sua pesquisa
+
+Em pesquisa clínica/epidemiológica típica, dados são quase sempre tabelares — JSON raramente é a escolha natural para o dataset principal. Mas há três cenários onde produzir JSON faz sentido:
+
+1. **Metadados estruturados que acompanham um dataset.** Junto de `coorte.parquet`, um `coorte_metadata.json` descrevendo variáveis, fontes, datas de extração, transformações aplicadas. Mais expressivo que CSV para representar essa hierarquia.
+2. **Configuração de pipeline de análise.** Em vez de hard-code de parâmetros nos scripts, um `config.json` com critérios de inclusão, ano-base, semente aleatória, etc. — facilita reproduzir variações.
+3. **Dados que são genuinamente aninhados.** Histórico de prescrições por paciente (lista variável), série temporal de exames com múltiplas medidas — JSON expressa isso naturalmente, enquanto forçar em CSV exige normalização (várias linhas por paciente) ou desnormalização (colunas duplicadas).
+
+Para os outros casos, **CSV ou Parquet são mais adequados**.
+
+## Conexão com IA
+
+JSON é provavelmente o formato em que agentes de IA mais ajudam, por dois motivos:
+
+**1. JSON é a língua nativa de saída estruturada de modelos.** Modelos modernos (Claude, GPT, Gemini) suportam *structured output* — você pede para a resposta vir num esquema JSON específico, e o modelo respeita. Isso é central para extrair dados estruturados de texto livre. Exemplo: *"Extraia desse prontuário (texto livre) os dados estruturados em JSON com schema: nome, idade, comorbidades (array), medicamentos (array de objetos com nome e dose)."* Resultado: JSON parseável, pronto para virar data frame.
+
+**2. Manipulação de JSON aninhado é tediosa para humano.** *"Achatar esse JSON aninhado em data frame"*, *"converter este JSON em CSV preservando a hierarquia em colunas separadas por ponto"* — operações que demandam concentração para fazer manualmente, triviais via agente.
+
+::: {.callout-warning}
+## Verifique sempre o achatamento
+Quando o agente "achata" JSON aninhado, ele toma decisões que podem perder dados. Arrays viram a primeira posição? Viram colunas separadas? Viram múltiplas linhas? Pequenas escolhas mudam profundamente o resultado. Sempre confira contagem de linhas e algumas amostras antes de seguir com a análise.
+:::
+
+## O que vem a seguir
+
+CSV, Excel e JSON cobrem os formatos **legíveis por humanos**. Os dois próximos capítulos tratam de formatos **binários** otimizados para volume e performance: **Parquet** (colunar, ideal para datasets grandes e analíticos) e **SQLite** (relacional, ideal para múltiplas tabelas com queries SQL). São os formatos para quando legibilidade humana deixa de ser prioridade e desempenho passa a ser.
+
+→ [05 · Parquet (formatos colunares)](05-parquet.qmd)

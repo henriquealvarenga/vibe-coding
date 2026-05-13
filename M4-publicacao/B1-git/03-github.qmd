@@ -1,0 +1,123 @@
+---
+title: "GitHub"
+---
+
+Git foi desenhado em 2005 como sistema **distribuído** de controle de versão — cada cópia local do repositório é completa, com histórico inteiro, sem necessidade de servidor central. Em teoria, isso bastaria para colaboração: você troca commits diretamente com colegas, peer-to-peer, sem intermediários. Na prática, **isso quase nunca acontece**. Pesquisadores precisam de um "centro" para se encontrar, ler o que o outro fez, abrir tickets de discussão, mostrar o trabalho para o mundo. É essa lacuna entre Git-a-ferramenta e Git-na-prática-colaborativa que o **GitHub** preenche desde 2008. Este capítulo é sobre o que o GitHub é, de onde veio, e por que ele se tornou o lugar de fato onde código aberto e pesquisa científica acontecem.
+
+## A diferença Git × GitHub, primeiro
+
+Esta é a confusão clássica que vale enfrentar logo no início:
+
+- **Git** é o **software** de controle de versão (rodando na sua máquina). É grátis, open source, criado por Linus Torvalds em 2005. Funciona offline, sem internet.
+- **GitHub** é uma **plataforma comercial na web** que hospeda repositórios Git remotos e adiciona camadas sociais (issues, pull requests, discussões, wiki, páginas). Empresa privada, hoje subsidiária da Microsoft.
+
+Você pode usar **Git sem GitHub** — repositórios locais, troca direta entre máquinas, ou usando alternativas como **GitLab**, **Bitbucket**, **Codeberg**, **Sourcehut**. Você **não pode** usar GitHub sem Git, porque GitHub é construído sobre Git. A relação é: Git é a tecnologia, GitHub é uma das plataformas que oferece serviço sobre essa tecnologia.
+
+Os capítulos anteriores deste Bloco trataram do **Git** em si (versionamento, conceitos). Este trata do **GitHub** como ambiente onde Git ganha dimensão social.
+
+## A história: de hackathon de fim de semana a US$ 7,5 bilhões
+
+A origem do GitHub é específica e curta. Em **outubro de 2007**, três programadores americanos — **Tom Preston-Werner**, **Chris Wanstrath** e **PJ Hyett** — começaram a construir uma plataforma para hospedar repositórios Git com interface web amigável. Git já existia há dois anos (criado por Torvalds em 2005), mas usá-lo colaborativamente era penoso — não havia forma simples de visualizar histórico, comentar mudanças, ou descobrir projetos de outras pessoas.
+
+A primeira versão pública do GitHub foi lançada em **abril de 2008**. O timing era perfeito: o movimento open source estava em explosão, Git estava ganhando tração rapidamente sobre Subversion, e a interface web amigável do GitHub fez a diferença para programadores que evitavam a linha de comando. Em poucos anos, a plataforma virou padrão.
+
+Marcos da trajetória:
+
+- **2008.** Lançamento. Modelo de negócio: contas gratuitas para projetos públicos, contas pagas para repositórios privados.
+- **2012.** GitHub atinge 1 milhão de repositórios. Cofundadores fazem rodada de investimento de US$ 100 milhões com a Andreessen Horowitz.
+- **2015.** GitHub atinge 10 milhões de usuários.
+- **2018.** **Microsoft adquire o GitHub por US$ 7,5 bilhões em ações** — uma das maiores aquisições de software open-source da história. Houve receio na comunidade open source sobre a Microsoft "matar" o GitHub; isso não aconteceu. A Microsoft manteve o produto rodando, expandiu funcionalidades, e tornou os repositórios privados gratuitos para contas pessoais.
+- **2019.** GitHub Actions lançado — sistema de automação (CI/CD) integrado.
+- **2020.** Em meio a debate sobre terminologia carregada, GitHub trocou o branch padrão de `master` para `main`.
+- **2022.** Lançamento do **GitHub Copilot** — primeiro produto comercial em larga escala de IA generativa para código, usando GPT (parceria OpenAI/Microsoft). Marco da transição da plataforma para a era da IA.
+- **2024+.** GitHub Copilot Workspace, integração profunda com agentes (Claude Code, Codex CLI), repositórios usados como contexto para LLMs.
+
+Em 2026, GitHub hospeda **mais de 100 milhões de desenvolvedores** e **420+ milhões de repositórios**. É o repositório de código central da humanidade — e, crescentemente, também repositório de pesquisa científica reproduzível.
+
+## O que torna o GitHub útil para pesquisa
+
+GitHub não é a única opção (alternativas listadas adiante), mas é a dominante. Cinco funcionalidades específicas que importam em contexto de pesquisa científica:
+
+### 1. Hospedagem de repositórios remotos
+
+A função mais básica: você tem um repositório Git local, cria um espelho dele no GitHub, e a partir dali sincroniza nas duas direções. Coisas que isso possibilita:
+
+- **Backup automático.** Computador queimou? Disco corrompeu? Está tudo no GitHub.
+- **Trabalhar em várias máquinas.** Casa, laboratório, viagem — clona o repositório onde estiver e continua.
+- **Compartilhamento simples.** Em vez de mandar `.zip` por email para o orientador, você manda o link do repositório. Ele clona, vê o estado mais recente, sugere mudanças.
+
+### 2. Issues — gerenciamento de tarefas e bugs
+
+Cada repositório tem um "tracker" embutido para listar tarefas pendentes, bugs, dúvidas, sugestões. Em pesquisa, isso vira gerenciador de pendências do projeto: *"falta calcular sobrevida estratificada por idade"*, *"orientador pediu para refazer figura 2 sem o eixo Y logarítmico"*, *"verificar se o filtro está descartando os pacientes da época pré-protocolo"*.
+
+Issues podem ser atribuídas a pessoas, marcadas com etiquetas (`bug`, `metodologia`, `figura`), agrupadas em milestones (`submissão NEJM`, `revisão R1`). Para projeto colaborativo de qualquer tamanho, é ferramenta **muito** mais eficaz que email ou WhatsApp.
+
+### 3. Pull Requests — proposta de mudança revisável
+
+Quando alguém quer contribuir com um projeto, abre um *pull request* (PR): um pedido formal de "puxar" suas mudanças para o repositório principal. O PR mostra o **diff** (linhas adicionadas em verde, removidas em vermelho), permite discussão linha por linha, e exige aprovação antes de mesclar.
+
+Em pesquisa, PRs viram fluxo de **revisão de código** entre coautores. O orientador faz PR sugerindo ajuste em um script de análise. Você revisa o diff, aceita ou pede modificações, mescla. Funciona como peer review aplicado a análise.
+
+### 4. GitHub Pages — hospedagem gratuita de site
+
+Qualquer repositório pode virar **site público** gratuitamente, com URL `https://usuario.github.io/repositorio/`. Para pesquisa, isso é como ter editora-própria-instantânea — material didático, blog acadêmico, portfólio, ou (caso central deste curso) **site Quarto** com curso, livro, ou compendium reproduzível de artigo. Capítulo `05-github-pages` cobre isso em detalhe; capítulo `06-quarto-github-pages` cobre o workflow específico de Quarto + GitHub Pages.
+
+### 5. GitHub Actions — automação
+
+Permite rodar processos automáticos a cada push ou em horários programados. Em pesquisa, casos típicos:
+
+- **Re-renderizar um site Quarto automaticamente** quando você atualiza o `.qmd`.
+- **Rodar testes** sobre scripts de análise para verificar se ainda funcionam após mudanças.
+- **Validar dados** chegados em uma pasta `incoming/`.
+- **Enviar email com resumo de alterações** semanais do projeto.
+
+Em projeto pequeno, essa automação não importa muito. Em projeto grande ou colaborativo, vira mecanismo de garantia de qualidade.
+
+## Alternativas ao GitHub
+
+GitHub não é a única opção. Vale conhecer as alternativas porque circunstâncias específicas pedem cada uma:
+
+| Plataforma | Caráter | Quando faz sentido |
+|---|---|---|
+| **GitLab** | Plataforma open core; pode ser auto-hospedada no servidor da instituição | Quando dados são sensíveis demais para subir em servidor americano (LGPD, dados de pacientes); muitos hospitais universitários hospedam GitLab institucional |
+| **Bitbucket** | Atlassian (mesma empresa do Jira); bom para times que já usam Jira | Geralmente em ambiente corporativo |
+| **Codeberg** | Open source, sem fins lucrativos, baseado em Gitea, hospedado na Europa | Para quem quer alternativa open source com governança comunitária |
+| **Sourcehut** | Minimalista, focado em produtividade, sem JavaScript | Nicho técnico de quem prefere ferramentas Unix-ish |
+| **Servidor Git pessoal** (gitea, gogs) | Roda no seu próprio servidor | Quando você precisa controle total |
+
+Para pesquisa em saúde com dados não-sensíveis, **GitHub é a escolha pragmática** — comunidade maior, integração com mais ferramentas, padrão de fato em ciência aberta. Para projetos com dados de pacientes que não podem sair da instituição, **GitLab institucional** é frequentemente a escolha forçada — verifique a política da sua universidade ou hospital.
+
+## Contas e planos
+
+Em 2026, a estrutura de planos do GitHub:
+
+- **Conta gratuita pessoal.** Repositórios públicos e privados ilimitados, colaboradores ilimitados em projetos públicos. Para pesquisa individual ou em grupo pequeno, **basta**.
+- **GitHub Pro** (~US$ 4/mês). Adiciona ferramentas de revisão de código mais avançadas, Codespaces gratuitos, e ferramentas de organização. Útil mas não obrigatório.
+- **GitHub Team / Enterprise.** Para organizações com muitos usuários e necessidades de governança específica.
+- **GitHub Education.** Conta com benefícios extras gratuitos para estudantes, professores e instituições — verifique [education.github.com](https://education.github.com).
+
+::: {.callout-tip}
+## Se você é professor universitário, peça GitHub Education
+GitHub Education dá acesso gratuito a vários produtos pagos do ecossistema (Copilot Pro, Datadog, JetBrains IDEs, etc.) para estudantes e professores em instituições verificadas. O cadastro leva alguns dias e exige comprovante de vínculo institucional. Para uso em sala de aula, há também o **GitHub Classroom** que automatiza distribuição e correção de exercícios em código.
+:::
+
+## Para a parte operacional: o livro do autor
+
+Este capítulo apresentou GitHub como plataforma e contexto. Para a **parte operacional** — como criar conta, configurar SSH, usar GitHub Desktop, integrar com Positron, fluxo completo de commit-push-pull, resolver conflitos básicos — o material de referência usado neste curso é o **Manual de Git e GitHub** do autor [@alvarenga2025github]:
+
+> [henriquealvarenga.com/github_manual/](https://henriquealvarenga.com/github_manual/)
+
+O livro cobre, em sequência didática:
+
+- Capítulos 1-4: Terminal, gerenciadores de pacote (Homebrew, winget), introdução a Git/GitHub.
+- Capítulos 5-7: Conceitos do Git (que aprofundam o que vimos no `02-conceitos-git`), instalação e configuração.
+- Capítulos 8-10: **Três caminhos práticos** para usar GitHub — Terminal puro, **GitHub Desktop** (interface gráfica oficial), e **integração no Positron** (IDE).
+- Capítulo 11: GitHub Pages (que aprofunda o `05-github-pages`).
+
+O livro está disponível online de forma gratuita. Ele cobre o "como fazer"; este capítulo cobre o "o que é e por que importa". Os dois materiais se complementam: depois de ler este capítulo, vá ao livro para os passos operacionais; depois de seguir o livro, volte aqui para os capítulos seguintes que tratam de IA aplicada a Git e do fluxo Quarto + GitHub Pages.
+
+## O que vem a seguir
+
+Você sabe o que é GitHub e tem caminho operacional pelo livro. O próximo capítulo é onde a especialidade do curso entra: **Git e GitHub na era da IA**. Como agentes ajudam a escrever boas mensagens de commit, abrir PRs com descrição decente, resolver conflitos de merge, e — crucialmente — quando NÃO confiar no agente para operações de Git (que podem ser destrutivas).
+
+→ [04 · Git e IA](04-git-ia.qmd)

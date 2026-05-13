@@ -1,0 +1,230 @@
+---
+title: "Quarto + GitHub Pages"
+---
+
+Este é o capítulo onde tudo se junta. Os Módulos anteriores trataram, separadamente, dos pedaços: Markdown como linguagem, Quarto como motor de execução, organização de arquivos, ambientes isolados, Git para versionar, GitHub para hospedar, GitHub Pages para servir. **Aqui esses pedaços viram um fluxo unificado** — um pesquisador escreve no `.qmd`, commita no Git, push pro GitHub, e o site público se atualiza sozinho. Sem servidor para gerenciar, sem servidor para pagar, sem etapas manuais.
+
+Esse fluxo é o que torna possível o que o **próprio site deste curso** faz: cada vez que um capítulo é editado e commitado, o site público em [henriquealvarenga.com](https://henriquealvarenga.com) (ou no domínio correspondente) re-renderiza automaticamente. Os dois livros do autor — **Manual da Linguagem R** [@alvarenga2024manualr] e **Manual de Git e GitHub** [@alvarenga2025github] — funcionam pelo mesmo mecanismo. Este capítulo explica como esse fluxo funciona e como configurar do zero.
+
+## A arquitetura: três peças, dois caminhos
+
+A arquitetura completa envolve três peças e tem dois caminhos possíveis para conectar.
+
+**As três peças:**
+
+1. **Repositório local.** Pasta no seu computador com `.qmd`, `_quarto.yml`, dados, scripts. Versionado em Git.
+2. **Repositório remoto no GitHub.** Cópia espelho do local, hospedada no GitHub.
+3. **Site público no GitHub Pages.** HTML renderizado, servido publicamente em URL.
+
+A relação **entre 1 e 2** é o `git push` clássico (você sincroniza local → remote). A relação **entre 2 e 3** — o que torna o `.qmd` virar HTML público — é onde estão os dois caminhos:
+
+| Caminho | Renderiza onde | Quando faz sentido |
+|---|---|---|
+| **A. Render local + commit do `_site/`** | Sua máquina | Análises rápidas, projetos pessoais, sem dependências externas pesadas |
+| **B. GitHub Actions (render automático no servidor)** | Servidor do GitHub | Projetos colaborativos, sites grandes, quando vários autores commitam |
+
+Cada caminho tem trade-offs próprios. Vamos pelo mais simples primeiro.
+
+## Caminho A: render local + `quarto publish gh-pages`
+
+A forma mais direta. Você renderiza o site no seu computador, e o Quarto cuida de empurrar o HTML para o branch `gh-pages` no GitHub. Esse é o caminho recomendado para a maioria dos projetos individuais.
+
+### Configuração inicial (uma vez por projeto)
+
+**Passo 1.** Garante que o repositório local está conectado a um remote no GitHub:
+
+```bash
+git remote -v
+# origin  https://github.com/usuario/projeto.git (fetch)
+# origin  https://github.com/usuario/projeto.git (push)
+```
+
+Se ainda não está, crie o repositório no GitHub e conecte (passos cobertos no livro do autor [@alvarenga2025github], capítulos 6 e 8).
+
+**Passo 2.** No seu `_quarto.yml`, defina `output-dir` como `_site` (ou o que preferir):
+
+```yaml
+project:
+  type: website
+  output-dir: _site
+```
+
+**Passo 3.** No primeiro publish, rode:
+
+```bash
+quarto publish gh-pages
+```
+
+O Quarto detecta o repositório, cria um branch `gh-pages` no GitHub se não existir, renderiza o site, e empurra o HTML pra lá. Em poucos minutos, o site fica acessível em `https://usuario.github.io/projeto/`.
+
+### Uso cotidiano
+
+Depois da configuração inicial, o fluxo regular fica:
+
+```bash
+# Faz mudanças no .qmd
+# Confere localmente:
+quarto preview
+
+# Quando estiver bom, publica:
+quarto publish gh-pages
+
+# E commita o source no main:
+git add .
+git commit -m "feat(cap-03): adiciona seção sobre BibTeX"
+git push origin main
+```
+
+Note que **dois commits acontecem**: o source do projeto vai para `main`; o HTML renderizado vai para `gh-pages`. O Quarto cuida do segundo automaticamente.
+
+::: {.callout-tip}
+## Atalho útil
+Você pode rodar `quarto publish gh-pages --no-prompt` para o Quarto não pedir confirmação (útil em scripts). E pode adicionar `.gitignore` para não rastrear o `_site/` localmente — ele vive só no branch `gh-pages` no remote.
+:::
+
+## Caminho B: GitHub Actions
+
+Render local funciona, mas tem limites:
+
+- Você precisa rodar `quarto publish` toda vez que muda algo.
+- Em projeto colaborativo, **só quem tem o ambiente local completo** consegue publicar.
+- Se a renderização exige bibliotecas pesadas (modelos estatísticos demorados, dados grandes), pode demorar minutos no seu laptop.
+
+A solução é mover a renderização para **GitHub Actions** — sistema de automação do GitHub que roda comandos em servidores deles a cada push. O fluxo:
+
+```
+Você commita .qmd e dá push
+       │
+       ▼
+[GitHub detecta o push]
+       │
+       ▼
+[GitHub Action é disparada]
+       │
+       ▼
+[Servidor GitHub instala R, Python, Quarto, dependências]
+       │
+       ▼
+[Servidor roda quarto render]
+       │
+       ▼
+[HTML resultante é publicado em gh-pages]
+       │
+       ▼
+[Site fica atualizado em segundos a minutos]
+```
+
+A vantagem é que **qualquer commit dispara o re-render** — não importa se quem commitou tem Quarto instalado ou não. E a renderização acontece em servidor potente, não no seu laptop.
+
+### Configurando o GitHub Action
+
+A configuração vai num arquivo YAML dentro do repositório, em `.github/workflows/publish.yml`:
+
+```yaml
+on:
+  push:
+    branches: main
+  workflow_dispatch:
+
+name: Quarto Publish
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Set up R (se você usa R)
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: '4.4.2'
+
+      - name: Install R dependencies
+        uses: r-lib/actions/setup-renv@v2
+
+      - name: Set up Python (se você usa Python)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Render and Publish
+        uses: quarto-dev/quarto-actions/publish@v2
+        with:
+          target: gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+A primeira vez que você commita esse arquivo e dá push, o GitHub começa a usar a Action. A cada novo push em `main`, o ciclo todo roda automaticamente.
+
+### Trade-offs entre A e B
+
+| Aspecto | A. Render local | B. GitHub Actions |
+|---|---|---|
+| **Setup inicial** | Trivial — um comando | Mais complexo — arquivo YAML, debugging inicial |
+| **Quem pode publicar** | Só quem tem ambiente local completo | Qualquer um que dê push em `main` |
+| **Tempo até o site atualizar** | Imediato (você renderiza) | Espera a Action rodar (1-10 min típico) |
+| **Custo computacional** | Sua máquina | Servidor GitHub (gratuito até 2.000 min/mês em conta gratuita) |
+| **Facilidade de debug** | Erros aparecem direto no seu console | Erros aparecem nos logs da Action — menos imediatos |
+| **Confiabilidade** | Depende de você lembrar de publicar | Automático |
+
+A regra prática: **comece com A**. Se o projeto crescer (vários autores, dependências pesadas, necessidade de rendering automático), migre para B. Os dois caminhos são complementares, não exclusivos — você pode usar A para iteração rápida em desenvolvimento e B para garantir que `main` esteja sempre publicado.
+
+## Domínio próprio integrado
+
+Para usar URL própria (`henriquealvarenga.com` em vez de `henriquealvarenga.github.io`), o passo extra envolve dois arquivos:
+
+**No repositório:** crie um arquivo `CNAME` (sem extensão) na raiz, com o domínio:
+
+```
+henriquealvarenga.com
+```
+
+**No seu registrador de domínio:** configure os registros DNS conforme instruções do GitHub Pages — geralmente um CNAME apontando para `usuario.github.io`. Detalhes operacionais no livro do autor [@alvarenga2025github] e na documentação oficial do GitHub Pages.
+
+Após propagação de DNS (até 48h), o site responde no novo domínio com HTTPS automático. **Isso é como `henriquealvarenga.com` consegue servir múltiplos subdiretórios** (`/manual_r/`, `/github_manual/`, e o site do curso) — cada um vem de um repositório diferente, todos publicados via GitHub Pages.
+
+## Quando algo dá errado
+
+Os erros típicos:
+
+**1. "404 Not Found" no site após publish.** Causa comum: o GitHub Pages não foi ativado nas configurações do repositório, ou está apontando para o branch errado. Vai em Settings → Pages → confere que está em `gh-pages` (ou `main`/`docs`, dependendo da configuração). Pode levar até 10 min para o GitHub processar a primeira publicação.
+
+**2. "Build failed" na GitHub Action.** Vai na aba Actions do repositório, clica na execução que falhou, lê o log. Causas comuns: pacote R/Python faltando no `renv.lock`/`requirements.txt`, erro de sintaxe no `_quarto.yml`, arquivo referenciado que não existe.
+
+**3. Site renderiza mas figuras quebradas.** Geralmente caminho relativo errado. `images/foto.png` num `.qmd` em pasta aninhada precisa ser `../../images/foto.png`. Veja o capítulo M2-B1-06 sobre caminhos absolutos vs relativos.
+
+**4. Mudanças commitadas mas o site não atualiza.** Cache do navegador ou da CDN do GitHub. Tente abrir em aba anônima, ou aguarde 5-10 min. Se persistir, verifica nos logs da Action que o build de fato rodou.
+
+## Conexão com IA
+
+Agentes de IA ajudam em três pontos específicos do fluxo Quarto + GitHub Pages:
+
+**1. Configuração inicial da Action.** *"Crie um GitHub Action que renderize meu projeto Quarto a cada push em main, com R 4.4 e renv."* — agente entrega o YAML pronto, com as ações certas referenciadas, sintaxe correta. Especialmente útil porque o YAML de Actions tem detalhes finos.
+
+**2. Diagnóstico de erros de build.** Cole o log da Action que falhou no chat. O agente lê o stack trace, identifica a causa, propõe correção. Erros de Action geralmente envolvem cadeias de causa (R faltou, porque renv não restaurou, porque arquivo lock está em formato antigo, etc.) — agente desentranha bem.
+
+**3. Otimização de tempo de render.** Sites grandes podem demorar para renderizar inteiros a cada commit. *"Como configuro o Quarto pra usar freeze e cache, evitando re-render dos capítulos que não mudaram?"* — agente explica e dá o YAML.
+
+## Para a parte operacional do GitHub
+
+Ao longo deste Bloco apareceu várias vezes o **Manual de Git e GitHub** do autor [@alvarenga2025github] como referência operacional para os comandos do Git, GitHub Desktop, integração com Positron, e ativação de GitHub Pages. Esses materiais cobrem o "como fazer" passo a passo, com screenshots — complemento direto deste curso, que cobre o "o que é e por que importa".
+
+A combinação dos dois textos:
+
+- **Este curso** — conceitos, fluxo unificado, integração com vibe coding, decisões arquiteturais.
+- **Livro do autor** — operações específicas, screenshots, fluxos detalhados.
+
+Funciona como par.
+
+## O que vem a seguir
+
+Você fechou o Bloco *Git, GitHub e GitHub Pages*. O Bloco final do **Módulo 3** trata de **reprodutibilidade** num sentido mais amplo — princípios FAIR (*Findable, Accessible, Interoperable, Reusable*) para datasets, depósito de código em repositórios institucionais como Zenodo, atribuição de DOI a software de pesquisa, e estudo de caso integrando tudo o que vimos. Tudo o que esse Bloco mostrou (Quarto, Git, GitHub, GitHub Pages) é a infraestrutura técnica; o próximo Bloco coloca essa infraestrutura no contexto institucional da ciência aberta.
+
+→ [Bloco 2 · Reprodutibilidade](../B2-reprodutibilidade/01-fair.qmd)

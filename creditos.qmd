@@ -1,0 +1,60 @@
+---
+title: "Créditos"
+toc: false
+body-classes: page-creditos
+---
+
+## Autor
+
+**Henrique Alvarenga da Silva**
+
+Médico psiquiatra. Professor do Curso de Medicina da Universidade Federal de São João del-Rei (UFSJ) e no UNIPTAN/AFYA. Especialista em Psiquiatria e Psicopatologia, com foco em metodologia de pesquisa e educação médica baseada em evidências.
+
+::: {.contact-links}
+[🌐 Site pessoal](https://www.henriquealvarenga.com){.contact-link}
+[📧 E-mail](mailto:henrique@ufsj.edu.br){.contact-link}
+[🆔 ORCID](https://orcid.org/0000-0001-9799-5240){.contact-link}
+[📚 GitHub](https://github.com/halvarengda){.contact-link}
+:::
+
+## Metodologia e tecnologias
+
+Este recurso foi construído usando ferramentas de código aberto e ciência aberta:
+
+::: {.tech-stack}
+::: {.tech-item}
+#### Escrita & Estrutura
+**Quarto** — Sistema de publicação científica\
+**Markdown** — Linguagem de marcação\
+**BibTeX** — Gerenciamento bibliográfico
+:::
+
+::: {.tech-item}
+#### Desenvolvimento
+**Positron IDE** — Ambiente integrado\
+**Git/GitHub** — Controle de versão\
+**GitHub Pages** — Hospedagem
+:::
+
+::: {.tech-item}
+#### Pesquisa
+**PubMed** — Base bibliográfica\
+**Zotero** — Gerenciamento de referências\
+**DOI verification** — Validação de citações
+:::
+
+::: {.tech-item}
+#### Design
+**CSS moderno** — Interface responsiva\
+**Inter typography** — Tipografia limpa\
+**SVG graphics** — Ícones escaláveis
+:::
+:::
+
+## Uso de IA generativa na construção deste recurso
+
+Este site foi desenvolvido em colaboração entre o autor e agentes de IA generativa da [Anthropic](https://www.anthropic.com) — **Claude** (versões Opus 4.x e Sonnet 4.x), acessados via **Claude Cowork** e **Claude Code**, no período de **abril a maio de 2026**.
+
+A IA participou ativamente da estruturação da ementa, da redação inicial de capítulos, da geração de código (YAML, CSS, SVG) e da revisão de consistência entre seções do site. O autor manteve curadoria humana sobre escopo, audiência, decisões pedagógicas, ordem dos capítulos, validação de informações técnicas, verificação de referências bibliográficas e revisão final de todo o texto. **A responsabilidade pelo conteúdo é integralmente do autor.**
+
+Em coerência com as recomendações do **ICMJE** discutidas no capítulo [*Documentar uso de IA*](M1-ia-pesquisa/B1-conceitos/05-citar-ia.qmd) (Módulo 1), agentes de IA não constam como autores deste recurso. O histórico granular de iterações está preservado nos commits do repositório Git público do projeto, podendo servir como log de uso de IA para fins de auditoria, reprodutibilidade ou estudo do próprio processo.

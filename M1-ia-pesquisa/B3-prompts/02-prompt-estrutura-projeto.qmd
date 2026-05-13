@@ -1,0 +1,299 @@
+---
+title: "Prompt para estrutura inicial de projeto"
+---
+
+No capítulo anterior você viu os quatro princípios de um bom prompt: contexto, especificidade, validação, iteração. Este capítulo é a primeira aplicação prática deles a uma tarefa real de pesquisa: **gerar a estrutura inicial de um projeto centrado em artigo de submissão** com um único prompt bem desenhado.
+
+Toda pesquisa começa do mesmo jeito: pasta vazia. Você precisa criar uma árvore de pastas, um `README.md` mínimo, um `.gitignore` apropriado, inicializar Git, configurar ambiente isolado (`renv` para R, `uv` para Python), montar o `_quarto.yml` com bibliografia e formato de saída, e estruturar o `manuscrito.qmd` com as seções IMRaD. **Toda submissão exige essas dez ou doze operações iniciais**, e fazer manualmente cada vez é tédio que rouba os primeiros 30 minutos do projeto — minutos em que você ainda não pegou velocidade e qualquer atrito empurra para "depois eu organizo melhor". Resultado: o projeto nasce torto e nunca é endireitado.
+
+A IA resolve isso. Você descreve uma vez o que quer, ela gera tudo, você confere. O resto deste capítulo é o prompt que torna isso confiável.
+
+## Por que pedir tudo de uma vez
+
+Três motivos justificam delegar a estrutura inicial à IA em vez de criar pasta por pasta:
+
+A primeira é **consistência**. Toda vez que você cria um projeto manual, alguma coisa fica diferente — `data/raw/` num projeto, `dados-brutos/` no outro, `.gitignore` esquecendo `_freeze/` em metade dos casos. Um prompt-modelo padroniza desde o commit zero, e padronização é o que permite reaproveitar scripts, lembrar onde as coisas estão, e voltar ao projeto seis meses depois sem ficar arqueólogo.
+
+A segunda é **convenções desde o início**. `data/raw/` somente leitura, `output/` no `.gitignore`, bibliografia declarada uma única vez no `_quarto.yml`, scripts numerados em `analysis/` — são decisões que **só doem se você não as toma cedo**. Tomar depois exige reorganizar arquivo por arquivo. Tomar agora custa um prompt.
+
+A terceira é **velocidade real**. Os 30 minutos que você economiza não são o ponto principal — o ponto é que você começa o projeto **com energia**, na primeira hora produtiva, em vez de gastá-la em scaffolding. A análise de verdade começa hoje, não amanhã.
+
+## A estrutura proposta
+
+Quando o produto final é **artigo de submissão**, a estrutura ideal tem um arquivo central que orquestra tudo (`manuscrito.qmd`), seções IMRaD em arquivos separados, scripts de análise que **geram** tabelas e figuras (em vez de você copiar/colar do RStudio), e uma pasta de saída pronta para enviar à revista. A árvore:
+
+````
+projeto/
+├── _quarto.yml          ← formato de saída, bibliografia, opções globais
+├── manuscrito.qmd       ← arquivo PRINCIPAL (renderiza o artigo completo)
+├── README.md            ← descrição + como renderizar
+├── .gitignore           ← inclui data/, output/, submission/, _freeze/
+├── sections/            ← seções incluídas pelo manuscrito.qmd
+│   ├── 00-resumo.qmd
+│   ├── 01-introducao.qmd
+│   ├── 02-metodos.qmd
+│   ├── 03-resultados.qmd
+│   ├── 04-discussao.qmd
+│   └── 05-conclusao.qmd
+├── analysis/            ← scripts que geram tabelas/figuras
+│   ├── 01-limpeza.R
+│   ├── 02-analise.R
+│   └── 03-figuras.R
+├── data/
+│   ├── raw/             ← intocável, gitignored
+│   └── processed/       ← derivado, gitignored
+├── output/
+│   ├── tables/          ← tabelas geradas (.csv, .html)
+│   └── figures/         ← figuras geradas (.png, .pdf)
+├── references/
+│   ├── references.bib   ← bibliografia única
+│   └── csl/             ← estilos (vancouver, abnt, apa)
+├── templates/
+│   ├── reference.docx   ← template Word com estilos do periódico
+│   └── article.tex      ← template LaTeX (se a revista exigir classe própria)
+└── submission/          ← versões renderizadas para envio (gitignored)
+    ├── manuscrito.docx
+    └── manuscrito.pdf
+````
+
+Cada pasta resolve um problema específico. Vale entender o porquê de cada uma antes de pedir à IA — assim você sabe o que adaptar.
+
+### `manuscrito.qmd` e `sections/`
+
+O manuscrito principal não tem o texto do artigo dentro dele. Tem **só o frontmatter** (título, autores, ORCID, abstract, palavras-chave) e diretivas `{{< include >}}` que puxam cada seção IMRaD do diretório `sections/`. Por que separar?
+
+Coautoria fica viável: cada coautor edita uma seção sem conflito de Git. Diff fica legível: mudou a discussão, o `git diff` mostra só `04-discussao.qmd`, não 800 linhas embaralhadas. Reuso fica fácil: a introdução de um artigo pode virar base de outro com pequenas adaptações — copiar arquivo é mais simples que extrair trecho. E paralelismo de escrita aparece naturalmente: enquanto você ajusta os métodos, a coautora reescreve a discussão, sem se atropelarem.
+
+Cada arquivo em `sections/` começa com cabeçalho de seção (`# Introdução`, `# Métodos`, etc.) e **não tem YAML próprio**. Eles são includes — herdam o contexto do `manuscrito.qmd`.
+
+### `analysis/` separado de `sections/`
+
+Esta separação é não-óbvia mas crítica. **A análise não roda toda vez que você renderiza o artigo.** Os scripts em `analysis/` são executados manualmente (ou em pipeline tipo `targets`), produzem tabelas e figuras em `output/`, e o manuscrito apenas **referencia** esses arquivos prontos.
+
+Se você puser análise dentro do `manuscrito.qmd`, cada `quarto render` reroda tudo — limpeza, modelos, gráficos. Para artigo com modelo bayesiano que demora 20 minutos para convergir, isso é inviável. Pior: torna o pipeline frágil, porque pequena mudança no texto pode disparar reanálise sem você notar.
+
+A regra: **análise gera output salvo em disco; manuscrito cita output salvo em disco**. Os scripts em `analysis/` são numerados (`01-limpeza.R`, `02-analise.R`, `03-figuras.R`) para deixar a ordem de execução explícita.
+
+### `data/raw/` vs `data/processed/`
+
+`raw/` é intocável e somente leitura. Nenhum script escreve ali. É a versão mais próxima possível do dado fornecido pela coleta — o que veio do REDCap, do prontuário eletrônico, do DataSUS. Se você modifica `raw/`, perdeu rastreabilidade: ninguém mais consegue regenerar a análise a partir do estado original.
+
+`processed/` é derivado: tudo que sai dos scripts de limpeza vai para cá. Por estar no `.gitignore` (junto com `raw/`), o Git não versiona dados — versiona só o **código que produz os dados**. Se outro pesquisador clona o repo, ele não recebe os dados (privacidade preservada), mas recebe os scripts que reproduziriam os dados a partir do `raw/`.
+
+### `output/`: tabelas e figuras como artefatos
+
+Mesma lógica de `data/processed/`: gerado por código, não versionado, sempre regenerável. `output/tables/` recebe `.csv` e `.html` (a tabela final do artigo); `output/figures/` recebe `.png` e `.pdf` (figuras já em alta resolução, prontas para o periódico).
+
+No manuscrito, tabelas e figuras entram via referência ao arquivo:
+
+````markdown
+![Sobrevida acumulada por grupo.](output/figures/fig1-sobrevida.png){#fig-sobrevida}
+````
+
+Editar a tabela ou figura significa rodar de novo o script em `analysis/`, não modificar nada no `manuscrito.qmd`. O artigo fica fino, focado em prosa.
+
+### `references/`: bibliografia e estilo de citação
+
+`references.bib` é a bibliografia única do projeto. Você adiciona referências aqui (exportando do Zotero, EndNote, Mendeley) e cita no texto via `[@silva2023]`. **Caminho declarado apenas uma vez no `_quarto.yml`**.
+
+`csl/` guarda os arquivos *Citation Style Language* dos estilos exigidos por diferentes periódicos. Vancouver, ABNT, APA, Nature, Lancet — cada um tem um `.csl` baixado de [zotero.org/styles](https://www.zotero.org/styles). Trocar de revista significa trocar uma linha do `_quarto.yml`; o texto não muda.
+
+### `templates/`: o que o periódico espera ver
+
+Esta é a pasta que mais confunde quem submete artigo pela primeira vez, mas resolve um problema real. A maioria dos periódicos publica, junto com as instruções para autores, **um arquivo de template** que define como o manuscrito deve aparecer formatado: margens, fonte, espaçamento entre linhas, estilo dos cabeçalhos de seção, formato das legendas de tabelas e figuras. Geralmente é um `.docx` (template Word) ou um `.cls` / `.tex` (classe LaTeX) baixado direto do site da revista.
+
+O Quarto integra com isso de forma direta. Para saída em Word, você baixa o template do periódico, renomeia para `templates/reference.docx`, e aponta no `_quarto.yml`:
+
+````yaml
+format:
+  docx:
+    reference-doc: templates/reference.docx
+````
+
+Quando você roda `quarto render manuscrito.qmd --to docx`, a saída sai com **fonte, margens, cabeçalhos e estilos exatamente como o periódico exige** — sem você precisar abrir o Word para formatar manualmente. O Pandoc (motor por trás do Quarto) lê os estilos definidos no `reference.docx` e aplica no documento gerado a partir do seu Markdown. É o oposto do fluxo "renderiza, abre no Word, ajusta tudo": aqui você nunca toca o Word para formatar.
+
+Para LaTeX/PDF, o caminho é similar: alguns periódicos publicam classe própria (`.cls`) e o Quarto aceita via `template:` no YAML do formato `pdf`.
+
+::: {.callout-tip}
+## Como achar o template do periódico
+Procure no site da revista por "Author guidelines", "Manuscript template", "Submission template", "Instructions for authors". Quase sempre há um link direto para download. Se a revista não publica template (acontece em revistas menores), use um genérico — Quarto sem `reference-doc` produz um `.docx` razoável, e o ajuste fino você faz no Word só na versão final.
+
+Você também pode pedir ao agente: *"Acessa o link X do guia para autores e me diz qual estilo de citação (Vancouver/APA/ABNT), tipo de arquivo de template (.docx/.cls), e formato de figuras (resolução, posição) o periódico exige. Configura o `_quarto.yml` de acordo."*
+:::
+
+### `submission/`: o que vai pro envio
+
+`submission/` é onde Quarto deposita as versões renderizadas (`manuscrito.docx`, `manuscrito.pdf`). Está no `.gitignore` porque é **regenerável** a partir do código — não faz sentido versionar arquivo derivado.
+
+A configuração `output-dir: submission` no `_quarto.yml` faz o Quarto colocar tudo lá automaticamente. Quando chegar a hora de submeter, você abre `submission/`, anexa os arquivos no portal da revista, pronto.
+
+## O prompt-modelo
+
+Com a estrutura entendida, o prompt fica direto. **Adapte os detalhes em colchetes** ao seu caso e cole tudo no agente:
+
+> **Antes de criar qualquer arquivo**, descreva a árvore proposta e o fluxo (análise gera tabelas/figuras → manuscrito cita). Só crie depois que eu confirmar.
+>
+> Crie a estrutura inicial de um **projeto centrado em artigo de pesquisa** em [LINGUAGEM: R / Python / R+Python] com saída em **Word e/ou PDF** (não site Quarto). Nome: `[NOME]`. Localização: pasta atual (`pwd` = `[CAMINHO]`).
+>
+> **Estrutura mínima:**
+>
+> ```
+> projeto/
+> ├── _quarto.yml          ← formato de saída, bibliografia, opções globais
+> ├── manuscrito.qmd       ← arquivo PRINCIPAL (renderiza o artigo completo)
+> ├── README.md            ← descrição + como renderizar
+> ├── .gitignore           ← inclui data/, output/, submission/, _freeze/
+> ├── sections/            ← seções incluídas pelo manuscrito.qmd
+> │   ├── 00-resumo.qmd
+> │   ├── 01-introducao.qmd
+> │   ├── 02-metodos.qmd
+> │   ├── 03-resultados.qmd
+> │   ├── 04-discussao.qmd
+> │   └── 05-conclusao.qmd
+> ├── analysis/            ← scripts que geram tabelas/figuras
+> │   ├── 01-limpeza.R
+> │   ├── 02-analise.R
+> │   └── 03-figuras.R
+> ├── data/
+> │   ├── raw/             ← intocável, gitignored
+> │   └── processed/       ← derivado, gitignored
+> ├── output/
+> │   ├── tables/          ← tabelas geradas (.csv, .html)
+> │   └── figures/         ← figuras geradas (.png, .pdf)
+> ├── references/
+> │   ├── references.bib   ← bibliografia única
+> │   └── csl/             ← estilos (vancouver, abnt, apa)
+> ├── templates/
+> │   ├── reference.docx   ← template Word com estilos do periódico
+> │   └── article.tex      ← template LaTeX (se a revista exigir classe própria)
+> └── submission/          ← versões renderizadas para envio (gitignored)
+>     ├── manuscrito.docx
+>     └── manuscrito.pdf
+> ```
+>
+> **Conteúdo do `_quarto.yml`** — versão dual-output (Word + PDF a partir do mesmo manuscrito):
+>
+> ````yaml
+> project:
+>   type: default
+>   output-dir: submission
+>
+> bibliography: references/references.bib
+> csl: references/csl/[ESTILO].csl
+> lang: pt-BR
+>
+> execute:
+>   echo: false
+>   warning: false
+>   message: false
+>   cache: true
+>
+> format:
+>   docx:
+>     reference-doc: templates/reference.docx
+>     number-sections: true
+>     fig-dpi: 300
+>     tbl-cap-location: top
+>     fig-cap-location: bottom
+>   pdf:
+>     documentclass: article
+>     papersize: a4
+>     fontsize: 11pt
+>     linestretch: 1.5
+>     geometry:
+>       - margin=2.5cm
+>     number-sections: true
+>     fig-pos: "H"
+>     cite-method: biblatex
+>     biblio-style: vancouver
+>     keep-tex: false
+> ````
+>
+> **Conteúdo do `manuscrito.qmd`** — frontmatter completo do artigo + includes das seções na ordem IMRaD:
+>
+> ````yaml
+> ---
+> title: "[TÍTULO]"
+> author:
+>   - name: "[NOME COMPLETO]"
+>     affiliations:
+>       - name: "[INSTITUIÇÃO]"
+>         department: "[DEPARTAMENTO]"
+>     orcid: "0000-0001-XXXX-XXXX"
+>     email: "[EMAIL]"
+>     corresponding: true
+> abstract: |
+>   **Introdução:** ...
+>   **Métodos:** ...
+>   **Resultados:** ...
+>   **Conclusão:** ...
+> keywords: [palavra1, palavra2, palavra3]
+> date: today
+> ---
+>
+> {{{< include sections/00-resumo.qmd >}}}
+> {{{< include sections/01-introducao.qmd >}}}
+> {{{< include sections/02-metodos.qmd >}}}
+> {{{< include sections/03-resultados.qmd >}}}
+> {{{< include sections/04-discussao.qmd >}}}
+> {{{< include sections/05-conclusao.qmd >}}}
+>
+> # Referências {.unnumbered}
+>
+> ::: {#refs}
+> :::
+> ````
+>
+> **Cada `sections/0X-*.qmd`** começa com cabeçalho da seção (`# Introdução`, `# Métodos`, etc.) e **não tem YAML próprio** — são includes, herdam contexto do `manuscrito.qmd`.
+>
+> **Diretrizes obrigatórias:**
+>
+> 1. `data/raw/` somente leitura — nenhum script grava ali.
+> 2. `output/`, `submission/`, `_freeze/`, `data/raw/` e `data/processed/` no `.gitignore`.
+> 3. Bibliografia (`.bib`) e estilo (`.csl`) referenciados **uma única vez** no `_quarto.yml`.
+> 4. Tabelas e figuras geradas por scripts em `analysis/` e salvas em `output/`. No manuscrito, citadas via `![Legenda](output/figures/fig1.png){#fig-x}` e `read_csv("output/tables/tab1.csv")`. Sem cópia manual.
+> 5. Nomes de arquivo em snake_case para `.R`/`.py`, kebab-case para `.qmd`.
+> 6. Ambiente isolado: `renv::init()` (R) ou `uv init` (Python). Lockfile commitado.
+>
+> **Inicialização ao final:** `git init`, primeiro commit `"estrutura inicial"`, e render-teste de `manuscrito.qmd` em `docx` e `pdf` para confirmar que o pipeline funciona.
+>
+> **Critério de sucesso:** `quarto render manuscrito.qmd --to docx` produz Word formatado segundo o `reference.docx` (ou padrão se ele não existir ainda); `quarto render manuscrito.qmd --to pdf` produz PDF de submissão. Tabelas e figuras saem dos scripts em `analysis/`, sem cópia manual.
+
+## Como adaptar os colchetes
+
+Antes de colar o prompt, preencha os campos entre colchetes. Os principais:
+
+`[LINGUAGEM]` define o ecossistema. Para R puro, o prompt usa `renv` e scripts `.R`. Para Python puro, `uv` e scripts `.py`. Para combinação (R para análise estatística, Python para machine learning), o agente vai gerar tanto `renv.lock` quanto `pyproject.toml`.
+
+`[NOME]` é o nome da pasta. Use kebab-case minúsculo: `coorte-estatinas-2026`, não `Coorte_Estatinas_2026`.
+
+`[CAMINHO]` é onde a pasta deve ser criada. Rode `pwd` no terminal e cole o resultado. Em macOS/Linux: algo como `/Users/seunome/projetos/`.
+
+`[ESTILO]` na linha do CSL é o nome do arquivo `.csl` que você baixou. Para Vancouver: `vancouver.csl`. Para ABNT: `abnt.csl`. Se ainda não baixou, use `vancouver.csl` como padrão e troque depois — Vancouver é aceito pela maioria dos periódicos médicos.
+
+Os campos do `manuscrito.qmd` (`[TÍTULO]`, `[NOME COMPLETO]`, `[INSTITUIÇÃO]`, ORCID, e-mail, palavras-chave) você pode deixar como placeholders e preencher quando começar a escrever de verdade. O agente cria o esqueleto; o conteúdo é seu.
+
+::: {.callout-tip}
+## Já tem um periódico-alvo definido?
+Se você já sabe para qual revista vai submeter, vale procurar (ou criar) uma variante calibrada do prompt para esse periódico — com URL do CSL, URL das *instructions for authors*, e nomes de pasta no idioma da revista já preenchidos. Para o **Brazilian Journal of Psychiatry**, há uma versão pronta no [capítulo 02b](02b-prompt-estrutura-artigo.qmd). Para outros periódicos, dá para usar a versão BJPsych como base e adaptar.
+:::
+
+## Validação após gerar
+
+A IA gerou a estrutura. Antes de seguir, faça duas checagens rápidas:
+
+A primeira é **árvore bate com o pedido**. Compare com a estrutura de pastas com a do prompt.
+
+A segunda é **render-teste funciona**. Rode `quarto render manuscrito.qmd --to docx`. Se sai erro de bibliografia, é porque `references/references.bib` está vazio (normal — adicione manualmente uma entrada teste, ou comente o `bibliography:` no `_quarto.yml` até ter referências reais). Se sai erro de `reference-doc`, é porque `templates/reference.docx` não existe — comente a linha `reference-doc:` até baixar o template do periódico.
+
+
+::: {.callout-warning}
+## Confirme antes de aceitar arquivos pré-existentes serem sobrescritos
+Se você roda o prompt numa pasta que já tem coisas dentro, alguns agentes sobrescrevem arquivos sem perguntar. Antes de confirmar a criação, leia a árvore proposta e cheque que ela não inclui sobrescrever `README.md` ou `.gitignore` que você já tinha. Em caso de dúvida, peça explicitamente: *"liste cada arquivo que você vai criar ou modificar antes de tocar em nada"*.
+:::
+
+## O que vem a seguir
+
+A estrutura está pronta, ambiente isolado, primeiro commit feito. O próximo passo é dar à IA o **contrato persistente** que ela vai consultar em toda conversa futura sobre este projeto: o `AGENTS.md`. Ele transforma todas as suas convenções (linguagem, pacotes, alpha, IC, casas decimais, restrições de privacidade) em regras implícitas — e reduz pela metade o tamanho de todos os prompts seguintes.
+
+→ [03 · Prompt para AGENTS.md customizado](03-prompt-agents-md.qmd)

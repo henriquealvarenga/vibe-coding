@@ -1,0 +1,89 @@
+---
+title: "Por que existem tantos formatos"
+sidebar: bloco-dados
+---
+
+Você abre uma pasta de pesquisa antiga e encontra: `coorte.csv`, `analise.xlsx`, `metadata.json`, `dados_geneticos.parquet`, `database.sqlite`. Cinco formatos diferentes para o que parece ser, basicamente, *tabelas*. Por que tantos? Por que cada um existe? E como saber qual usar quando você for criar dados novos?
+
+Este capítulo abre o Bloco *Dados* respondendo essas três perguntas, e estabelece o mapa que os capítulos seguintes vão preencher um por vez.
+
+## Por que não basta um formato
+
+A tentação é dizer: "deveria existir um formato universal de dados tabulares, e os outros são acidentes históricos". É tentadora, mas errada. Cada formato existe porque otimizou um trade-off diferente entre **cinco dimensões** que não podem ser maximizadas todas ao mesmo tempo:
+
+| Dimensão | O que significa | Quem prioriza |
+|---|---|---|
+| **Legibilidade humana** | Você consegue abrir num editor de texto e entender? | CSV, TSV, JSON |
+| **Tipagem preservada** | Distingue número de texto, data de string, booleano de zero? | Excel, Parquet, SQLite, JSON parcialmente |
+| **Compactação** | Quantos bytes para armazenar a mesma tabela? | Parquet, SQLite (binários comprimidos) |
+| **Capacidade relacional** | Permite múltiplas tabelas com relações entre si, queries SQL? | SQLite |
+| **Portabilidade** | Funciona em qualquer linguagem, qualquer sistema, qualquer época? | CSV, JSON |
+
+Nenhum formato pontua alto nas cinco dimensões simultaneamente. CSV é maximamente portável e legível, mas péssimo em tipagem (tudo é string até alguém interpretar) e sem capacidade relacional. Parquet é compacto e tipado, mas ilegível para humanos sem ferramenta especializada. SQLite é relacional e tipado, mas binário e mais pesado para datasets pequenos. **Cada formato é uma escolha**, e qual cabe no seu projeto depende do que você está priorizando.
+
+## Os cinco formatos do Bloco
+
+Os capítulos seguintes cobrem os formatos que aparecem com mais frequência em pesquisa científica:
+
+| # | Formato | Caráter | Quando faz sentido |
+|---|---|---|---|
+| 02 | **CSV / TSV** | Texto puro, valores delimitados | Padrão universal de troca; datasets pequenos a médios; arquivamento de longo prazo |
+| 03 | **Excel** (`.xlsx` / `.xls`) | Binário Office Open XML | Comunicação com colaboradores não-técnicos; planilhas com fórmulas; entrada manual de dados |
+| 04 | **JSON** | Texto puro, hierárquico | Dados aninhados (não retangulares); APIs web; configuração; metadados |
+| 05 | **Parquet** | Binário colunar | Datasets grandes (centenas de MB a TB); análises que filtram por colunas; cluster de dados |
+| 06 | **SQLite** | Binário relacional | Múltiplas tabelas com relações; queries SQL; datasets que ultrapassam memória RAM |
+
+Há outros formatos que você vai encontrar pontualmente — Feather, Arrow, RDS (R-específico), Pickle (Python-específico), HDF5 (científico), netCDF (climatologia), DICOM (imagem médica). Cada um tem uso de nicho. Os cinco listados acima cobrem o essencial.
+
+## Como escolher: árvore de decisão
+
+Quando você está criando dados novos (não recebendo de fora), a sequência prática de perguntas:
+
+```
+1. Os dados precisam ser editados manualmente por colaboradores não-técnicos?
+   → SIM: Excel
+   → NÃO: continue
+
+2. Os dados são essencialmente uma tabela retangular única?
+   → NÃO (são aninhados, hierárquicos): JSON
+   → SIM: continue
+
+3. Você precisa de queries entre múltiplas tabelas?
+   → SIM: SQLite
+   → NÃO: continue
+
+4. O dataset é grande (>100 MB)?
+   → SIM: Parquet
+   → NÃO: CSV (ou TSV se houver muitas vírgulas no conteúdo)
+```
+
+Essa árvore cobre 90% dos casos. As exceções aparecem em domínios específicos (imagem médica é DICOM, astronomia é FITS, climatologia é netCDF), mas para dados clínicos, epidemiológicos e estatísticos típicos, os cinco formatos do bloco bastam.
+
+::: {.callout-tip}
+## Quando em dúvida, comece por CSV
+Se a árvore acima não der resposta clara, **CSV é o default seguro**. É portável, legível, arquivável, e qualquer ferramenta lê. Os custos do CSV (perda de tipagem, vulnerabilidade a dialetos, ineficiência em grandes volumes) só aparecem quando o projeto cresce. Para protótipo e exploração inicial, CSV é a escolha que minimiza commitment a stack específico.
+:::
+
+## Recebendo dados de fora
+
+Frequentemente, **você não escolhe o formato** — recebe dados num formato decidido por terceiros. Sistemas hospitalares de prontuário eletrônico exportam em formato próprio (HL7, FHIR, CSV, XLSX). Bancos públicos disponibilizam em CSV (DataSUS, OpenDataSUS) ou JSON. Repositórios de bioinformática usam combinações de TSV, FASTQ, BAM, VCF.
+
+A regra geral nesse cenário: **converta para um formato adequado ao seu fluxo, mas preserve o original intacto**. Mantenha `dados/raw/extracao_2026.xlsx` (a versão recebida, intocada) e gere `dados/processed/coorte.parquet` (a versão limpa, no formato escolhido para análise). Essa separação é central para reprodutibilidade — sempre dá para refazer a limpeza se descobrir um erro ou receber novos dados; sem o original, não dá.
+
+Esse princípio é detalhado no último capítulo do bloco (`08-organizacao-arquivos`).
+
+## Conexão com IA
+
+Agentes de IA são especialmente úteis em **identificar e converter** formatos:
+
+- *"Esse arquivo recebido tem extensão `.dat`. Quais são os primeiros bytes? Que formato você acha que é?"* O agente roda comandos como `file` e `xxd` no terminal, identifica o magic number (assinatura inicial dos bytes que identifica o formato), e propõe a leitura.
+- *"Converta este XLSX em Parquet preservando tipos."* Operação comum, propensa a erro manual; o agente cuida dos detalhes.
+- *"Como abrir esse `.dcm`?"* Para formatos que você nunca viu, o agente serve de "documentação imediata" — diz o que é, qual biblioteca usar.
+
+A regra que vale para tudo: **verifique o resultado**. Conversões silenciosas que descartam linhas problemáticas ou perdem precisão numérica são clássicas. Sempre confira contagem de linhas e estatísticas básicas antes e depois.
+
+## O que vem a seguir
+
+O próximo capítulo aprofunda o formato mais usado e mais antigo do bloco: o **CSV** (e seu primo menos famoso, o TSV). História, especificação, persistência, e armadilhas práticas — incluindo as três que pegam usuário brasileiro com mais frequência.
+
+→ [02 · CSV e TSV](02-csv-tsv.qmd)

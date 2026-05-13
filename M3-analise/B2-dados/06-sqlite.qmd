@@ -1,0 +1,166 @@
+---
+title: "SQLite e bancos relacionais"
+---
+
+Você tem três planilhas separadas: `pacientes.csv` (uma linha por paciente, dados demográficos), `internacoes.csv` (uma linha por internação, várias por paciente), `prescricoes.csv` (uma linha por medicamento prescrito, várias por internação). A pergunta que você quer responder é: *"qual a duração média de internação dos pacientes que receberam Anticoagulante X em internações posteriores a 2024?"* Resposta exige cruzar as três tabelas pelas chaves de paciente e internação. Em R com `dplyr` dá pra fazer; em Python com `pandas` também. Mas se isso vira workflow recorrente, com tabelas grandes e queries complexas, há uma ferramenta melhor: o **banco relacional**.
+
+E quando "banco relacional" entra na conversa, a primeira opção que vale considerar — antes de instalar Postgres ou MySQL — é o **SQLite**. Este capítulo é sobre por que SQLite cabe em pesquisa científica.
+
+## O banco mais ubíquo da história
+
+A primeira coisa que choca quem aprende sobre SQLite é a escala da adoção. O **SQLite é, com larga vantagem, o banco de dados mais usado do mundo** [@sqlite2024docs]. Não está em segundo lugar competindo com MySQL ou Postgres — está em primeiro lugar absoluto, e a distância para o segundo é enorme. O motivo: SQLite roda **em todo lugar**:
+
+- **Todo iPhone e iPad.** O sistema iOS usa SQLite para mensagens, contatos, fotos, histórico do Safari, e dezenas de outros sistemas internos.
+- **Todo Android.** Idem — o sistema operacional inteiro depende de SQLite.
+- **Todo navegador moderno.** Chrome, Firefox e Safari usam SQLite para histórico, favoritos, cache, armazenamento local de aplicações web.
+- **Aviões e dispositivos embarcados.** Sistemas críticos de aviação Airbus usam SQLite. Carros, dispositivos médicos, set-top boxes, leitores de e-book — qualquer aparelho minimamente complexo provavelmente tem SQLite dentro.
+
+A estimativa do projeto SQLite é de **mais de 1 trilhão de bancos SQLite ativos** no mundo, em 2024. Para comparação, isso é mais que todos os outros bancos de dados somados, em ordem de magnitude.
+
+## A história: do US Navy a tudo que existe
+
+A origem é específica. Em 2000, **D. Richard Hipp** — engenheiro de software então em uma empresa contratada pelo Departamento de Defesa dos EUA — recebeu um problema curioso. Ele estava trabalhando em um sistema de controle para destróieres da Marinha americana. Os destróieres precisavam de um banco de dados local para armazenar configurações e dados operacionais — mas tinha que ser um banco que **não exigisse administrador** (porque os marinheiros operando o sistema não eram DBAs), que **funcionasse mesmo se o navio perdesse energia no meio de uma escrita** (resiliência crítica em ambiente militar), e que **fosse pequeno o suficiente** para rodar em hardware embarcado.
+
+Bancos tradicionais (Oracle, SQL Server, MySQL) eram inadequados — todos exigiam servidor separado, processo dedicado, administração ativa. Hipp decidiu construir um banco diferente: **embarcado**, que rodasse como biblioteca dentro do programa hospedeiro, sem servidor, sem processo separado, sem admin. Em agosto de 2000, lançou a versão 1.0 do **SQLite**.
+
+A genialidade do design ficou aparente rapidamente. Como SQLite não tinha pretensão de ser "um produto comercial", Hipp colocou o código no **domínio público** (não open source com licença, mas literalmente sem direitos autorais — qualquer um pode usar para qualquer fim, sem atribuição). Empresas adotaram em massa. Em 2003, Apple integrou ao Mac OS X. Em 2005, viraram parte do Android. Em 2007, do iOS. Daí em diante, o crescimento foi exponencial.
+
+Hipp tem três outras curiosidades históricas:
+
+- **Código com cobertura de testes neurótica.** O SQLite tem mais código de teste do que código de produção — proporção de centenas de linhas de teste por linha de feature. Isso reflete a origem militar e a exigência de robustez extrema.
+- **Domínio público.** O código não tem licença. Você pode incluir SQLite no seu produto comercial fechado, redistribuir, modificar, sem qualquer obrigação. Isso facilitou adoção mas é juridicamente raro.
+- **Documentação histórica preservada.** O projeto mantém aberto o histórico completo de decisões de design por 25+ anos.
+
+## O que é um banco relacional, em poucas linhas
+
+Para quem nunca usou banco relacional formalmente, vale o resumo. A ideia central é três:
+
+**1. Múltiplas tabelas relacionadas.** Em vez de uma tabela única, você tem várias tabelas pequenas com relacionamentos explícitos. Pacientes tem uma chave única (`id`); cada internação tem `paciente_id` apontando para a tabela de pacientes; cada prescrição tem `internacao_id`. As tabelas se conectam por essas chaves.
+
+**2. SQL para consultar.** SQL (*Structured Query Language*) é uma linguagem declarativa para descrever **o que** você quer, sem dizer **como** o banco deve buscar. O banco se encarrega de planejar a busca eficiente:
+
+```sql
+SELECT p.id, AVG(i.duracao_dias) AS media_internacao
+FROM pacientes p
+JOIN internacoes i ON i.paciente_id = p.id
+JOIN prescricoes pr ON pr.internacao_id = i.id
+WHERE pr.medicamento = 'Anticoagulante X'
+  AND i.data_admissao > '2024-01-01'
+GROUP BY p.id;
+```
+
+Essa query cruza três tabelas, filtra por dois critérios, e calcula uma agregação — tudo numa única expressão declarativa.
+
+**3. Garantias de consistência (ACID).** Bancos relacionais oferecem garantias formais: ou uma operação completa por inteiro, ou não acontece nada (atomicidade); o banco nunca fica num estado inválido (consistência); operações concorrentes não interferem entre si (isolamento); uma vez commitada, a operação persiste mesmo após queda de energia (durabilidade). Essas garantias importam quando você está coletando dados em tempo real ou em ambiente colaborativo.
+
+## SQLite vs Postgres/MySQL: quando vale qual
+
+SQLite é diferente dos bancos "tradicionais" em uma característica central: **não é cliente-servidor**. Não há processo `sqlite-server` rodando no fundo. SQLite é uma **biblioteca** — `libsqlite3.dylib` em Mac, `sqlite3.dll` em Windows — que seu programa carrega e usa direto. O "banco" é um único arquivo (`.sqlite` ou `.db`) no disco. Programas diferentes podem abrir o mesmo arquivo (com cuidado para concorrência), mas não há servidor mediando.
+
+Isso muda o trade-off:
+
+| Característica | SQLite | Postgres / MySQL |
+|---|---|---|
+| **Setup** | Zero (arquivo `.sqlite` é o banco) | Instalar servidor, configurar usuários, abrir porta |
+| **Concorrência** | Limitada (multi-leitura ok, multi-escrita serializada) | Plena (milhares de conexões simultâneas) |
+| **Tamanho** | Bom até dezenas de GB; viável até centenas | Sem limite prático |
+| **Distribuído** | Não — um arquivo numa máquina | Sim — replicação, sharding, cluster |
+| **Backup** | `cp banco.sqlite backup.sqlite` | Ferramentas dedicadas, dump SQL, replicação |
+| **Compartilhamento** | Mandar o `.sqlite` por email funciona | Exige acesso a servidor |
+
+Para **pesquisa típica** (cohort de centenas a milhares de pacientes, datasets que cabem em uma máquina, projeto colaborativo de poucas pessoas), SQLite é absolutamente adequado e mais simples de gerenciar. Para **registros nacionais multi-instituição com escrita concorrente massiva**, faz sentido um Postgres dedicado.
+
+::: {.callout-tip}
+## A heurística simples
+Se a pergunta começa com "qual banco devo usar para...", e o projeto cabe numa máquina, a resposta default é **SQLite**. Você só sai dele quando descobre uma necessidade específica que ele não atende — não antes.
+:::
+
+## SQLite em pesquisa: três casos típicos
+
+**1. Dados que ultrapassam memória RAM.** Você tem um dataset de 30 GB e sua máquina tem 16 GB de RAM. Carregar tudo no R é impossível. Mas SQLite consegue ler/escrever sem precisar carregar tudo — o arquivo fica no disco, e queries leem só os pedaços necessários:
+
+```r
+library(DBI)
+library(RSQLite)
+
+con <- dbConnect(RSQLite::SQLite(), "dados/coorte.sqlite")
+
+# Query opera no banco, retorna só o resultado pequeno
+resultado <- dbGetQuery(con, "
+  SELECT idade_grupo, AVG(pas_sistolica) as media_pas
+  FROM pacientes
+  WHERE ano_inclusao = 2024
+  GROUP BY idade_grupo
+")
+
+dbDisconnect(con)
+```
+
+**2. Dados estruturados em múltiplas tabelas relacionadas.** Coorte com pacientes, exames, internações, prescrições — naturalmente relacionais. Modelar como banco SQLite preserva a estrutura e permite consultas que envolvem cruzamento.
+
+**3. Dados que se acumulam ao longo do tempo.** Um sistema de coleta diária de dados clínicos. Em vez de criar `dados_2026-05-04.csv`, `dados_2026-05-05.csv`, etc. e ter que concatenar tudo na análise, mantém um único `coorte.sqlite` que cresce — `INSERT` novos registros sem precisar reescrever o arquivo inteiro.
+
+## Lendo SQLite em R e Python
+
+Em R, via **`DBI`** + **`RSQLite`**:
+
+```r
+library(DBI)
+library(RSQLite)
+library(dplyr)
+
+con <- dbConnect(RSQLite::SQLite(), "dados/coorte.sqlite")
+
+# Listar tabelas existentes
+dbListTables(con)
+
+# Query SQL direta
+dbGetQuery(con, "SELECT * FROM pacientes WHERE idade > 65 LIMIT 10")
+
+# Ou com dplyr (escreve dplyr, gera SQL automaticamente)
+pacientes <- tbl(con, "pacientes")
+pacientes |>
+  filter(idade > 65) |>
+  count(sexo) |>
+  collect()
+
+dbDisconnect(con)
+```
+
+Em Python, via **`sqlite3`** (biblioteca-padrão) ou **`pandas`**:
+
+```python
+import pandas as pd
+import sqlite3
+
+con = sqlite3.connect("dados/coorte.sqlite")
+
+# Query SQL direta retorna DataFrame
+dados = pd.read_sql("SELECT * FROM pacientes WHERE idade > 65 LIMIT 10", con)
+
+# Lista tabelas
+tabelas = pd.read_sql("SELECT name FROM sqlite_master WHERE type='table'", con)
+
+con.close()
+```
+
+A interface **`dplyr` + `dbplyr`** em R é especialmente elegante: você escreve a análise em sintaxe `dplyr` familiar, e ela é traduzida em SQL e executada no banco. Você ganha SQL sem precisar escrever SQL.
+
+## Conexão com IA
+
+Agentes são particularmente úteis com SQL/SQLite por dois motivos:
+
+**1. Tradução de pergunta em linguagem natural para SQL.** *"Quero a média de pressão arterial sistólica por grupo etário em pacientes incluídos depois de 2024, ordenado do mais alto para o mais baixo, mas só grupos com pelo menos 30 pacientes."* O agente devolve a query SQL pronta. Para quem não escreve SQL com fluência, isso é transformador.
+
+**2. Modelagem inicial do banco.** *"Tenho dados de pacientes, internações e prescrições — me proponha o esquema relacional inicial em SQLite, com chaves primárias e estrangeiras."* O agente devolve `CREATE TABLE` statements consistentes, com chaves bem desenhadas.
+
+::: {.callout-warning}
+## Sempre revise o SQL gerado
+SQL é fácil de gerar errado de jeitos sutis. Um `JOIN` no lugar errado pode multiplicar linhas. Um `WHERE` antes de um `GROUP BY` filtra coisa diferente de um `HAVING` depois. Para queries que vão alimentar análise científica, **rode primeiro num subset pequeno**, confira contagens, valide manualmente o resultado de algumas linhas, antes de aplicar no banco completo. Especialmente com queries geradas por IA — agente raramente avisa quando a query está sintaticamente válida mas semanticamente errada.
+:::
+
+## O que vem a seguir
+
+Os cinco capítulos anteriores cobriram **formatos** — como armazenar dados. Os dois capítulos finais do bloco mudam o foco para **estrutura** — como organizar os dados (sejam eles em qualquer formato) de modo que a análise seja eficiente e reprodutível. O próximo trata do conceito que organiza tudo: **tidy data**, ou *dados arrumados* — o paper de 2014 de Hadley Wickham que mudou como ciência de dados é praticada em R e Python.
+
+→ [07 · Tidy data](07-tidy-data.qmd)

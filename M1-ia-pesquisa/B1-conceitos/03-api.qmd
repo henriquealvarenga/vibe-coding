@@ -1,0 +1,189 @@
+---
+title: "API × app"
+---
+
+Você já viu **o que é IA generativa** e **como tokens funcionam**. Agora vamos olhar para os **dois grandes modos** pelos quais você acessa um modelo de IA — e por que um pesquisador deveria saber a diferença entre eles, mesmo que use só um na prática.
+
+## As duas portas de entrada
+
+Todo modelo grande de IA generativa (Claude, GPT, Gemini) é, por dentro, **um único produto**: o modelo treinado pela empresa, rodando em servidores dela. O que muda é **como você se conecta**.
+
+```
+                  ┌────────────────────────────┐
+                  │     O modelo de IA         │
+                  │   (Claude, GPT, Gemini)    │
+                  │   roda nos servidores      │
+                  │     da empresa             │
+                  └────────────┬───────────────┘
+                               │
+              ┌────────────────┴────────────────┐
+              │                                  │
+              ▼                                  ▼
+     ┌────────────────┐                ┌────────────────┐
+     │     APP        │                │      API       │
+     │   (chat)       │                │ (programática) │
+     ├────────────────┤                ├────────────────┤
+     │ login + senha  │                │  chave de API  │
+     │ assinatura $   │                │  por token $   │
+     │ janela de chat │                │  programa →    │
+     │                │                │  programa      │
+     └────────────────┘                └────────────────┘
+```
+
+Vamos olhar cada um de perto.
+
+## App: o caminho conversacional
+
+O **app** é o caminho que a maior parte dos usuários conhece. São produtos como:
+
+- **[claude.ai](https://claude.ai)** e o **Claude Desktop** (que você instalou no Módulo 0);
+- **[chatgpt.com](https://chatgpt.com)** e o **ChatGPT Desktop**;
+- **[gemini.google.com](https://gemini.google.com)** e o **Gemini app**.
+
+Você abre uma janela, digita uma mensagem, recebe uma resposta. Como em qualquer outro app, há **login** (e-mail e senha, ou OAuth com Google/Apple) e a empresa cuida de toda a infraestrutura: cobrança, limites, atualizações de modelo, segurança.
+
+### Como se paga
+
+Há, em geral, três tiers:
+
+| Tier | O que você ganha |
+|---|---|
+| **Gratuito (Free)** | Acesso ao modelo padrão da empresa, com limites de uso (ex.: número de mensagens por dia). Sem cartão de crédito. |
+| **Assinatura mensal** (Pro / Plus / Advanced) — ~$20/mês | Modelo mais capaz, limites maiores, recursos extras (carregar arquivos, gerar imagens, modos especializados). É o tier mais comum entre profissionais. |
+| **Tiers superiores** (Max, Pro nível 2, Team, Enterprise) | Limites ainda maiores, modelos *flagship*, integrações corporativas. Custos sobem para $100-$200/mês ou planos institucionais. |
+
+Para um estudante ou professor, **o tier gratuito ou a assinatura de ~$20/mês cobre quase tudo o que vamos fazer no curso**.
+
+### O que você ganha além do modelo
+
+Os apps não são "só uma janela de chat". Eles incluem:
+
+- **Histórico de conversas** salvo em sua conta;
+- **Memória** entre conversas (em alguns produtos);
+- **Carregar arquivos** (PDF, imagem, planilha) com clique;
+- **Gerar imagens** (em alguns apps);
+- **Acesso a modelos especializados** sem você escolher manualmente.
+
+Tudo isso é construído **em cima** da API — mas a empresa empacota o conjunto numa experiência fácil. Você não precisa pensar em tokens, modelos, parâmetros: só conversar.
+
+### Limitações do app
+
+Em compensação, há coisas que você **não consegue fazer** pelo app:
+
+- **Automatizar** (rodar a mesma conversa em centenas de arquivos);
+- **Integrar** com outras ferramentas (escrever um script que processa dados e chama a IA);
+- **Escolher modelo específico** com precisão (geralmente o app decide por você qual versão usar);
+- **Controlar custos por operação** (o limite é mensal; uma operação pesada conta como qualquer outra).
+
+Se você só quer conversar com IA — escrever, traduzir, brainstorm, pedir explicações — **o app é mais que suficiente**.
+
+## API: o caminho programático
+
+A **API** (*Application Programming Interface*) é o canal **direto e técnico** para o modelo. Em vez de uma janela de chat, é um **endpoint** — uma URL na internet que recebe um pedido (em JSON) e devolve uma resposta (em JSON):
+
+```
+POST https://api.anthropic.com/v1/messages
+Content-Type: application/json
+x-api-key: sk-ant-...
+
+{
+  "model": "claude-opus-4-7",
+  "messages": [{"role": "user", "content": "Olá!"}],
+  "max_tokens": 1024
+}
+```
+
+Você não vai escrever esse JSON na mão durante o curso. Quem escreve são **as ferramentas que você usa** — Claude Code, Codex, Gemini CLI, scripts em Python ou R que chamam a IA, agentes que rodam em servidores. Todas elas, por baixo dos panos, mandam pedidos como o de cima.
+
+### Como se autentica: a chave de API
+
+A API não usa login com senha. Cada usuário (ou ferramenta dele) tem uma **chave de API** — uma string longa que parece algo como:
+
+```
+sk-ant-api03-aBcD1234eFgH5678iJkL9012mNoP3456qRsT...
+```
+
+Essa chave **é a sua senha** — quem tiver acesso a ela pode fazer chamadas em seu nome (e portanto **gastar seu dinheiro**). Por isso há regras estritas:
+
+- **Nunca** colar a chave em código compartilhado (GitHub, e-mail, mensagem);
+- **Nunca** colar a chave em documento Quarto que será publicado;
+- Guardar em **variável de ambiente** ou em **gerenciador de senhas** (1Password, Bitwarden, etc.);
+- **Revogar e gerar nova** se desconfiar de vazamento (todos os consoles têm o botão).
+
+Vamos voltar a esse ponto na prática quando você for usar API de fato — provavelmente no Módulo 2 ou 3.
+
+### Como se paga
+
+A API cobra **estritamente por uso**:
+
+- Você **não** paga assinatura mensal mínima;
+- **Cada chamada** consome tokens (entrada + saída) — vimos no capítulo 02;
+- A conta é **somada e cobrada no fim do mês**;
+- Quem nunca usou pode começar com **créditos gratuitos** (Anthropic dá $5; Google é mais generoso) — um teste sem cartão.
+
+Para um pesquisador, isso significa:
+
+- Em meses que você usa pouco, **paga muito pouco** (ou nada).
+- Em meses de uso intenso, **paga mais** que uma assinatura — mas geralmente em troca de muito mais trabalho útil feito.
+- Sem teto: rodar um agente desatento durante a noite pode custar **dezenas ou centenas de dólares**. Por isso quase todos os consoles permitem definir um **limite mensal de gastos** — recomendação forte: ative na primeira vez que ativar a API.
+
+### O que você ganha
+
+Em troca da complexidade, a API libera tudo o que o app não permite:
+
+- **Automação** — chamadas em loop, processamento em lote;
+- **Integração** — chamar IA dentro de scripts, dentro de pipelines de análise, dentro de outras ferramentas;
+- **Escolha de modelo** — você decide se quer Opus (mais caro, melhor) ou Haiku (mais barato, suficiente para tarefas simples);
+- **Controle fino** — temperatura, número máximo de tokens, formato de saída.
+
+E, principalmente, é o que viabiliza os **agentes**.
+
+## Os agentes (Claude Code, Codex, Gemini CLI): meio termo
+
+As três ferramentas que você instalou no Módulo 0 são **agentes**. Eles ocupam um **terceiro espaço** entre app e API:
+
+- **Tecnicamente**: agentes usam a **API** — cada ação que o Claude Code executa no seu projeto (ler um arquivo, rodar um comando, editar código) é uma chamada à API.
+- **Na sua experiência**: você não vê chave nenhuma. Faz login com sua conta, e a ferramenta cuida de autenticar e cobrar.
+
+Como funciona a cobrança? Depende da ferramenta:
+
+| Agente | Como cobra |
+|---|---|
+| **Claude Code** | Se você logou com sua conta Anthropic e tem assinatura **Max** ou **Team**, o uso conta contra a quota dessa assinatura. Caso contrário, usa a API e cobra por token. |
+| **Codex CLI** | Se você logou com ChatGPT Plus / Pro, conta contra a quota. Senão, usa API. |
+| **Gemini CLI** | Tem uma **quota gratuita generosa** (mais de 1000 requisições/dia para usuários autenticados com Google), suficiente para a maior parte do uso pessoal. Acima disso, vira API. |
+
+Em outras palavras: você pode usar agentes **sem mexer em API diretamente** — basta logar. Por baixo dos panos, é tudo API; mas o agente esconde a complexidade.
+
+::: {.callout-tip}
+## Boa notícia para o curso
+**Você não precisa de chave API agora.** Para tudo o que vamos fazer no Módulo 1 e na maior parte do Módulo 2, **o Claude Desktop (com a assinatura gratuita ou Pro) e o Claude Code logado com sua conta** já resolvem. Chaves de API entram em cena se você decidir, mais à frente, automatizar análises ou rodar processamentos em lote.
+:::
+
+## Quando cada modo faz sentido
+
+Resumindo a decisão prática:
+
+| Cenário | Modo recomendado |
+|---|---|
+| Conversar, escrever, brainstorm, pedir explicações | **App (chat)** com plano gratuito ou Pro |
+| Análise de código, edição de arquivos, refatoração | **Agente** (Claude Code, Codex, Gemini CLI) — usa API por baixo, mas via login |
+| Processar 200 PDFs em lote | **API direta** (precisa de chave) |
+| Integrar IA em pipeline de análise R/Python | **API direta** |
+| Aplicação que vai ser usada por outras pessoas | **API direta** com chave do projeto |
+| Aluno começando o curso | **App + agente logado** — não toca em chave API por enquanto |
+
+Para o curso, **a recomendação é**: comece com **Claude Desktop** (chat) + **Claude Code** logado. Avance para chave de API só quando uma necessidade específica aparecer.
+
+## Implicações para reprodutibilidade científica
+
+Um ponto rápido importante para pesquisa: **a API é muito mais reprodutível que o app**.
+
+- Pelo app, você não controla qual versão exata do modelo está respondendo. A empresa atualiza o modelo "por baixo", e suas conversas anteriores podem produzir resultados diferentes se repetidas amanhã.
+- Pela API, você **especifica** o modelo (`claude-opus-4-7`, por exemplo). E pode até guardar **versão específica e timestamp** se a documentação científica exigir.
+
+Isso importa quando o uso de IA for **parte da metodologia** de um estudo (ex.: sumarizar artigos para uma revisão sistemática, classificar respostas de questionário, gerar texto para análise). Vamos voltar a esse ponto no capítulo **05 · Citar IA**.
+
+## O que vem a seguir
+
+O próximo capítulo trata da habilidade que **define a qualidade** de tudo o que você obtém com IA — independentemente de usar app, API ou agente: o **prompt**. Anatomia, técnicas, iteração.

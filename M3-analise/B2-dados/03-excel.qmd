@@ -1,0 +1,138 @@
+---
+title: "Excel (XLSX/XLS)"
+---
+
+Em algum lugar de qualquer hospital universitário, neste momento, alguém está digitando dados de um paciente numa planilha do Excel. É o programa de inserção de dados de pesquisa mais usado do mundo, com larga vantagem sobre qualquer alternativa. Você pode ter opinião negativa sobre isso (e há motivos), mas é a realidade do trabalho: na cadeia de produção de dados clínicos, o Excel está em algum lugar quase sempre. Este capítulo é sobre o que esse formato é, de onde veio, por que dominou, e — importante para pesquisa — onde ele é perigoso.
+
+## Da origem à hegemonia
+
+A história do Excel é, antes de mais nada, uma história de **batalha por mercado** que a Microsoft ganhou.
+
+**Antes do Excel: VisiCalc e Lotus 1-2-3.** A planilha eletrônica como gênero foi inventada em 1979 por Dan Bricklin e Bob Frankston, com o **VisiCalc** para o Apple II — o primeiro *killer app* da computação pessoal, o programa que justificou a compra de um computador para usuário comum de empresa. Pouco depois, em 1983, a Lotus Development lançou o **Lotus 1-2-3** para o IBM PC, que rapidamente substituiu o VisiCalc e dominou o mercado corporativo dos anos 80.
+
+A Microsoft entrou nesse mercado tarde. Lançou o **Multiplan** em 1982 (versão para CP/M, depois portado para outros sistemas) sem grande sucesso, e em **1985** lançou o **Excel** — primeiro para o Macintosh. A escolha era estratégica: o Mac tinha tela gráfica de alta resolução, mouse e interface de janelas, todos recursos que permitiam uma planilha visualmente superior à concorrência ainda em modo texto. Excel para Windows veio em 1987.
+
+A vitória sobre o Lotus 1-2-3 levou cerca de uma década. Foi consolidada nos anos 1990 com a estratégia de empacotar Excel no **Microsoft Office** junto com Word e PowerPoint — força de venda que a Lotus não conseguiu igualar. Em 1995, o Excel já era a planilha dominante; nos anos 2000, virou padrão absoluto em qualquer escritório, laboratório, hospital ou universidade do mundo.
+
+## Os dois formatos: `.xls` e `.xlsx`
+
+Tecnicamente, "arquivo Excel" pode significar dois formatos bem diferentes:
+
+**`.xls` (1987–2007).** Formato binário proprietário baseado em **OLE Compound File Binary Format**. Era um arquivo único contendo planilhas, fórmulas, gráficos, macros — tudo em estrutura binária fechada. A especificação não foi publicamente documentada até 2008 (sob pressão regulatória); por décadas, ler `.xls` exigia engenharia reversa ou licença comercial da Microsoft.
+
+**`.xlsx` (2007 em diante).** Em 2007, com o Office 2007, a Microsoft lançou o **Office Open XML (OOXML)** — um formato aberto, baseado em XML compactado em ZIP. Um arquivo `.xlsx` é, literalmente, um arquivo ZIP que você pode descompactar com qualquer ferramenta:
+
+```bash
+mv coorte.xlsx coorte.zip
+unzip coorte.zip
+ls
+# [Content_Types].xml  _rels/  docProps/  xl/
+```
+
+Dentro, há XMLs descrevendo planilhas, células, estilos, fórmulas. A abertura do formato foi resultado de **pressão antitruste** e da **competição com o Open Document Format (ODF)** — o formato aberto usado pelo OpenOffice/LibreOffice, padronizado como ISO/IEC 26300 em 2006. Para evitar perder o mercado governamental europeu (que começava a exigir formatos abertos), a Microsoft formalizou o OOXML como padrão **ISO/IEC 29500** em 2008 — em processo polêmico de fast-track no qual a Microsoft foi acusada de manipular votos nacionais.
+
+A consequência prática: hoje, `.xlsx` pode ser lido e escrito por qualquer biblioteca em qualquer linguagem (`openxlsx2` e `readxl` em R, `openpyxl` e `pandas` em Python, etc.) sem licença Microsoft. `.xls` ainda funciona em programas modernos por compatibilidade, mas é tratado como formato legado em vias de descontinuação.
+
+## Excel em pesquisa: o que ele faz bem
+
+Antes do que ele faz mal: vale registrar onde Excel **é genuinamente útil em pesquisa**:
+
+- **Entrada manual de dados.** Auxiliares de pesquisa, residentes coletando dados de prontuário, colaboradores eventuais — para entrada manual estruturada, a interface do Excel é difícil de superar. Validação de células, listas suspensas, formatação condicional ajudam a reduzir erro de digitação.
+- **Compartilhamento com colaboradores não-técnicos.** Mostrar dados a um clínico, um administrador, um colaborador de outra área — Excel é o denominador comum universal. Mandar `.csv` para um colega que nunca abriu terminal é convidar problema; mandar `.xlsx` ele abre direto.
+- **Exploração rápida e ad-hoc.** Pequenas verificações, gráficos descartáveis, tabelas dinâmicas — são tarefas onde Excel ganha por baixo custo de fricção, antes de qualquer ambiente de programação.
+
+Negar esses casos é teimosia. A questão é onde Excel **deixa de ser apropriado** — e essa fronteira é mais próxima do que muitos assumem.
+
+## O custo da onipresença: gene names e além
+
+Em 2016, **Ziemann, Eren e El-Osta** publicaram no *Genome Biology* um estudo que revisou sistematicamente artigos de genômica com tabelas suplementares em Excel [@ziemann2016gene]. Resultado: **aproximadamente 20% dos artigos** continham nomes de gene **silenciosamente corrompidos** pela autoconversão do Excel. Os clássicos:
+
+- `SEPT2` (gene Septin-2) → autoconvertido para `2-Sep` (segunda de setembro)
+- `MARCH1` (gene Membrane Associated Ring-CH-Type Finger 1) → `1-Mar`
+- `OCT4` (gene de pluripotência) → `4-Oct`
+- Identificadores como `2310009E13` → notação científica `2.31E+13`
+
+O Excel "ajudava" interpretando string que parecia data como data, e número longo como notação científica — e gravava o resultado de volta na planilha **sem aviso**. Pesquisador exportava CSV de banco, abria no Excel para inspecionar, salvava, reenviava — e os gene names estavam destruídos. O artigo de 2016 mostrou que era epidemia.
+
+A consequência foi histórica e quase cômica: depois de **anos de campanhas pedindo à Microsoft que oferecesse opção para desativar a autoconversão** (sem sucesso), em 2020 o **HUGO Gene Nomenclature Committee (HGNC)** — comitê internacional que rege nomes de genes humanos — **renomeou 27 genes** [@bruford2020guidelines]. `SEPT1` virou `SEPTIN1`. `MARCH1` virou `MARCHF1`. `DEC1` virou `DELEC1`. A nomenclatura científica internacional cedeu ao software desktop.
+
+Esse episódio é uma alegoria útil. Excel é uma ferramenta opinativa — ela **interpreta** o que você digita, não armazena passivamente. Em pesquisa científica, onde fidelidade ao dado bruto é essencial, essa opinião embutida é fonte de erro.
+
+::: {.callout-warning}
+## Outras autoconversões silenciosas
+Além de gene names, Excel comumente corrompe:
+
+- **CEP brasileiro** com zero à esquerda (`02115-000`) — o zero some, vira `2115-000`.
+- **CPF / CNPJ** longos — convertidos para notação científica.
+- **Códigos de identificação alfanuméricos** que parecem data ou número — interpretação imprevisível.
+- **Datas em formato regional misturado** — DD/MM/YYYY brasileiro vs MM/DD/YYYY americano viram silenciosamente uma na outra dependendo do locale do sistema.
+- **Trailing zeros em números decimais** (`1,10` vira `1,1`).
+
+A defesa: ao importar CSV no Excel, **nunca use "Abrir"** (que aplica autoconversão). Use **"Importar Dados"** ou **"Get Data → From Text/CSV"**, escolhendo *texto* como tipo das colunas problemáticas. Em fluxo automatizado (R, Python), prefira ler o CSV diretamente sem passar por Excel.
+:::
+
+## Trabalhando com Excel em R e Python
+
+Para o trabalho de análise propriamente dito, **leia o `.xlsx` programaticamente** em vez de abri-lo no Excel. Isso preserva tipos de dado, evita autoconversões, e mantém o pipeline reprodutível.
+
+Em R:
+
+```r
+library(readxl)
+
+# Lê uma planilha específica de um arquivo Excel
+dados <- read_excel("dados/coorte.xlsx", sheet = "Pacientes")
+
+# Lista todas as planilhas (sheets) do arquivo
+excel_sheets("dados/coorte.xlsx")
+```
+
+Em Python:
+
+```python
+import pandas as pd
+
+# Lê uma planilha específica
+dados = pd.read_excel("dados/coorte.xlsx", sheet_name="Pacientes")
+
+# Lê todas as planilhas como dicionário
+todas = pd.read_excel("dados/coorte.xlsx", sheet_name=None)
+```
+
+Para **escrever** Excel formatado a partir de R/Python (relatórios para colaboradores que esperam `.xlsx`), bibliotecas como `openxlsx2` (R) e `openpyxl` (Python) permitem controle fino — incluir múltiplas planilhas, formatação, bordas, cores, fórmulas. Útil para entregar resultado em formato familiar sem comprometer o processamento.
+
+## O fluxo recomendado para pesquisa
+
+Resumindo a conclusão prática:
+
+| Onde Excel é OK | Onde Excel é arriscado |
+|---|---|
+| Entrada manual com validação de células | Como formato de armazenamento canônico de dados de pesquisa |
+| Comunicação visual com não-técnicos | Pipeline de processamento (autoconversões corrompem) |
+| Relatórios pontuais para apresentação | Identificadores alfanuméricos sensíveis (gene names, CEP, CPF) |
+| Pequenas tabelas que cabem na cabeça | Datasets grandes (Excel trava acima de ~1M linhas) |
+
+O fluxo de pesquisa robusto típico:
+
+1. **Coleta:** Excel para entrada manual estruturada.
+2. **Conversão imediata:** exporta `.xlsx` para CSV ou Parquet, **sem reabrir no Excel**.
+3. **Análise:** todo processamento em R/Python lendo CSV/Parquet.
+4. **Comunicação:** se precisar entregar resultado em `.xlsx`, gere programaticamente com `openxlsx2`/`openpyxl` a partir do código de análise.
+
+Esse fluxo isola o Excel ao papel para o qual ele é melhor (interface humana) e protege os dados das autoconversões durante análise.
+
+## Conexão com IA
+
+Três usos onde agentes ajudam especificamente com Excel:
+
+**1. Inspecionar planilhas complexas.** *"Cole o resultado de `excel_sheets()` desse arquivo. Há 12 sheets. Qual provavelmente contém os dados de pacientes?"* O agente identifica padrões nos nomes e propõe a sheet certa, evitando que você abra cada uma manualmente.
+
+**2. Diagnosticar autoconversões.** Quando uma análise produz resultado estranho, *"essa coluna deveria ter 487 valores únicos mas tem 322 — pode ser autoconversão do Excel?"* O agente lê o `.xlsx` direto, compara com o que você esperava, identifica conversões silenciosas.
+
+**3. Gerar código de exportação `.xlsx` formatada.** *"Crie um `.xlsx` com 3 abas (resumo, dados completos, gráficos), formatação ABNT, primeira linha em negrito."* Resultado: chamadas de `openxlsx2` que você adapta. Tedioso à mão, rápido com agente.
+
+## O que vem a seguir
+
+CSV é mínimo, Excel é estruturado mas opinativo. O próximo formato — **JSON** — ocupa um espaço diferente: tão portável quanto CSV, mas capaz de representar dados **hierárquicos** (não retangulares), o que abre uso em APIs, configurações, e metadados.
+
+→ [04 · JSON](04-json.qmd)

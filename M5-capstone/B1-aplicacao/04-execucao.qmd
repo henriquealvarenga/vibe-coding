@@ -1,0 +1,193 @@
+---
+title: "Execução com vibe coding"
+---
+
+Você tem o tema definido (capítulo 02), o planejamento documentado (capítulo 03), e o repositório com estrutura inicial. **Agora vem a parte central** — conduzir a análise propriamente dita usando vibe coding. Este capítulo descreve o ritmo de trabalho e os pontos-chave de validação que separam um Capstone bem-feito de um Capstone que parece bem-feito.
+
+Não é tutorial passo-a-passo de uma análise específica — é **descrição do workflow** que você aplica, qualquer que seja o tema escolhido.
+
+## O ritmo de trabalho
+
+A execução do Capstone se divide em três fases progressivas:
+
+| Fase | O que entra | O que sai |
+|---|---|---|
+| **1. Limpeza** | Dados brutos em `data/raw/` + descrição da pergunta | Dados limpos em `data/processed/` |
+| **2. Análise** | Dados limpos | Tabelas e figuras finais em `output/` |
+| **3. Manuscrito** | Tabelas + figuras + texto narrativo | `manuscrito.qmd` renderizado em PDF |
+
+Cada fase é um capítulo `.qmd` separado em `analysis/`, com prefixo numerado (`01-limpeza.qmd`, `02-analise.qmd`, `03-figuras.qmd`). O `manuscrito.qmd` na raiz integra resultados das três.
+
+## Fase 1: Limpeza
+
+A fase mais subestimada e a que costuma consumir mais tempo. **Pelo menos 40% do tempo do Capstone é limpeza**. Não é fracasso — é como pesquisa funciona.
+
+O fluxo recomendado para vibe coding nesta fase:
+
+**Passo 1.** Carregue dados brutos no R/Python e rode `head()` + `summary()`. Cole o output no Claude Cowork.
+
+**Passo 2.** Pergunte ao agente em PT-BR algo como:
+
+> *"Aqui está o cabeçalho e o `summary()` dos dados PNS 2019 (487.000 observações, 47 variáveis). Minha pergunta de pesquisa é estimar prevalência de HAS estágio 2 em adultos 40-64 anos. Critérios em PESQUISA.md, anexado. Crie script de limpeza em `analysis/01-limpeza.qmd` que: (a) filtra a faixa etária, (b) cria variável de desfecho `has_estagio2`, (c) recodifica região e sexo conforme dicionário, (d) remove valores implausíveis, (e) salva em `data/processed/coorte.parquet`. Comente cada passo."*
+
+**Passo 3.** Agente entrega o `.qmd` completo. **Você lê — sem rodar ainda**. Cada passo faz sentido? Os critérios batem com seu PESQUISA.md? Há algo que parece arbitrário?
+
+**Passo 4.** Roda o script. Compara resultados com o esperado:
+
+- **n inicial** bate com a documentação da PNS?
+- **n após filtro de idade** bate com a contagem manual?
+- **Distribuição de variáveis** após limpeza está coerente?
+
+**Passo 5.** Validações específicas: rode `summary()` no resultado final, verifique que não há NAs onde não deveria, que valores estão dentro de range esperado.
+
+**Passo 6.** Iterações se necessário. Se algo está errado, descreva especificamente — não "está errado, conserte". *"O n final foi 17.234 mas eu esperava ~21.000 baseado na PNS. Há um filtro implícito sendo aplicado?"* — agente investiga e corrige.
+
+**Passo 7.** Quando satisfeito, commit. Mensagem de commit gerada com auxílio do agente:
+
+```bash
+git diff --staged | claude "sugira mensagem de commit conforme conventional commits, em pt-br"
+```
+
+A mensagem fica algo como: `feat(limpeza): aplica critérios de inclusão e cria variáveis de desfecho`.
+
+::: {.callout-warning}
+## A regra de ouro da limpeza
+**Sempre confira `n` em cada passo de filtro.** O bug mais comum em análise epidemiológica é descartar mais (ou menos) observações que o pretendido por causa de NA não detectado, valor sentinela mal interpretado, ou comparação imprecisa. Adicione no script linhas que reportam contagem após cada filtro:
+
+```r
+cat("n após filtro de idade:", nrow(dados), "\n")
+cat("n após remoção de NAs em PA:", nrow(dados), "\n")
+```
+
+Compare com o esperado **a cada execução**. Se algum número não bate, **pare e investigue antes de seguir**. Esses minutos de paranoia são o que separa análise verificável de análise plausível-mas-errada.
+:::
+
+## Fase 2: Análise
+
+Com dados limpos em `data/processed/`, a fase de análise tipicamente é mais rápida — você sabe o que quer (está no SAP do capítulo 03), e os agentes implementam bem operações estatísticas comuns.
+
+Para cada análise pré-especificada no SAP, repete o ciclo:
+
+1. **Descrição em PT-BR** ao agente: *"Calcule prevalência de HAS estágio 2 estratificada por região e sexo, com IC 95% binomial exato. Use o pacote `Hmisc::binconf()` ou equivalente. Tabela formatada com `gtsummary` em estilo de Tabela 1 de artigo."*
+
+2. **Recebe código** + tabela renderizada.
+
+3. **Validação cruzada manual.** Pegue um grupo (ex.: mulheres da região Sul) e calcule manualmente um número específico — proporção bruta — usando uma calculadora ou planilha simples. Confira que bate. Se não bater, há erro silencioso.
+
+4. **Iteração** se necessário. Se a tabela não está como você quer (formato, nomenclatura, ordem), descreva e peça ajuste.
+
+5. **Commit** quando estável.
+
+Ordem típica de análise num Capstone epidemiológico:
+
+- Caracterização baseline (Tabela 1 — quem está na coorte).
+- Análise descritiva da pergunta principal (prevalência bruta + IC).
+- Estratificações pré-especificadas (região, sexo, idade).
+- Análise de sensibilidade (excluindo extremos, etc.).
+- Tabelas e gráficos finais.
+
+Cada um dos itens entra como uma seção do `analysis/02-analise.qmd`, ou como `.qmd` separado (`02-descritiva.qmd`, `03-prevalencia.qmd`, `04-estratificacoes.qmd`) — escolha conforme tamanho do trabalho.
+
+## Fase 3: Manuscrito
+
+Tabelas e figuras prontas. Hora de costurar tudo em texto narrativo formatado para artigo. **Aqui você usa Quarto no seu auge** — texto + chunks que carregam tabelas/figuras geradas + citações + LaTeX para fórmulas.
+
+Estrutura de `manuscrito.qmd`:
+
+````yaml
+---
+title: "Prevalência de hipertensão arterial estágio 2 em adultos brasileiros 40-64 anos: análise transversal da PNS 2019"
+author:
+  - name: Henrique Alvarenga
+    orcid: 0000-0001-2345-6789
+    affiliation: UFSJ
+abstract: |
+  **Introdução.** ...
+  **Métodos.** ...
+  **Resultados.** Prevalência bruta de XX% (IC95% YY-ZZ).
+  **Discussão.** ...
+format:
+  pdf:
+    documentclass: article
+    geometry: margin=2.5cm
+    fontsize: 11pt
+    linestretch: 1.5
+bibliography: references.bib
+csl: vancouver.csl
+---
+
+# Introdução
+
+A hipertensão arterial sistêmica (HAS) é o principal fator de risco
+cardiovascular [@whelton2018]...
+
+# Métodos
+
+## Desenho e fonte de dados
+
+Utilizamos a Pesquisa Nacional de Saúde 2019 (PNS) [@stopa2020]...
+
+```{{r}}
+#| include: false
+source("analysis/02-analise.R")
+```
+
+# Resultados
+
+A coorte final incluiu `r n_final` adultos brasileiros de 40 a 64 anos.
+
+```{{r}}
+#| label: tab-1-baseline
+#| tbl-cap: "Caracterização da amostra"
+tabela_1
+```
+
+A prevalência bruta de HAS estágio 2 foi de `r prev_geral`%
+(IC95% `r ic_low`-`r ic_high`).
+
+```{{r}}
+#| label: fig-1-prevalencia
+#| fig-cap: "Prevalência de HAS por região e sexo"
+fig_1
+```
+
+# Discussão
+
+...
+````
+
+O ponto crítico: os **números do texto vêm direto do código** (`r prev_geral`% etc.). Se os dados mudarem, o manuscrito muda automaticamente. **Sem números mágicos digitados manualmente**.
+
+Para escrita do texto narrativo (Introdução, Métodos, Discussão), o agente também ajuda — descreva o que o parágrafo precisa dizer, ele entrega draft, você revisa, refina.
+
+::: {.callout-tip}
+## Use IA com cuidado para Discussão
+Introdução e Métodos são razoavelmente "objetivos" — o agente pode escrever decentemente. **Discussão exige interpretação clínica e contextualização** que o agente faz de modo genérico. Para Discussão sólida, use o agente como **partida** mas reescreva com sua interpretação humana — comparando com literatura específica que você conhece, reconhecendo limitações específicas do seu desenho, propondo hipóteses informadas. Discussão genérica é o sintoma mais óbvio de "trabalho que parece feito por IA sem revisão humana cuidadosa".
+:::
+
+## Documentação contínua
+
+Ao longo das três fases, mantenha:
+
+**Decisões registradas.** Toda vez que tomar decisão metodológica não-óbvia (escolher um teste em vez de outro, definir um corte específico, excluir uma observação atípica), registre num arquivo `DECISIONS.md` com data, decisão, justificativa. Daqui a um ano, isso vai ser ouro.
+
+**Commits frequentes.** Mensagem descritiva, em ritmo de 1-2 por hora de trabalho. Não acumule mudanças num "commit gigante" no fim do dia. Histórico granular permite voltar a estados anteriores quando algo der errado.
+
+**Atualizações no `_freeze`.** Para análises pesadas, configure o Quarto com `freeze: auto` para não re-rodar tudo a cada render — vimos em M3-B3-13.
+
+## Sinais de que algo vai mal
+
+Aprende a reconhecer:
+
+- **"O p-valor não está como eu esperava."** Não rode mais 3 testes diferentes esperando achar algo. **Volte ao SAP**. O resultado é o que é.
+- **"Estou fazendo análise não pré-especificada."** Pode ser legítimo (descobertas raras valem reporte), mas marque explicitamente como "análise post-hoc, não pré-especificada".
+- **"O agente sugere análise X, mas não tenho certeza se é apropriada."** Pause. Consulte literatura ou estatístico. Não delegue decisão metodológica.
+- **"Estou perto da minha hipótese desejada."** Sinal vermelho. Reflita — você está sendo levado pelo viés de confirmação?
+
+A honestidade científica é responsabilidade humana. **A IA não corrige esse tipo de problema** — pelo contrário, pode amplificar se você pedir.
+
+## O que vem a seguir
+
+Análise concluída, manuscrito drafted. Hora de **publicar reproduzivelmente** — empacotar tudo como compendium, subir pro GitHub Pages, depositar no Zenodo, atribuir DOI. O ciclo que vimos em M4-B2-06 (estudo de caso) aplicado ao seu projeto.
+
+→ [05 · Publicação reprodutível do projeto](05-publicacao.qmd)

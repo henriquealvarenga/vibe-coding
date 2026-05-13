@@ -1,0 +1,162 @@
+---
+title: "Anatomia de um bom prompt"
+sidebar: bloco-prompts
+---
+
+Você abre o Cowork, descreve o que quer e... a IA devolve algo que **quase** serve. Não está errado, mas falta um detalhe. Você pede de novo, ela melhora, mas troca outra coisa. Mais uma rodada, e finalmente sai. Vinte minutos para algo que poderia ter sido três. **Diferença não está no modelo — está em como você descreve.**
+
+Este capítulo é o primeiro do Bloco *Padrões de prompts* e estabelece os princípios que valem para qualquer prompt, qualquer ferramenta, qualquer tarefa. Os capítulos seguintes aplicam esses princípios a tarefas específicas (estrutura de projeto, AGENTS.md, limpeza de dados, análise estatística, visualização, escrita acadêmica, Git). Mas tudo começa com a anatomia mínima de um prompt que funciona.
+
+## Por que importa especificamente em pesquisa
+
+Em chat conversacional cotidiano (perguntar receita, traduzir um trecho), prompt mediano basta. A IA preenche lacunas com bom senso e na pior das hipóteses você descobre o erro lendo o output.
+
+Em **pesquisa científica**, a régua é diferente:
+
+- O resultado vai entrar em manuscrito, em apresentação, em decisão clínica.
+- Erros silenciosos (n errado, teste inadequado, gráfico em escala errada) são caros.
+- Você precisa que o resultado seja **reprodutível** — ou seja, você precisa entender o que a IA fez para validá-lo.
+
+Prompts mal feitos em pesquisa não geram só ineficiência — geram **conclusões frágeis com cara de robustez**. É o oposto da ciência decente. A diferença entre prompt OK e prompt bom é o que separa "vibe coding como atalho perigoso" de "vibe coding como ferramenta científica séria".
+
+## Os quatro princípios
+
+Tudo cabe em quatro princípios. Eles aparecem em vários capítulos do curso (especialmente o cap. 14 de M3-B3 sobre análise estatística), e este capítulo os consolida como fundação do Bloco. Os capítulos seguintes deste Bloco aplicam cada princípio a tarefas específicas.
+
+### 1. Contexto
+
+A IA não tem como adivinhar o que está no seu computador, no seu projeto, na sua cabeça. **Forneça** o contexto que ela precisa.
+
+Em pesquisa, o contexto típico inclui:
+
+- **Estrutura dos dados.** O que é uma linha? Quantas colunas? Quais variáveis-chave? `head()` e `summary()` colados no chat resolvem isso em 10 segundos.
+- **Pergunta de pesquisa.** Qual hipótese, qual desfecho, qual desenho de estudo (coorte, RCT, transversal, etc.).
+- **Convenções do projeto.** Linguagem (R/Python), bibliotecas preferidas (`tidyverse`, `pandas`), critérios estatísticos (alpha, IC), formato de saída.
+- **Restrições.** Dados sensíveis (PHI, LGPD), tempo disponível, hardware (memória, GPU).
+
+Prompt **sem** contexto:
+
+> "Faz uma análise dos meus dados."
+
+Prompt **com** contexto:
+
+> "Tenho um data frame `coorte.parquet` com 487 pacientes, 18-89 anos, randomizados em dois grupos (`grupo`: 'intervencao' n=243, 'controle' n=244). Variáveis: `pas_baseline` (mmHg, integer), `pas_12sem` (mmHg, mesma escala), `idade`, `sexo`. Quero comparar a redução de PA sistólica entre grupos. Use R com tidyverse."
+
+A diferença não é "ser educado" — é **dar à IA o que ela precisa para acertar de primeira**. Sem contexto, ela vai chutar (provavelmente errado). Com contexto, ela entrega.
+
+::: {.callout-tip}
+## Atalho prático: cole `head()` e `summary()`
+Em vez de descrever as variáveis manualmente, rode no console:
+
+``` r
+head(dados, 10)
+summary(dados)
+```
+
+Copie o output e cole no chat. O agente entende essa estrutura nativamente — infere tipos, distribuições, faixas, presença de NA. Economiza minutos de descrição manual e elimina erros de "esqueci de mencionar a variável X".
+:::
+
+### 2. Especificidade
+
+Contexto responde "o que tem". Especificidade responde "o que quero". A IA não decide o que é resultado bom — você decide. Especifique:
+
+- **Formato de saída.** "Tabela formatada com `gtsummary` em estilo de Tabela 1 de artigo." Ou: "Gráfico ggplot2, eixo Y de 0 a 200, paleta `viridis`, 300dpi salvo em `output/figuras/`."
+- **Critérios técnicos.** "Use teste t de Welch (não assume variância igual)." Ou: "Modelo de Cox para sobrevida, ajustado por idade e sexo."
+- **Apresentação.** "Comente cada bloco de código." "Use pipe `|>` em vez de funções aninhadas." "Salve o resultado intermediário em `data/processed/`."
+
+A regra mental: **a IA é melhor implementando do que decidindo**. Você decide o método; ela escreve o código. Não delegue decisão metodológica — delegue execução.
+
+Prompt **vago**:
+
+> "Compara os dois grupos."
+
+Prompt **específico**:
+
+> "Compara `pas_12sem` entre os grupos com teste t de Welch (variâncias desiguais). Apresenta como tabela `gtsummary::tbl_summary` com média (DP) por grupo, IC 95% da diferença, p-valor. Adicione 2 casas decimais para PA, 3 para p-valor."
+
+### 3. Validação
+
+Receber código que roda **não é o mesmo** que receber código correto. Isso é talvez a coisa mais subestimada por quem está começando. *"Rodou sem erro"* é necessário mas insuficiente.
+
+Antes de aceitar um output da IA, três checagens valem ouro:
+
+- **`n` bate.** O número de observações usadas no resultado é o esperado? Se você tem 487 pacientes mas o output diz "n=423", investigue por quê (NA descartado? filtro inesperado?).
+- **Estatísticas básicas batem.** Médias, medianas, contagens — comparáveis com `summary()` que você viu antes? Discrepâncias grandes indicam bug.
+- **Direção do efeito faz sentido.** Se a intervenção *deveria* reduzir PA mas o resultado mostra aumento, é achado raro (pouco provável) ou bug (mais comum). Investigue.
+
+E, crucialmente: **peça à própria IA para validar**. Você pode pedir explicitamente:
+
+> "Antes de me mandar o resultado, valide: confirme que n_total bate com n_intervencao + n_controle, que não há NA inesperado em variáveis-chave, e que a direção do efeito é coerente com a hipótese (espera-se redução de PA no grupo intervenção)."
+
+A IA roda essas verificações como código, e te entrega resultado já checado. Mas atenção: ela **às vezes inventa que validou** sem ter validado. **A confirmação manual final é sua**.
+
+### 4. Iteração com critério
+
+Quando algo não está certo, descreva **especificamente** o que está errado. Não "está errado, conserte" — isso convida o agente a fazer mudanças aleatórias.
+
+**Iteração ineficiente:**
+
+> "Não funciona."
+
+**Iteração útil:**
+
+> "O código rodou mas o n final foi 423 em vez dos 487 esperados. Investigue: há algum filtro implícito ou casos com NA sendo descartados sem aviso? Se encontrar, corrija e confirme que n volta a 487."
+
+A segunda iteração **dá ao agente o material para corrigir**: o que está errado, em que direção, com que evidência esperada. Sem isso, o agente faz mudanças que podem ou não ajudar.
+
+Outra regra de iteração: **um problema por vez**. Se você diz *"o n está errado E o teste é inadequado E a tabela está feia"*, o agente tenta resolver tudo de uma vez e provavelmente piora dois enquanto conserta um. Prefira: corrige o n primeiro, valida; depois discute o teste; depois ajusta a tabela.
+
+## Anatomia visualizada
+
+Pondo os quatro princípios juntos, um prompt ideal de pesquisa tem essa estrutura:
+
+```
+[CONTEXTO]
+  - Sobre os dados: estrutura, n, variáveis-chave (com head/summary)
+  - Sobre a pergunta: hipótese, desfecho, desenho do estudo
+  - Sobre o ambiente: linguagem, bibliotecas, convenções (alpha, IC)
+
+[ESPECIFICIDADE]
+  - O que quero como saída (tabela formatada? gráfico? número?)
+  - Que método/teste/operação aplicar
+  - Em que formato e onde salvar
+
+[VALIDAÇÃO]
+  - Que checagens quero que a IA faça antes de entregar
+  - Que valores esperados servem como sanity check
+
+[FORMATO DE RESPOSTA — opcional]
+  - Como quero que a IA me apresente o resultado
+  - Pedir comentários no código? Explicação separada?
+```
+
+Não é receita rígida — você adapta conforme a complexidade do pedido. Para pedido simples (gerar lista, traduzir trecho), o contexto é mínimo e os outros três quase não precisam aparecer. Para pedido sério de análise (que vai virar tabela do artigo), os quatro elementos importam.
+
+## Anti-padrões a evitar
+
+Padrões que pegam pesquisador novato:
+
+**1. "Faz X" sem contexto.** Já cobri acima. Sem contexto, a IA vai inventar premissas — frequentemente erradas.
+
+**2. Pedir várias coisas no mesmo prompt.** *"Faz a tabela 1, depois calcula a regressão, depois gera as figuras 2 e 3."* — o agente entrega tudo, mas se algo está errado no caminho, é difícil isolar onde. **Prefira um pedido por vez** com validação entre eles.
+
+**3. Aceitar output sem ler.** Você pediu, ele entregou, você copiou para o `.qmd`, renderizou, está bonito. **Você não validou nada**. Daqui a três meses, alguém pergunta sobre um número específico — você não sabe responder porque não sabe como o código chegou nele.
+
+**4. Iterar com vagueza.** *"Algo está errado, faz de novo."* — a IA tenta adivinhar o que mudar. Frequentemente piora.
+
+**5. Esquecer que dados sensíveis viajam.** Quando você cola CSV no chat, esses dados vão para o servidor da IA. Em pesquisa em saúde, isso pode violar LGPD. Anonimize antes (capítulo M1-B1-06 cobre LGPD em prompts).
+
+::: {.callout-warning}
+## A regra de ouro: a IA não é responsável metodologicamente
+A IA implementa o que você pede. Se você pede análise estatística inadequada para o desenho do estudo (ex.: ANOVA quando deveria ser modelo de medidas repetidas), ela vai implementar a análise inadequada **sem questionar**.
+
+Decisão metodológica é responsabilidade humana. Em caso de dúvida, consulte literatura ou estatístico — não delegue à IA. Esse princípio aparece em todos os capítulos seguintes deste Bloco e fica explicitado novamente no Bloco *Limites e armadilhas* (M1-B4).
+:::
+
+## O que vem a seguir
+
+Você tem os quatro princípios. Os próximos sete capítulos aplicam-nos a tarefas específicas que aparecem em qualquer projeto de pesquisa: criação de estrutura de pastas, AGENTS.md, limpeza de dados, análise estatística, visualização, escrita acadêmica, e Git. Cada um traz prompts-modelo prontos para você adaptar ao seu projeto.
+
+Começamos pelo mais fundamental: **gerar a estrutura inicial do projeto** — pastas, `.gitignore`, README, ambiente isolado — com um único prompt bem desenhado.
+
+→ [02 · Prompt para estrutura inicial de projeto](02-prompt-estrutura-projeto.qmd)

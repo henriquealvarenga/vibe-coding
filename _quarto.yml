@@ -1,0 +1,275 @@
+project:
+  type: website
+  output-dir: docs
+  render:
+    - "**/*.qmd"
+    - "!planejamento/**"
+    - "!OLD_FILES/**"
+  resources:
+    - "references/references.bib"
+    - "references/csl_styles/**"
+    - "!references/PDFs/**"
+
+website:
+  title: "Vibe Coding na Pesquisa Científica"
+  site-url: https://henriquealvarenga.com/vibe-coding
+  favicon: images/house-fill.svg
+  description: |
+    Curso de Vibe Coding aplicado à pesquisa médica: agentes de IA,
+    análise de dados em R e Python, escrita técnica em Quarto e
+    publicação científica reprodutível.
+  open-graph: true
+  twitter-card: true
+
+  search:
+    location: navbar
+    type: overlay
+
+  navbar:
+    background: dark
+    logo: images/house-fill.svg
+    logo-alt: "Início"
+    left:
+      - text: "Prefácio"
+        href: prefacio.qmd
+      - text: "Módulos"
+        href: index.qmd
+      - text: "Créditos"
+        href: creditos.qmd
+    right:
+      - icon: projector
+        text: "Keynote"
+        href: apresentacao/aula-vibe-coding.qmd
+        target: "_blank"
+      - icon: search
+
+  page-footer:
+    background: dark
+    border: false
+    left: |
+      Desenvolvido por [Henrique Alvarenga da Silva](https://henriquealvarenga.com) © 2026
+    right: |
+      [Créditos](/creditos.qmd)
+
+  sidebar:
+    - id: bloco-instalacoes
+      title: "Módulo 0 · Instalações"
+      style: floating
+      collapse-level: 2
+      contents:
+        - M0-setup/B1-instalacoes/01-r-python.qmd
+        - M0-setup/B1-instalacoes/02-ides.qmd
+        - M0-setup/B1-instalacoes/03-quarto.qmd
+        - M0-setup/B1-instalacoes/04-zotero.qmd
+        - M0-setup/B1-instalacoes/05-agentes.qmd
+        - M0-setup/B1-instalacoes/06-git.qmd
+        - text: "---"
+        - text: "Próximo bloco: Conceitos Fundamentais →"
+          href: M1-ia-pesquisa/B1-conceitos/01-ia-generativa.qmd
+    - id: bloco-m0-apendice
+      title: "Módulo 0 · Apêndice"
+      style: floating
+      collapse-level: 2
+      contents:
+        - M0-setup/B2-apendice/01-nodejs-npm.qmd
+    - id: bloco-conceitos
+      title: "Módulo 1 · Conceitos Fundamentais"
+      style: floating
+      collapse-level: 2
+      contents:
+        - M1-ia-pesquisa/B1-conceitos/01-ia-generativa.qmd
+        - M1-ia-pesquisa/B1-conceitos/02-tokens.qmd
+        - M1-ia-pesquisa/B1-conceitos/03-api.qmd
+        - M1-ia-pesquisa/B1-conceitos/04-prompts.qmd
+        - M1-ia-pesquisa/B1-conceitos/05-citar-ia.qmd
+        - M1-ia-pesquisa/B1-conceitos/06-lgpd.qmd
+        - text: "---"
+        - text: "Próximo bloco: Agentes de IA →"
+          href: M1-ia-pesquisa/B2-agentes/01-chatbot-agente.qmd
+    - id: bloco-agentes
+      title: "Módulo 1 · Agentes de IA"
+      style: floating
+      collapse-level: 2
+      contents:
+        - M1-ia-pesquisa/B2-agentes/01-chatbot-agente.qmd
+        - M1-ia-pesquisa/B2-agentes/02-claude.qmd
+        - M1-ia-pesquisa/B2-agentes/03-codex.qmd
+        - M1-ia-pesquisa/B2-agentes/04-gemini.qmd
+        - M1-ia-pesquisa/B2-agentes/05-arquivo-agents.qmd
+        - text: "---"
+        - text: "Próximo bloco: Padrões de prompts →"
+          href: M1-ia-pesquisa/B3-prompts/01-anatomia-prompt.qmd
+    - id: bloco-prompts
+      title: "Módulo 1 · Padrões de prompts"
+      style: floating
+      collapse-level: 2
+      contents:
+        - M1-ia-pesquisa/B3-prompts/01-anatomia-prompt.qmd
+        - M1-ia-pesquisa/B3-prompts/02-prompt-estrutura-projeto.qmd
+        - M1-ia-pesquisa/B3-prompts/02b-prompt-estrutura-artigo.qmd
+        - M1-ia-pesquisa/B3-prompts/03-prompt-agents-md.qmd
+        - M1-ia-pesquisa/B3-prompts/04-prompt-limpeza-dados.qmd
+        - M1-ia-pesquisa/B3-prompts/05-prompt-analise-estatistica.qmd
+        - M1-ia-pesquisa/B3-prompts/06-prompt-visualizacao.qmd
+        - M1-ia-pesquisa/B3-prompts/07-prompt-escrita-academica.qmd
+        - M1-ia-pesquisa/B3-prompts/08-prompt-git-debug.qmd
+        - text: "---"
+        - text: "Próximo bloco: Limites e armadilhas →"
+          href: M1-ia-pesquisa/B4-limites/01-quando-ia-falha.qmd
+    - id: bloco-limites
+      title: "Módulo 1 · Limites e armadilhas"
+      style: floating
+      collapse-level: 2
+      contents:
+        - M1-ia-pesquisa/B4-limites/01-quando-ia-falha.qmd
+        - M1-ia-pesquisa/B4-limites/02-validacao-responsabilidade.qmd
+        - M1-ia-pesquisa/B4-limites/03-etica-regulacao.qmd
+        - text: "---"
+        - text: "Próximo bloco: Terminal →"
+          href: M2-fundamentos-tecnicos/B1-terminal/01-historia-e-conceitos.qmd
+    - id: bloco-terminal
+      title: "Módulo 2 · Terminal"
+      style: floating
+      collapse-level: 2
+      contents:
+        - M2-fundamentos-tecnicos/B1-terminal/01-historia-e-conceitos.qmd
+        - M2-fundamentos-tecnicos/B1-terminal/02-shells.qmd
+        - M2-fundamentos-tecnicos/B1-terminal/03-abrindo-terminal.qmd
+        - M2-fundamentos-tecnicos/B1-terminal/04-anatomia-comando.qmd
+        - M2-fundamentos-tecnicos/B1-terminal/05-navegacao.qmd
+        - M2-fundamentos-tecnicos/B1-terminal/06-caminhos.qmd
+        - M2-fundamentos-tecnicos/B1-terminal/07-manipulacao-arquivos.qmd
+        - M2-fundamentos-tecnicos/B1-terminal/08-visualizacao-busca.qmd
+        - M2-fundamentos-tecnicos/B1-terminal/09-atalhos-pratica.qmd
+        - text: "---"
+        - text: "Próximo bloco: Ambientes de trabalho →"
+          href: M2-fundamentos-tecnicos/B2-ambientes/01-introducao.qmd
+    - id: bloco-ambientes
+      title: "Módulo 2 · Ambientes de trabalho"
+      style: floating
+      collapse-level: 2
+      contents:
+        - M2-fundamentos-tecnicos/B2-ambientes/01-introducao.qmd
+        - M2-fundamentos-tecnicos/B2-ambientes/02-positron.qmd
+        - M2-fundamentos-tecnicos/B2-ambientes/03-rstudio.qmd
+        - M2-fundamentos-tecnicos/B2-ambientes/04-vscode.qmd
+        - text: "---"
+        - text: "Próximo bloco: Convenções técnicas →"
+          href: M2-fundamentos-tecnicos/B3-convencoes/01-introducao.qmd
+    - id: bloco-convencoes
+      title: "Módulo 2 · Convenções técnicas"
+      style: floating
+      collapse-level: 2
+      contents:
+        - M2-fundamentos-tecnicos/B3-convencoes/01-introducao.qmd
+        - M2-fundamentos-tecnicos/B3-convencoes/02-nomeacao-extensoes.qmd
+        - M2-fundamentos-tecnicos/B3-convencoes/03-comentarios.qmd
+        - M2-fundamentos-tecnicos/B3-convencoes/04-simbolos-operadores.qmd
+        - M2-fundamentos-tecnicos/B3-convencoes/05-indentacao.qmd
+        - M2-fundamentos-tecnicos/B3-convencoes/06-arquivos-invisiveis.qmd
+        - M2-fundamentos-tecnicos/B3-convencoes/07-yaml.qmd
+        - M2-fundamentos-tecnicos/B3-convencoes/08-versao-semantica.qmd
+        - M2-fundamentos-tecnicos/B3-convencoes/09-estrutura-projeto.qmd
+        - M2-fundamentos-tecnicos/B3-convencoes/10-encoding.qmd
+        - M2-fundamentos-tecnicos/B3-convencoes/11-mensagens-erro.qmd
+        - M2-fundamentos-tecnicos/B3-convencoes/12-interfaces-cli-gui-tui.qmd
+        - text: "---"
+        - text: "Próximo bloco: Markdown, Quarto e Escrita Técnica →"
+          href: M3-analise/B1-markdown/01-markdown.qmd
+    - id: bloco-markdown
+      title: "Módulo 3 · Markdown, Quarto e Escrita Técnica"
+      style: floating
+      collapse-level: 2
+      contents:
+        - M3-analise/B1-markdown/01-markdown.qmd
+        - M3-analise/B1-markdown/02-quarto.qmd
+        - M3-analise/B1-markdown/03-citacao.qmd
+        - M3-analise/B1-markdown/04-latex.qmd
+        - text: "---"
+        - text: "Próximo bloco: Dados →"
+          href: M3-analise/B2-dados/01-formatos.qmd
+    - id: bloco-dados
+      title: "Módulo 3 · Dados"
+      style: floating
+      collapse-level: 2
+      contents:
+        - M3-analise/B2-dados/01-formatos.qmd
+        - M3-analise/B2-dados/02-csv-tsv.qmd
+        - M3-analise/B2-dados/03-excel.qmd
+        - M3-analise/B2-dados/04-json.qmd
+        - M3-analise/B2-dados/05-parquet.qmd
+        - M3-analise/B2-dados/06-sqlite.qmd
+        - M3-analise/B2-dados/07-tidy-data.qmd
+        - M3-analise/B2-dados/08-organizacao-arquivos.qmd
+        - text: "---"
+        - text: "Próximo bloco: Python e R →"
+          href: M3-analise/B3-linguagens/01-python-e-r.qmd
+    - id: bloco-linguagens
+      title: "Módulo 3 · Python e R"
+      style: floating
+      collapse-level: 2
+      contents:
+        - M3-analise/B3-linguagens/01-python-e-r.qmd
+        - M3-analise/B3-linguagens/02-r.qmd
+        - M3-analise/B3-linguagens/03-python.qmd
+        - M3-analise/B3-linguagens/04-instalacao-ambientes.qmd
+        - M3-analise/B3-linguagens/13-documentacao-reproduzivel.qmd
+        - M3-analise/B3-linguagens/14-prompts-analise.qmd
+        - text: "---"
+        - text: "Próximo bloco: Git, GitHub e GitHub Pages →"
+          href: M4-publicacao/B1-git/01-versionamento.qmd
+    - id: bloco-git
+      title: "Módulo 4 · Git, GitHub e GitHub Pages"
+      style: floating
+      collapse-level: 2
+      contents:
+        - M4-publicacao/B1-git/01-versionamento.qmd
+        - M4-publicacao/B1-git/02-conceitos-git.qmd
+        - M4-publicacao/B1-git/03-github.qmd
+        - M4-publicacao/B1-git/04-git-ia.qmd
+        - M4-publicacao/B1-git/05-github-pages.qmd
+        - M4-publicacao/B1-git/06-quarto-github-pages.qmd
+        - text: "---"
+        - text: "Próximo bloco: Reprodutibilidade →"
+          href: M4-publicacao/B2-reprodutibilidade/01-fair.qmd
+    - id: bloco-reprodutibilidade
+      title: "Módulo 4 · Reprodutibilidade"
+      style: floating
+      collapse-level: 2
+      contents:
+        - M4-publicacao/B2-reprodutibilidade/01-fair.qmd
+        - M4-publicacao/B2-reprodutibilidade/02-ambientes.qmd
+        - M4-publicacao/B2-reprodutibilidade/03-quarto-artefato.qmd
+        - M4-publicacao/B2-reprodutibilidade/04-zenodo.qmd
+        - M4-publicacao/B2-reprodutibilidade/05-doi.qmd
+        - M4-publicacao/B2-reprodutibilidade/06-estudo-caso.qmd
+        - text: "---"
+        - text: "Próximo bloco: Aplicação na docência →"
+          href: M5-capstone/B1-aplicacao/01-apresentacao.qmd
+    - id: bloco-aplicacao
+      title: "Módulo 5 · Aplicação na docência"
+      style: floating
+      collapse-level: 2
+      contents:
+        - M5-capstone/B1-aplicacao/01-apresentacao.qmd
+        - M5-capstone/B1-aplicacao/02-tema-dataset.qmd
+        - M5-capstone/B1-aplicacao/03-planejamento.qmd
+        - M5-capstone/B1-aplicacao/04-execucao.qmd
+        - M5-capstone/B1-aplicacao/05-publicacao.qmd
+        - M5-capstone/B1-aplicacao/06-retrospectiva.qmd
+
+format:
+  html:
+    theme: [slate, styles.scss]
+    toc: true
+    toc-title: "Nesta página"
+    toc-depth: 3
+    code-copy: true
+    smooth-scroll: true
+    link-external-icon: true
+    include-in-header: _head.html
+
+bibliography: references/references.bib
+csl: references/csl_styles/ABNT.csl
+
+lang: pt-BR

@@ -1,0 +1,223 @@
+---
+title: "YAML em todo lugar"
+---
+
+Você já encontrou YAML mais vezes neste curso do que percebeu. O cabeçalho de cada `.qmd` (entre as duas linhas `---`) é YAML. O `_quarto.yml` que configura o site é YAML. O `_variables.yml` que guarda parâmetros do projeto é YAML. Workflows do GitHub Actions são YAML. Configurações de Docker, Kubernetes, Ansible, Hugo, Jekyll — tudo YAML.
+
+É a *lingua franca* moderna de configuração — e tem armadilhas próprias que vale conhecer antes de tropeçar.
+
+## O que é YAML — e por que esse nome estranho
+
+**YAML** começou a vida em 2001 com uma sigla típica dos anos 1990–2000: **"Yet Another Markup Language"** — *Mais Uma Linguagem de Marcação*. Era a era das siglas auto-irônicas e recursivas: GNU se gabava de ser "GNU's Not Unix"; PHP virou "PHP: Hypertext Preprocessor"; WINE adotou "Wine Is Not an Emulator"; pip ficou "Pip Installs Packages". Praticamente todo projeto novo tinha uma piada interna no próprio nome.
+
+Pouco tempo depois, os criadores — **Clark Evans**, **Ingy döt Net** e **Oren Ben-Kiki** — perceberam que o nome dava a impressão errada. **YAML não é uma linguagem de marcação no sentido técnico.** Linguagens de marcação (XML, HTML, LaTeX) anotam um documento de texto com etiquetas que descrevem partes dele:
+
+``` html
+<p>O paciente tem <strong>67 anos</strong>.</p>
+```
+
+YAML faz outra coisa: descreve **estruturas de dados** — chaves, valores, listas, hierarquia — sem ter texto-base para marcar. Para sublinhar a distinção (e fazer outra piada), eles renomearam o projeto para **"YAML Ain't Markup Language"** — *YAML Não É Linguagem de Marcação* — mantendo as mesmas quatro letras, mas agora num acrônimo recursivo (a primeira letra da sigla referencia a própria sigla).
+
+A mudança parece pedante, mas tem peso prático: por anos depois, ainda apareciam pessoas tentando usar YAML para marcar texto (caso para o qual ele é péssimo) ou Markdown/HTML para serializar dados (caso para o qual *eles* são péssimos). O nome recauchutado ajudou a deixar o escopo claro.
+
+::: {.callout-note}
+## "Ingy döt Net" não é apelido
+É o nome legal de um dos criadores — originalmente Brian Ingerson, programador conhecido na comunidade Perl/CPAN. Trocou de nome formalmente, e mantém a grafia com `ö` e a separação por espaço em todas as suas publicações. Em referências bibliográficas o nome entra como *{Ingy döt Net}* (entre chaves, para o BibTeX não confundir o "Net" com sobrenome).
+:::
+
+O propósito original do projeto era oferecer uma alternativa **mais legível** ao XML para serializar dados editados a mão por humanos:
+
+``` xml
+<!-- XML -->
+<paciente>
+  <id>42</id>
+  <idade>67</idade>
+  <ativo>true</ativo>
+</paciente>
+```
+
+``` yaml
+# YAML
+paciente:
+  id: 42
+  idade: 67
+  ativo: true
+```
+
+A versão YAML é mais curta, sem repetição de tags, e legível por qualquer pessoa que nunca viu YAML antes. É essa legibilidade o motivo de ele ter virado padrão para arquivos editados a mão por humanos.
+
+A especificação atual é a **YAML 1.2.2**, publicada em outubro de 2021 [@benkiki2021yaml].
+
+## Sintaxe básica
+
+Três construções cobrem 90% do que você vai escrever:
+
+**1. Chave: valor**
+
+``` yaml
+title: "Vibe Coding na Pesquisa Científica"
+lang: pt-BR
+toc-depth: 3
+```
+
+Os dois-pontos separam a chave do valor; sempre seguidos por **um espaço** antes do valor.
+
+**2. Listas com hífen**
+
+``` yaml
+contents:
+  - introducao.qmd
+  - capitulo-01.qmd
+  - capitulo-02.qmd
+```
+
+Cada item começa com `- ` (hífen + espaço) e fica na mesma indentação dos demais.
+
+**3. Hierarquia por indentação**
+
+``` yaml
+website:
+  title: "Meu site"
+  navbar:
+    background: dark
+    left:
+      - text: "Sobre"
+        href: about.qmd
+      - text: "Blog"
+        href: blog.qmd
+```
+
+A indentação determina **quem está dentro de quê** — `title` e `navbar` estão dentro de `website`; `background` e `left` estão dentro de `navbar`. Ver capítulo 05 deste bloco sobre indentação (em YAML, **só espaços, nunca tabs**).
+
+## Onde YAML aparece no fluxo do curso
+
+| Lugar | O que configura | Exemplo |
+|---|---|---|
+| Cabeçalho do `.qmd` (entre `---`) | Metadados do capítulo (título, autor, opções de render) | `title: "Indentação"` |
+| `_quarto.yml` | Site inteiro: tema, navbar, sidebars, formato de output | navbar, sidebar, theme |
+| `_variables.yml` | Variáveis reusáveis no texto via `{{{< var nome_curso >}}}` | `nome_curso: "Vibe Coding"` |
+| `_metadata.yml` | Metadados aplicáveis a uma pasta inteira | `bibliography: refs.bib` |
+| `.github/workflows/*.yml` | GitHub Actions: o que rodar a cada *push* | `name: render-site` |
+| `config.yml` (vários frameworks) | Configuração genérica de aplicação | depende da ferramenta |
+| `_freeze/*.yml` | Cache de execução do Quarto | gerado automaticamente |
+
+::: {.callout-note}
+## YAML, TOML, JSON: três primos
+Outros formatos de configuração que você vai encontrar:
+
+- **TOML** (Tom's Obvious Minimal Language) — usado pelo `pyproject.toml` (configuração padrão de projetos Python modernos), pelo Cargo (Rust) e pelo Hugo. Sintaxe diferente: `chave = "valor"`, seções entre `[colchetes]`. **Não é YAML**, apesar de servir ao mesmo propósito.
+- **JSON** — formato de troca de dados (APIs, configurações geradas por máquina). Mais verboso que YAML, sem comentários, mas universal e sem ambiguidades. Usado em `package.json` (Node) e em respostas de praticamente toda API.
+
+YAML é preferido onde humanos escrevem; JSON onde máquinas trocam dados; TOML onde a comunidade já padronizou (Python moderno, Rust).
+:::
+
+## As armadilhas mais comuns
+
+YAML é amigável até você cair em uma destas. Vale ler com calma:
+
+### 1. Tab quebra silenciosamente
+
+Cobrimos no [capítulo 05](05-indentacao.qmd): **YAML não aceita tabs como indentação** [@benkiki2021yaml]. Se você copiar trecho de outro lugar e ele vier com tab, parser quebra. Configure o IDE para inserir espaços.
+
+### 2. O "Norway problem"
+
+Talvez a armadilha mais famosa. Em **YAML 1.1** (e em parsers que ainda implementam 1.1, como o `PyYAML` por padrão), as palavras `yes`, `no`, `true`, `false`, `on`, `off` — em qualquer combinação de caixa — são interpretadas como **booleanos**. Por isso:
+
+``` yaml
+country_codes:
+  - BR
+  - US
+  - NO   # ⚠ interpretado como FALSE!
+```
+
+A lista vira `["BR", "US", false]`. O nome "Norway problem" pegou porque a sigla ISO da Noruega (`NO`) é a vítima clássica.
+
+A solução é colocar **aspas** sempre que o valor puder ser confundido com booleano, número ou data:
+
+``` yaml
+country_codes:
+  - "BR"
+  - "US"
+  - "NO"   # agora é a string "NO", não false
+```
+
+YAML 1.2 (2009) restringiu booleanos a apenas `true`/`false`, mas como muitos parsers seguem 1.1 por padrão, a defesa via aspas continua sendo prática recomendada.
+
+### 3. Valores com `:` precisam de aspas
+
+Como os dois-pontos são parte da sintaxe, valores que contêm `:` ficam ambíguos sem aspas:
+
+``` yaml
+horario: 14:30        # ⚠ pode virar 870 (segundos) em parsers 1.1
+horario: "14:30"      # OK — string literal
+url: https://exemplo.com   # geralmente OK, mas frágil
+url: "https://exemplo.com" # mais seguro
+```
+
+### 4. Conversão automática de tipos
+
+YAML "adivinha" o tipo do valor:
+
+``` yaml
+zip: 02115            # vira INTEIRO 2115 (perde o zero à esquerda)
+zip: "02115"          # OK — string
+versao: 1.10          # vira NÚMERO 1.1 (perde o zero final)
+versao: "1.10"        # OK — string
+data: 2026-04-30      # vira objeto DATA, não string
+data: "2026-04-30"    # OK — string
+```
+
+A regra prática: **quando em dúvida, use aspas**. Não custa nada e elimina classe inteira de bug.
+
+### 5. Identação inconsistente em listas dentro de mapas
+
+``` yaml
+website:
+  sidebar:
+  - texto: "A"     # ⚠ alguns parsers aceitam, outros não
+  - texto: "B"
+```
+
+A versão segura indenta os itens da lista:
+
+``` yaml
+website:
+  sidebar:
+    - texto: "A"
+    - texto: "B"
+```
+
+A inconsistência aqui é o tipo de coisa que funciona localmente e quebra quando a versão do parser muda.
+
+## Como validar
+
+**Positron / VS Code** mostram erros de YAML em tempo real se você instalar a extensão **YAML** (Red Hat) — o ícone de exclamação aparece na barra lateral indicando linha exata e tipo de erro.
+
+**Quarto** valida o cabeçalho YAML do `.qmd` ao renderizar — se tiver erro, exibe `ERROR: Validation of YAML metadata failed` apontando a linha.
+
+**Linha de comando**, com Python:
+
+``` bash
+python -c "import yaml; yaml.safe_load(open('arquivo.yml'))"
+```
+
+Se carregar sem erro, está sintaticamente válido (semântica é problema separado).
+
+## Conexão com IA
+
+YAML é onde agentes de IA ajudam mais do que parece. Três usos comuns:
+
+- **"Por que esse YAML não está funcionando?"** Cole o trecho, peça para encontrar o erro. O agente identifica indentação errada, aspas faltando ou booleano-armadilha em segundos.
+- **"Converta este JSON para YAML"** (ou vice-versa). Tarefa tediosa para humano, instantânea para o agente.
+- **"Adicione no `_quarto.yml` um sidebar para o Bloco X com os capítulos Y, Z, W"**. Como o `_quarto.yml` segue padrão repetitivo, agente preenche corretamente — mas **sempre revise indentação** após colar.
+
+::: {.callout-warning}
+## Cuidado com aspas adicionadas pelo agente
+Modelos de IA têm tendência a **adicionar aspas em tudo** ("para evitar problemas"). Em YAML, aspas demais não quebram nada, mas tornam o arquivo visualmente sujo. Se o agente envolver títulos, números e booleanos em aspas sem necessidade, ajuste para o estilo do resto do arquivo.
+:::
+
+## O que vem a seguir
+
+YAML resolve "como descrever a configuração". O próximo capítulo cobre o que vem **dentro** de uma configuração específica que aparece em quase todo lugar: a **versão** do software (`R 4.4.2`, `Python 3.12.5`, `quarto 1.5.57`), o que cada número significa, e por que arquivos `.lock` existem para travar essas versões.
+
+→ [08 · Versão semântica, dependências e lockfiles](08-versao-semantica.qmd)

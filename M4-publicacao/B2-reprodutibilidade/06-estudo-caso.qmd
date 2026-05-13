@@ -1,0 +1,288 @@
+---
+title: "Estudo de caso: do dado bruto ao DOI"
+---
+
+Os cinco capítulos anteriores apresentaram peças. **Este capítulo coloca todas em uso simultaneamente** — segue um projeto fictício de pesquisa em saúde, do recebimento dos dados brutos até a publicação reprodutível com DOI, e mostra exatamente onde cada conceito do Bloco entra. O objetivo é tornar concreta a coreografia que costuma parecer abstrata quando vista peça por peça.
+
+O estudo escolhido como caso é **fictício mas realista**: uma coorte retrospectiva de pacientes com hipertensão arterial em uso de antihipertensivo X, com seguimento de 24 meses, desfecho primário sendo redução de pressão arterial sistólica. O tipo de estudo que aparece em residência de medicina interna ou de cardiologia, em mestrado de saúde pública, ou em rotina de hospital universitário. Substitua os detalhes pelo seu próprio projeto enquanto lê.
+
+## Cenário
+
+Você é pesquisadora em hospital universitário. Conduziu uma coorte retrospectiva: 487 pacientes, hipertensão arterial estágio 2, em uso de antihipertensivo X, com medidas de pressão arterial em três momentos (baseline, 12 semanas, 24 meses) e dados clínicos completos. Aprovação ética obtida. Análise concluída. Resultado positivo: redução média de PA sistólica de 14 mmHg em 24 meses.
+
+Você quer **publicar artigo + compêndio reprodutível**. Vamos ao fluxo.
+
+## Etapa 1: Configuração inicial do projeto
+
+**Capítulos relevantes: M2-B3-09 (estrutura de projeto), M3-B2-08 (organização de arquivos), M3-B3-04 (ambientes).**
+
+Cria a estrutura no terminal:
+
+``` bash
+mkdir coorte-antihipertensivo-2026
+cd coorte-antihipertensivo-2026
+
+mkdir -p data/raw data/processed analysis output figures tables R
+touch README.md .gitignore CITATION.cff LICENSE
+echo "data/raw/" >> .gitignore
+echo "data/processed/" >> .gitignore
+echo "_freeze/" >> .gitignore
+```
+
+Inicializa Git e ambiente R:
+
+``` bash
+git init
+git branch -M main
+
+# No console R:
+renv::init()
+```
+
+Em poucos minutos, esqueleto pronto: estrutura clara, dados sensíveis isolados em `data/raw/` (gitignored — não vai pro GitHub), ambiente R isolado via `renv`.
+
+## Etapa 2: Recebimento e tratamento dos dados
+
+**Capítulos relevantes: M3-B2-02 (CSV/TSV), M3-B2-08 (raw vs processed), M1-B1-06 (LGPD), M3-B2-07 (tidy data).**
+
+Recebe `extracao-2026-05-04.xlsx` do colega que extraiu do prontuário eletrônico. Move para `data/raw/`, nunca mais toca.
+
+Cria `analysis/01-limpeza.qmd` que lê do `data/raw/`, aplica:
+
+- Anonimização (remove nome, prontuário, CPF — substitui por ID sequencial).
+- Conversão de tipos (datas como Date, valores numéricos como numeric, fatores corretos).
+- Recodificação (sexo F/M, comorbidades em colunas binárias).
+- Tidy data (formato long para medidas repetidas de PA).
+- Salva em `data/processed/coorte.parquet`.
+
+Inicia commits em ritmo regular:
+
+``` bash
+git add analysis/01-limpeza.qmd renv.lock R/
+git commit -m "feat(limpeza): implementa pipeline de limpeza com anonimização"
+```
+
+## Etapa 3: Análise estatística com vibe coding
+
+**Capítulos relevantes: M3-B3-14 (prompts para análise), M1-B2-05 (AGENTS.md).**
+
+Você abre o **Claude Cowork** no Positron com o projeto carregado. Cria `AGENTS.md` na raiz definindo convenções (linguagem R, estilo tidyverse, alpha=0.05, ajuste por idade/sexo, sempre `set.seed(12345)`).
+
+Pede ao agente em PT-BR:
+
+> *"Tenho `data/processed/coorte.parquet` com 487 pacientes (`id`, `sexo`, `idade`, `pas_baseline`, `pas_12sem`, `pas_24m`). Quero (1) caracterização baseline em formato Tabela 1 com gtsummary, (2) modelo linear misto comparando trajetórias de PA com tempo como medida repetida, ajustando por idade e sexo, (3) gráfico de evolução de PA com IC 95% por grupo etário usando ggplot2."*
+
+O agente entrega `analysis/02-modelagem.qmd` com tudo. Você revisa, valida (`n` correto, médias plausíveis, direção do efeito clinicamente esperada), aceita.
+
+Commit:
+
+``` bash
+git add analysis/02-modelagem.qmd
+git commit -m "feat(analise): adiciona modelo linear misto + tabela 1 + figura"
+```
+
+## Etapa 4: Manuscrito reprodutível em Quarto
+
+**Capítulos relevantes: M3-B1-02 (Quarto), M3-B1-03 (citação), M3-B3-13 (engines).**
+
+Cria `manuscrito.qmd` na raiz — texto formal do artigo com chunks de código embutidos que **geram tabelas e figuras na hora**:
+
+```` markdown
+---
+title: "Efeito do antihipertensivo X em coorte retrospectiva"
+author: "Henrique Alvarenga"
+format: pdf
+bibliography: references.bib
+csl: ../../references/csl_styles/Vancouver.csl
+---
+
+# Métodos
+
+Coorte retrospectiva de 487 pacientes...
+
+```{{r}}
+#| label: tab-1-baseline
+#| tbl-cap: "Caracterização baseline da coorte"
+source("analysis/02-modelagem.R")
+tabela_1
+```
+
+# Resultados
+
+A redução média de PA sistólica em 24 meses foi de
+{{{< meta valor_reducao_pa >}}} mmHg [@silva2026], significativa
+no modelo linear misto (p < 0.001).
+
+```{{r}}
+#| label: fig-2-evolucao
+#| fig-cap: "Evolução da PA sistólica por grupo etário"
+fig_2_evolucao
+```
+````
+
+Quando renderiza, o Quarto roda os chunks, gera tabela formatada Vancouver, gráfico em PDF 300dpi, e injeta tudo no manuscrito. **Os números do texto vêm direto do código** — se os dados mudam, o manuscrito muda automaticamente.
+
+## Etapa 5: Versionamento e remote
+
+**Capítulos relevantes: M4-B1-01, 02 (Git), M4-B1-03 (GitHub), M4-B1-04 (Git e IA).**
+
+Cria repositório no GitHub:
+
+``` bash
+gh repo create coorte-antihipertensivo-2026 --private --source=. --remote=origin
+git push -u origin main
+```
+
+Note `--private`: enquanto o projeto está em desenvolvimento e há dados em arquivos locais (mesmo gitignored, vale o cuidado), o repositório fica privado. Será aberto na publicação.
+
+Daqui em diante, todo trabalho vira commit + push regular. Mensagens de commit geradas com ajuda do agente:
+
+``` bash
+git diff --staged | claude "sugira mensagem de commit conforme conventional commits"
+git commit -m "fix(modelagem): corrige IC 95% que não considerava clustering por paciente"
+git push
+```
+
+## Etapa 6: Site Quarto via GitHub Pages
+
+**Capítulos relevantes: M4-B1-05 (GitHub Pages), M4-B1-06 (Quarto + GP).**
+
+Decide publicar **versão web do compêndio** (sem dados sensíveis — só código, README e relatório).
+
+Adiciona ao `_quarto.yml`:
+
+``` yaml
+project:
+  type: website
+  output-dir: docs
+website:
+  title: "Coorte antihipertensivo X — compêndio"
+  navbar:
+    left:
+      - href: index.qmd
+      - href: analysis/01-limpeza.qmd
+      - href: analysis/02-modelagem.qmd
+      - href: manuscrito.qmd
+```
+
+Renderiza e publica:
+
+``` bash
+quarto publish gh-pages
+```
+
+Em minutos, site fica acessível em `https://usuario.github.io/coorte-antihipertensivo-2026/`. Qualquer pessoa pode navegar pelo compêndio inteiro — código de limpeza, código de modelagem, manuscrito completo.
+
+## Etapa 7: Princípios FAIR aplicados
+
+**Capítulos relevantes: M4-B2-01 (FAIR).**
+
+Antes de submeter, verifica aderência aos princípios:
+
+- **Findable.** Vai ter DOI (próxima etapa). Metadados ricos no README e CITATION.cff.
+- **Accessible.** Site público; dados sensíveis com mecanismo de acesso descrito (DUA disponível mediante pedido para a autora).
+- **Interoperable.** Dados em CSV/Parquet, diagnósticos codificados em CID-10, dosagens em mg/kg padronizadas.
+- **Reusable.** Licença MIT no código, CC BY 4.0 no compêndio, README com instruções de uso, scripts comentados.
+
+Confere a lista, ajusta o que falta. Cria `data/processed/data-dictionary.md` com descrição de cada variável.
+
+## Etapa 8: Repositório Zenodo + DOI
+
+**Capítulos relevantes: M4-B2-04 (Zenodo), M4-B2-05 (DOI).**
+
+Conecta repositório GitHub ao Zenodo (uma única vez por conta, em [zenodo.org/account/settings/github](https://zenodo.org/account/settings/github)).
+
+Adiciona `.zenodo.json` para metadados ricos:
+
+``` json
+{
+  "title": "Coorte retrospectiva: efeito do antihipertensivo X em 24 meses",
+  "creators": [
+    {"name": "Silva, Henrique", "orcid": "0000-0001-2345-6789"}
+  ],
+  "license": "MIT",
+  "keywords": ["hipertensão", "epidemiologia", "coorte retrospectiva"],
+  "communities": [{"identifier": "vibe-coding-pesquisa-medica"}]
+}
+```
+
+Atualiza `CITATION.cff` para versão final.
+
+Quando o manuscrito está aceito pela revista, **torna o repositório público** no GitHub e **cria release `v1.0.0`**:
+
+``` bash
+gh release create v1.0.0 --title "v1.0.0 - Versão final do artigo" \
+  --notes "Compêndio reprodutível do artigo Silva et al. 2026."
+```
+
+Em poucos minutos, **Zenodo cria automaticamente o registro com DOI** (algo como `10.5281/zenodo.1234567`). DOI específico para esta versão. Compêndio preservado por pelo menos 20 anos no CERN.
+
+## Etapa 9: Citação no manuscrito
+
+**Capítulos relevantes: M4-B2-05 (DOI).**
+
+No manuscrito final, na seção *Disponibilidade de dados e código*:
+
+> "Código completo da análise, dicionário de variáveis e relatório técnico estão disponíveis em compêndio reprodutível depositado no Zenodo: <https://doi.org/10.5281/zenodo.1234567>. Dados individuais de pacientes não estão disponíveis publicamente devido a considerações de privacidade conforme LGPD; mediante solicitação à autora correspondente e aprovação por comitê de ética, dados anonimizados podem ser disponibilizados."
+
+Esse parágrafo é o **fecho do ciclo**. Conecta o artigo (no servidor da revista) ao compêndio (no Zenodo, com DOI persistente). Daqui a 20 anos, qualquer pesquisador que ler o artigo conseguirá chegar ao compêndio, refazer a análise, criticar a metodologia.
+
+## Etapa 10: Após a publicação
+
+A vida do projeto continua. Conforme você revisa, melhora ou estende:
+
+- Mudanças vão pro GitHub (versão "viva" no `main` do repositório).
+- Releases novas geram novos DOIs no Zenodo (versão 1.1, 2.0, etc.).
+- Site Quarto re-renderiza automaticamente (via `quarto publish gh-pages` ou GitHub Actions).
+- Citações em outros artigos sempre apontam para o **DOI específico** da versão correspondente ao trabalho citado.
+
+A pesquisa deixa de ser **objeto fechado** (artigo publicado, fim) e vira **artefato vivo** (compêndio mantido, citável em versões específicas, evolutivo).
+
+## O que isso muda na prática
+
+Vale comparar dois mundos:
+
+**Pesquisa tradicional (sem o que esse Bloco ensina):**
+
+- Artigo publicado, código no email do orientador, dados em pasta no Dropbox que ninguém mais acessa, planilhas com formatação manual difícil de reproduzir, e versão "final" desconhecida (foi `relatorio_final_v3.docx` ou `relatorio_final_FINAL.docx`?). Daqui a 5 anos, ninguém — nem você — refaz a análise.
+
+- O leitor do artigo confia no resultado porque tem que confiar — não tem como verificar.
+
+**Pesquisa com o fluxo deste Bloco:**
+
+- Artigo publicado + compêndio Zenodo com DOI permanente. Qualquer pessoa, em qualquer lugar do mundo, em qualquer ano: clona o repositório, restaura o ambiente, roda o pipeline, **chega exatamente nos mesmos números**. A pesquisa é **auditável**.
+
+- O leitor do artigo confia porque pode verificar.
+
+Em pesquisa em saúde, onde decisões clínicas podem se basear em evidência publicada, **a diferença entre confiável-em-tese e confiável-na-prática é grande**. A infraestrutura coberta neste Bloco é o que move pesquisa para o segundo lado.
+
+## Conexão com o resto do curso
+
+O ciclo completo demonstra como **todos os módulos do curso se encaixam**:
+
+- **Módulo 0** (Setup) — instalou as ferramentas (R, Python, Quarto, Zotero, agentes, Git).
+- **Módulo 1** (Fundamentos) — entendeu IA, agentes, terminal, IDEs, convenções.
+- **Módulo 2** (Análise + Escrita) — produziu Markdown, Quarto, citação, dados organizados, R/Python, vibe coding.
+- **Módulo 3** (Publicação + Reprodutibilidade) — versionou, hospedou, depositou, citou.
+- **Módulo 4** (Capstone) — aplica tudo em projeto integrador de docência.
+
+Cada módulo é um nível da escada. **Pesquisador que percorre os cinco produz pesquisa de outra qualidade institucional**.
+
+## Conexão com IA
+
+Para o estudo de caso completo, IA aparece em **vários pontos** que valem listar:
+
+1. **Limpeza** — agente escreve script de anonimização.
+2. **Análise estatística** — agente implementa modelo linear misto, gtsummary, ggplot.
+3. **Mensagens de commit** — agente sugere mensagens descritivas.
+4. **`.zenodo.json` e `CITATION.cff`** — agente gera arquivos meta a partir do README.
+5. **Texto do manuscrito** — agente revisa redação, sugere ajustes de clareza.
+6. **Auditoria FAIR** — agente verifica aderência antes de publicar.
+
+A consequência: **um pesquisador trabalhando sozinho com agentes de IA produz, em semanas, o que tradicionalmente exigiria meses de uma equipe**. A diferença não é só velocidade — é **qualidade institucional acessível para quem antes não tinha condições** de produzir compêndio FAIR + DOI + Quarto + Git.
+
+## O que vem a seguir
+
+Este capítulo fecha o **Módulo 3** — toda a infraestrutura de publicação reprodutível. O **Módulo 4 (Capstone)** propõe o exercício final: você aplica tudo o que viu até aqui em um projeto integrador de **aplicação na docência**. Escolhe um tema, monta um dataset (real ou sintético), conduz análise via vibe coding, publica como compêndio Quarto + GitHub Pages, deposita no Zenodo, e usa o resultado em sala de aula com seus alunos.
+
+→ [Módulo 4 · Capstone](../../M5-capstone/B1-aplicacao/01-apresentacao.qmd)

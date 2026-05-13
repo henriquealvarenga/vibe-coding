@@ -1,0 +1,169 @@
+---
+title: "Prompt para limpeza e transformação de dados"
+---
+
+Limpeza de dados é onde mora a maior parte do tempo de qualquer projeto — costuma-se citar a regra dos **80%** (80% do tempo total numa análise vai para preparação dos dados, 20% para a análise propriamente dita). Em pesquisa em saúde isso é regra ainda mais firme: prontuário tem variável codificada de cinco jeitos diferentes; CID exportado vem com espaços extras; data de nascimento alterna entre `dd/mm/aaaa` e `aaaa-mm-dd`; idade vem em ano, em mês, em meses-completos. Sem limpeza confiável, qualquer análise estatística depois é lixo bem formatado.
+
+E é exatamente aqui que **descrever a tarefa para a IA economiza horas reais**. Limpeza tem padrões repetitivos (renomear colunas, recodificar categorias, parsear datas, tratar NAs) — coisa que o agente faz bem. O risco é que limpeza também tem decisões metodológicas (quem é elegível? como tratar perda de seguimento? imputação?) — coisa que o agente **não** decide, você decide.
+
+Este capítulo é sobre como escrever *prompts* que aproveitem o agente para o trabalho repetitivo, mantendo as decisões metodológicas com você.
+
+## O prompt-modelo
+
+> Tenho um dataset cru em `data/raw/[NOME-ARQUIVO]` ([formato: csv / xlsx / parquet / dta]). Cole abaixo o output de `head()` e `summary()`/`str()`:
+>
+> ```
+> [output do head]
+>
+> [output do summary]
+> ```
+>
+> **O que esse dataset é:** [ex.: "Coorte de 2.341 pacientes com IAM, exportada do prontuário do hospital X, período 2018-2024."].
+>
+> **Quero gerar um dataset limpo em `data/processed/[NOME-LIMPO].parquet`** seguindo as etapas abaixo. Para cada uma, **gere o código (R/tidyverse), comente o porquê, e ao final reporte quantas linhas foram afetadas**:
+>
+> 1. **Renomear colunas** para snake_case. Manter mapeamento original→novo num arquivo `data/processed/dicionario.csv`.
+> 2. **Parsear datas** das colunas `[lista]`. Formato esperado: [dd/mm/aaaa]. Sinalizar quantas falharam parse.
+> 3. **Recodificar variáveis categóricas:**
+>    - `sexo`: 1→"masculino", 2→"feminino", outros→NA.
+>    - `cor_raca`: 1→"branca", 2→"preta", 3→"parda", 4→"amarela", 5→"indigena", 9→NA.
+>    - [outras conforme dicionário do estudo]
+> 4. **Calcular variáveis derivadas:**
+>    - `idade_anos` a partir de `data_nascimento` e `data_admissao`.
+>    - `imc` a partir de `peso_kg` e `altura_m`.
+> 5. **Aplicar critérios de elegibilidade** (filtrar apenas elegíveis):
+>    - Idade entre 18 e 100 anos.
+>    - Data de admissão entre 2018-01-01 e 2024-12-31.
+>    - `desfecho_primario` não-NA.
+> 6. **Não imputar NAs** nesta fase. Apenas reportar quantos NAs por variável-chave.
+> 7. **Gerar relatório final** com:
+>    - n inicial (antes de qualquer limpeza)
+>    - n após renomear/recodificar (esperado: igual ao inicial)
+>    - n após critérios de elegibilidade
+>    - tabela de razões de exclusão (n por critério)
+>    - n final, salvo em `data/processed/`
+>
+> Validação obrigatória antes de me entregar:
+>
+> - Confirme que as etapas foram aplicadas **na ordem listada**.
+> - Confirme que o `n_final` no relatório bate com `nrow()` do dataset salvo.
+> - Confirme que nenhuma coluna do dicionário ficou sem mapeamento.
+> - Use `seed=42` em qualquer operação aleatória.
+
+Esse *prompt* é mais longo que os anteriores porque **limpeza é onde mais detalhes importam**. Vale o investimento — você roda uma vez, salva o script, e ele vira reproduzível.
+
+## Por que esse prompt funciona
+
+Mapeando para os quatro princípios:
+
+**Contexto:**
+
+- Output de `head()` e `summary()` colado no chat — o agente vê tipos, faixas, NAs.
+- Descrição do dataset em uma frase — agente entende o domínio (prontuário, coorte, período).
+- Caminhos exatos dos arquivos — entrada e saída.
+
+**Especificidade:**
+
+- Cada etapa numerada com instrução explícita.
+- Recodificações listadas exaustivamente — sem deixar agente "inferir" o que 1, 2, 3 significam.
+- Critérios de elegibilidade pré-especificados — você decidiu, agente implementa.
+- Formato de saída fixo (parquet, dicionário em CSV).
+
+**Validação:**
+
+- Pede relatório de n por etapa — você acompanha exclusões.
+- Pede tabela de razões de exclusão — útil para fluxograma CONSORT/STROBE no manuscrito.
+- Pede confirmações específicas antes da entrega.
+
+**Iteração:**
+
+- Estrutura numerada facilita iterar — se etapa 3 está errada, você diz "refaz só a 3".
+
+## O princípio fundamental: dado cru intocável
+
+Antes de qualquer outra regra: **`data/raw/` é intocável**. Tudo que entra ali fica como está, para sempre, com permissões de leitura apenas. Limpeza sempre gera arquivo novo em `data/processed/`. Se você tem que voltar dois passos, você re-executa o pipeline; nunca edita o dado cru.
+
+Esse princípio aparece três vezes no curso (M2-B3 sobre estrutura de projeto, este capítulo, e M3-B2 sobre validação) porque é o erro mais comum em pesquisa: editar o cru "só essa vez", esquecer, e três meses depois ninguém sabe se aquela coluna foi modificada ou veio assim do banco.
+
+No *prompt*, isso vira regra implícita: **nunca pedir ao agente para editar `data/raw/`**. Sempre pedir para ler de `raw/`, processar, e escrever em `processed/`.
+
+## Variações comuns
+
+### Limpeza de dados de pesquisa nacional (PNS, DataSUS, IBGE)
+
+Quando o dataset vem com pesos amostrais e desenho complexo:
+
+> ATENÇÃO: este é dado de pesquisa amostral complexa. Após a limpeza, **não converta em data frame simples**. Mantenha a estrutura de desenho amostral via `survey::svydesign()` (R) ou `samplics` (Python).
+>
+> Variáveis de desenho:
+>
+> - Pesos: [V0029 / wgt / etc.]
+> - Estratos: [V0024 / strata]
+> - Unidades primárias de amostragem: [UPA / V0023]
+>
+> Ao salvar o dataset processado, salve também um script `scripts/00-load-design.R` que **re-cria o objeto de desenho** a partir do parquet. Todas as análises subsequentes começam carregando esse objeto.
+
+### Limpeza com dados sensíveis (PHI/LGPD)
+
+> ATENÇÃO: este dataset contém dados identificáveis. Antes de salvar em `data/processed/`:
+>
+> - **Remover** variáveis: `cpf`, `nome`, `prontuario_id`, `endereco`, `telefone`, `email`.
+> - **Substituir** identificador por hash: criar `id_anonimizado` = `digest::sha256(cpf || sal)` onde `sal` está em `~/.config/projeto-X/sal.txt` (NÃO commitado).
+> - **Mascarar** datas de nascimento: manter apenas ano e mês (não dia).
+> - **Confirmar** ao final que o dataset processado **não contém** nenhuma das variáveis-PII listadas. Se contiver, parar e me alertar.
+
+### Merge de múltiplos arquivos
+
+> Tenho cinco arquivos `.csv` em `data/raw/`, um por ano (2019-2023). Mesmo schema. Quero combinar em um dataset único.
+>
+> Por favor:
+>
+> 1. Listar os cinco arquivos. Verificar que todos têm as **mesmas colunas e mesmos tipos**. Se houver discrepância, parar e me mostrar antes de combinar.
+> 2. Adicionar coluna `ano_origem` extraída do nome do arquivo.
+> 3. Combinar em um data frame único.
+> 4. Verificar duplicatas por `[chave-única, ex.: paciente_id]`. Reportar quantas e em quais anos.
+> 5. Salvar em `data/processed/dados-combinados-2019-2023.parquet`.
+
+### Reshaping wide ↔ long
+
+> Tenho dataset wide em `data/raw/seguimento.csv` com colunas `pas_basal`, `pas_3meses`, `pas_6meses`, `pas_12meses` (uma linha por paciente, várias medidas em colunas).
+>
+> Converter para formato **long**: uma linha por (paciente, momento), com colunas `paciente_id`, `momento` ("basal", "3m", "6m", "12m") e `pas`. Salvar em `data/processed/seguimento-long.parquet`.
+>
+> Validação: confirmar que `n_pacientes_long * 4 == n_linhas_long` (ou explicar se algum paciente tem medidas faltantes).
+
+## O que evitar
+
+**1. Pedir limpeza sem mostrar o dado.** Sem `head()`/`summary()` colado, o agente vai inferir tipos, formatos de data, codificações — e errar metade. Sempre cole alguma evidência da estrutura.
+
+**2. Misturar limpeza com análise no mesmo prompt.** *"Limpa os dados E roda regressão E faz tabela 1."* — o agente entrega tudo, mas se algo está errado na limpeza, a tabela 1 está errada também, e você só descobre olhando o output da regressão. **Limpeza primeiro, validação dela, depois análise.**
+
+**3. Aceitar imputação automática.** Por *default*, o agente pode "limpar" NAs com mediana ou modo, sem perguntar. Em pesquisa, **nunca aceite imputação automática**. Imputação é decisão metodológica (vale fazer? múltipla? única? por desfecho?), e a documentação dela vai no manuscrito. Sempre peça **explicitamente "não imputar"** nesta etapa, e trate imputação como capítulo separado.
+
+**4. Esquecer de pedir o dicionário.** O mapeamento "coluna original → coluna nova" precisa ficar documentado. Sem ele, daqui a três meses você não sabe se `idade_anos` veio de `idade` ou de `idade_paciente_admissao`. Sempre peça `data/processed/dicionario.csv`.
+
+**5. Não validar n a cada etapa.** Limpeza silenciosamente perde linhas (filtros, joins falhos, NAs). Sem relatório de n por etapa, você descobre depois que sua coorte de 2.341 pessoas virou 1.872 sem você ter decidido excluir 469.
+
+::: {.callout-warning}
+## Imputação ≠ limpeza
+Imputação de dados faltantes (substituir NA por valor estimado) **não é parte de limpeza** — é parte de análise. Misturar isso confunde o pipeline e o manuscrito. Limpeza só **identifica e reporta** NAs; análise (com decisão metodológica explícita) imputa quando apropriado, com método documentado (média/mediana/regressão/MICE).
+
+Se você não tem certeza se vai imputar, **deixa NA mesmo** — o pacote estatístico depois vai descartar (com aviso) e você decide na análise.
+:::
+
+## Conexão com o resto do curso
+
+Limpeza é o degrau zero. Tudo o que vem depois assume que você fez essa etapa direito:
+
+- A análise estatística (cap. 05) assume `data/processed/coorte-limpa.parquet` pronto.
+- A visualização (cap. 06) lê o mesmo dataset processado.
+- O manuscrito (cap. 07) cita o `n_final` e a tabela de exclusões geradas aqui.
+- O fluxograma STROBE/CONSORT (gerado no M3-B3) usa as razões de exclusão geradas aqui.
+
+Em projetos de pesquisa que duram meses ou anos, o pipeline de limpeza é re-executado várias vezes (revisor pede análise nova; descobre-se erro de codificação; chega lote novo de dados). **Por isso o pipeline precisa ser script reproduzível, não cliques manuais**. O *prompt* deste capítulo gera exatamente esse script.
+
+## O que vem a seguir
+
+Dataset limpo em `data/processed/`, dicionário documentado, relatório de exclusões guardado. Tudo pronto para a etapa que mais aparece em manuscrito: **análise estatística**. O próximo capítulo é sobre como descrever testes, modelos e tabelas para o agente, mantendo as decisões metodológicas com você.
+
+→ [05 · Prompt para análise estatística](05-prompt-analise-estatistica.qmd)

@@ -1,0 +1,83 @@
+---
+title: "VS Code"
+---
+
+Em 2015, ninguém apostaria que a Microsoft iria lançar o editor de código mais usado do mundo nos próximos dez anos. A Microsoft era a empresa do Visual Studio "completo" — IDE pesada, paga, focada em desenvolvimento Windows profissional. Era a antítese do que a comunidade open source apreciava. Foi nesse contexto que, em abril de 2015, a empresa anunciou na conferência Build o **Visual Studio Code** — um editor de código leve, multi-plataforma, gratuito, e (parte importante) **open source no núcleo**.
+
+Em poucos anos, virou padrão. Pesquisas anuais como a [Stack Overflow Developer Survey](https://survey.stackoverflow.co) mostram VS Code como o editor mais usado pela esmagadora maioria dos desenvolvedores desde 2018, com larga vantagem sobre alternativas. Para o curso, ele aparece em três papéis: como **base técnica do Positron** (capítulo anterior anterior), como **alternativa direta** para quem quer um editor mais universal, e como **referência cultural** — a maior parte dos tutoriais de programação na web hoje pressupõe VS Code, e tudo que você aprender ali transfere para o Positron sem dor.
+
+## A história
+
+A genealogia do VS Code passa por três produtos:
+
+**Visual Studio (1997).** A IDE pesada da Microsoft para desenvolvimento Windows profissional, lançada em 1997 com versões para C++ e Visual Basic. Era (e continua sendo) o ambiente preferido de programadores corporativos no ecossistema Microsoft. Custava caro, ocupava muito disco, era lenta de abrir. Para o pesquisador científico médio, era exagero.
+
+**Atom (2014).** O GitHub lançou o **Atom**, editor open source baseado em **Electron** (uma tecnologia inovadora que permitia construir aplicações desktop usando HTML, CSS e JavaScript — ou seja, as mesmas tecnologias da web). Atom era leve, customizável, com ecossistema de plugins. Em pouco tempo virou popular entre programadores web. A escolha do Electron (em vez de tecnologias nativas como C++/Qt) provou que aplicações desktop construídas em web tech podiam ser viáveis.
+
+**Visual Studio Code (2015).** A Microsoft adotou a mesma fórmula do Atom — base em Electron — e construiu o VS Code. Comparado ao Atom, o VS Code era mais rápido (a Microsoft investiu pesado em performance), tinha melhor suporte a **TypeScript** (linguagem da própria Microsoft, que dominou o desenvolvimento web nos anos 2010), e veio com integração nativa com Git, terminal embutido e debugger. A combinação foi vencedora.
+
+Em 2018, GitHub foi adquirido pela Microsoft. Em 2022, o Atom foi descontinuado oficialmente. VS Code havia ganhado a guerra dos editores leves.
+
+## O modelo "open core"
+
+Aqui aparece um detalhe técnico-jurídico que importa para entender Positron, Cursor, Windsurf e outros descendentes. O VS Code é construído sobre uma base chamada **Code OSS** (`Code` + `Open Source Software`), publicada pela Microsoft sob licença **MIT** (uma das licenças open source mais permissivas — qualquer um pode pegar, modificar, redistribuir, até comercialmente).
+
+Code OSS é o "núcleo limpo" — editor, suporte multi-linguagem, sistema de extensões, terminal, etc. O **Visual Studio Code** que a Microsoft distribui é Code OSS *mais* uma camada de extras proprietários: telemetria, branding, *marketplace* de extensões com termos de uso fechados, ícones, logos, e algumas funcionalidades específicas (como Live Share). Essa distinção entre o núcleo aberto e a distribuição com extras proprietários é o que se chama em inglês de **"open core"**.
+
+A consequência prática: **qualquer um pode pegar o Code OSS e construir uma IDE própria em cima**, com licenciamento livre. Foi exatamente o que aconteceu na vaga de IDEs derivadas a partir de 2023:
+
+- **Cursor** (2023) — VS Code com Claude/GPT integrados profundamente, voltado a "vibe coding" antes do termo virar comum.
+- **Windsurf** (2024) — variação semelhante, antes Codeium.
+- **Theia** — um fork orientado a uso embarcado em outros produtos.
+- **Positron** (2024) — a versão da Posit, focada em ciência de dados.
+
+Sem o open core, nenhuma dessas IDEs existiria. É uma jogada estratégica deliberada da Microsoft: doar o núcleo gera ecossistema, e o ecossistema fortalece a posição da Microsoft em ferramentas para desenvolvedores.
+
+## O que torna o VS Code adequado ao curso
+
+VS Code é, em essência, um **editor universal**. Não foi desenhado para ciência de dados (ao contrário do RStudio); foi desenhado para programação em qualquer linguagem. Isso tem prós e contras.
+
+**Prós:**
+
+- **Ecossistema massivo de extensões.** O *marketplace* tem dezenas de milhares de extensões, cobrindo praticamente toda linguagem e ferramenta. Para R, há a extensão oficial **R** (mantida pela própria comunidade R, com suporte a `.R`, REPL, plots, autocompletar). Para Python, a extensão oficial **Python** (mantida pela Microsoft) é referência. Para Quarto, a Posit publicou a extensão oficial **Quarto** [@quarto2024vscode] que adiciona preview, render, e syntax highlighting.
+
+- **Universalidade.** O mesmo VS Code que você usa para `.qmd` serve para editar `.html`, `.css`, `.js`, `.yaml`, arquivos de configuração de Docker, scripts de shell, código LaTeX, e qualquer coisa que vier pela frente. Pesquisador que tem um pé fora da pesquisa pura (constrói um site institucional, configura um servidor, mantém um README de projeto colaborativo) ganha muito com a versatilidade.
+
+- **Documentação e tutoriais abundantes.** Quase qualquer dúvida resolve com uma busca rápida — VS Code é o editor mais documentado da web. Isso vale ouro para autodidata.
+
+**Contras (para quem quer ciência de dados):**
+
+- **Configuração inicial maior.** Suporte a R/Python/Quarto vem de extensões separadas que você instala uma a uma. Cada uma tem suas próprias configurações, e ajustar tudo para conversar entre si demanda paciência. Positron resolve esse problema entregando tudo configurado.
+
+- **Console é cidadão de segunda classe.** O fluxo "natural" do VS Code é editar um arquivo, salvar, executar via comando ou debugger. Console interativo persistente — central para análise de dados — é uma adição via extensão. No Positron e RStudio, o console é central por design.
+
+- **Ausência de painéis dedicados a dados/plots/variáveis.** Você consegue tudo via extensões (notebooks Jupyter para visualizar plots inline, extensão R para `View(dados)`, etc.), mas é mais clicado.
+
+## Quando escolher VS Code para o curso
+
+Para a maioria dos alunos, **Positron resolve melhor** — capítulo `02-positron.qmd` foi explícito sobre isso. Mas VS Code faz sentido em alguns cenários:
+
+- **Você programa profissionalmente em outras linguagens.** Se você é desenvolvedor (web, mobile, infra) que também faz pesquisa, ter uma IDE universal evita trocar de programa cada vez que muda de contexto.
+
+- **Você precisa de extensões específicas do *marketplace* oficial da Microsoft.** Algumas extensões corporativas, e algumas da Microsoft (como a versão completa do **GitHub Copilot** com features pagas), só estão disponíveis no marketplace oficial — Open VSX, usado pelo Positron, tem alternativas mas não cobre 100%.
+
+- **Você quer aprender a IDE mais usada do mundo.** Em ambientes mistos (programadores e pesquisadores), VS Code é o denominador comum. Saber usá-lo vale como capital profissional, mesmo que para análise você prefira Positron.
+
+- **Você é desenvolvedor que ocasionalmente faz análise.** A inversão do caso anterior: se a pesquisa é minoria e a programação geral é maioria, VS Code com extensões R/Python/Quarto faz mais sentido que Positron com extensões para outras linguagens.
+
+## Conexão com IA
+
+VS Code é o terreno mais maduro para integração com agentes de IA dentro de uma IDE. Algumas opções:
+
+- **GitHub Copilot** (Microsoft) — autocompletar via IA, sugestões em tempo real enquanto você digita. Por assinatura. É a integração mais consolidada.
+- **Continue** ([continue.dev](https://www.continue.dev)) — extensão open source que conecta a vários modelos (Claude, GPT, Llama local).
+- **Cline** ([cline.bot](https://cline.bot)) — agente de IA dentro do VS Code, com acesso ao filesystem e terminal — opera no projeto inteiro, não só sobre o cursor.
+- **Claude Code, Codex CLI, Gemini CLI** — rodando no terminal embutido do VS Code, mesmo modelo de uso que vimos para Positron e RStudio.
+
+Para o curso, a recomendação é a mesma das outras duas IDEs: **agente CLI no terminal embutido**. Isso transfere entre Positron, RStudio e VS Code sem mudança no workflow — o agente cuida do que muda, a IDE só hospeda.
+
+## O que vem a seguir
+
+Este capítulo fecha o Bloco *Ambientes de trabalho*. Você agora conhece a categoria IDE no panorama histórico, sabe a diferença entre o que cada uma das três oferece, e tem critérios para escolher entre elas. Resta o Bloco final do Módulo 2: as **Convenções técnicas** que aparecem em qualquer trabalho com texto e código — nomeação, indentação, comentários, encoding, mensagens de erro, e outros pequenos detalhes que, depois de aprendidos, somem do caminho.
+
+→ [Bloco 3 · Convenções técnicas](../B3-convencoes/01-introducao.qmd)

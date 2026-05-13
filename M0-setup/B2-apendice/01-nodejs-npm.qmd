@@ -1,0 +1,209 @@
+---
+title: "Node.js e npm"
+---
+
+Este apêndice explica o que são **Node.js** e **npm**, como instalá-los nos três sistemas operacionais e quais comandos você vai encontrar ao longo do curso. **Não é leitura obrigatória**: leia apenas se algum capítulo linkou para cá ou se uma ferramenta que você está instalando exige `node` ou `npm`.
+
+## Quando você precisa deste apêndice
+
+Capítulos do curso que dependem de Node.js + npm:
+
+- **Módulo 0 — Capítulo 5 (Agentes de IA):** instalação de **Codex** (`@openai/codex`) e **Gemini CLI** (`@google/gemini-cli`).
+
+Esta lista será expandida conforme outros capítulos passarem a depender de ferramentas distribuídas via npm.
+
+## O que é o Node.js
+
+**Node.js** é um ambiente de execução para a linguagem **JavaScript** **fora do navegador**. Originalmente, JavaScript foi criado para rodar dentro de páginas web — quando você acessava um site, era o JavaScript dentro do seu navegador que tornava a página interativa.
+
+Em 2009, o Node.js extraiu a engine de JavaScript do navegador (a **V8**, da Google) e a transformou em um programa autônomo. Com isso, JavaScript ganhou a capacidade de:
+
+- ler e escrever arquivos no computador;
+- abrir conexões de rede;
+- executar comandos de sistema;
+- ser empacotado como ferramentas de linha de comando — exatamente o que Codex e Gemini CLI fazem.
+
+Hoje, o Node.js é uma das **plataformas mais comuns para distribuir ferramentas de linha de comando**, e por isso aparece como dependência mesmo em projetos que não têm nada a ver com web.
+
+## O que é o npm
+
+**npm** (*Node Package Manager*) é o gerenciador de pacotes oficial do Node.js. Ele tem duas funções:
+
+1. **Instalar bibliotecas e ferramentas** publicadas em um registro público chamado [npmjs.com](https://www.npmjs.com).
+2. **Gerenciar versões** dessas dependências dentro de cada projeto.
+
+Quando o capítulo de Agentes pediu `npm install -g @openai/codex`, o `npm` foi até o registro npmjs.com, baixou o pacote `@openai/codex` e o instalou **globalmente** (a flag `-g`) — disponibilizando o comando `codex` em qualquer pasta do seu sistema.
+
+::: {.callout-note}
+## Onde o npm instala os pacotes globais?
+Pacotes instalados com `-g` ficam numa pasta do sistema reservada ao Node.js: `/usr/local/lib/node_modules` no Mac/Linux, ou `%APPDATA%\npm\node_modules` no Windows. Você normalmente não precisa interagir com essa pasta diretamente.
+:::
+
+Importante: o **npm vem junto com o Node.js**. Ao instalar o Node.js, o npm é instalado automaticamente. **Não há instalação separada do npm.**
+
+## Por que ferramentas como Codex e Gemini CLI usam Node.js?
+
+A pergunta é justa: por que agentes de IA — que você usa para escrever código em Python ou R — são distribuídos em JavaScript?
+
+Três fatores explicam:
+
+1. **JavaScript tem uma das maiores comunidades de desenvolvedores do mundo.** Distribuir uma ferramenta nesse ecossistema maximiza alcance e contribuições.
+2. **O `npm` funciona em qualquer sistema operacional.** Outros gerenciadores de pacotes (`apt`, `dnf`, `brew`, `winget`...) cobrem só algumas plataformas; um pacote npm roda em todos.
+3. **Node.js já é dependência comum em ambientes de desenvolvimento.** Quando o requisito não pode ser eliminado, vale aproveitar uma base já existente.
+
+Você não precisa entender JavaScript para usar essas ferramentas — Node.js é, neste contexto, **infraestrutura invisível**.
+
+## Instalando o Node.js + npm
+
+A versão recomendada é a **LTS** (*Long-Term Support*), que recebe atualizações de segurança por longos períodos e é a mais estável. Em maio de 2026, é a **Node.js 22 LTS**.
+
+::: {.panel-tabset group="os"}
+
+### macOS
+
+1. Acesse [nodejs.org](https://nodejs.org).
+2. Baixe a versão **LTS**. O arquivo é um `.pkg` universal (funciona em Apple Silicon e Intel).
+3. Execute o instalador na pasta Downloads: **Continuar** → **Continuar** → **Concordar** → **Instalar**. Digite a senha do Mac quando solicitada.
+4. Aguarde alguns segundos e clique em **Fechar**.
+
+### Windows
+
+1. Acesse [nodejs.org](https://nodejs.org).
+2. Baixe a versão **LTS**. O arquivo é um `.msi`.
+3. Execute o instalador: **Next** → aceite a licença → **Next** → mantenha o caminho padrão → **Next** → **Install**.
+4. **Não desmarque** a opção *"Automatically install the necessary tools"* na última tela — ela garante que ferramentas de compilação opcionais fiquem disponíveis para alguns pacotes npm.
+5. Clique em **Finish**.
+
+### Linux
+
+A versão do Node.js que vem nos repositórios padrão das distros costuma ser **antiga demais** para ferramentas modernas. O caminho recomendado é instalar a partir do repositório **NodeSource** (Ubuntu/Debian) ou do repositório oficial atualizado (Fedora).
+
+**Ubuntu / Debian / Linux Mint / Pop!_OS:**
+
+```bash
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt install -y nodejs
+```
+
+**Fedora / RHEL / Rocky / CentOS:**
+
+```bash
+sudo dnf install nodejs npm
+```
+
+**Arch / Manjaro:**
+
+```bash
+sudo pacman -S nodejs npm
+```
+
+:::
+
+## Conferindo a instalação
+
+Abra o terminal (no Windows: PowerShell pelo Menu Iniciar) e digite os dois comandos abaixo, um de cada vez. Em cada um, deve aparecer um número de versão.
+
+```bash
+node --version
+```
+
+Saída esperada:
+
+```
+v22.x.x
+```
+
+```bash
+npm --version
+```
+
+Saída esperada:
+
+```
+10.x.x
+```
+
+Se ambos os comandos retornaram um número de versão, **Node.js e npm estão instalados e funcionando**. Pode fechar o terminal.
+
+## Comandos de npm que você vai ver no curso
+
+Esta tabela serve como referência rápida — não é necessário decorar:
+
+| Comando | O que faz |
+|---|---|
+| `npm install -g <pacote>` | Instala um pacote globalmente (vira comando em qualquer pasta) |
+| `npm uninstall -g <pacote>` | Remove um pacote global |
+| `npm list -g --depth=0` | Lista todos os pacotes globais instalados |
+| `npm update -g` | Atualiza todos os pacotes globais para a versão mais recente |
+| `npm view <pacote> version` | Mostra a versão mais recente publicada de um pacote |
+| `npm outdated -g` | Mostra quais pacotes globais estão desatualizados |
+
+## Problemas comuns
+
+::: {.callout-warning collapse="true"}
+## "command not found: node" ou "'node' não é reconhecido como comando interno ou externo"
+
+Sintoma: depois da instalação, o terminal não encontra o comando `node`.
+
+**No Mac/Linux:** geralmente é problema de **PATH** — a pasta onde o Node.js foi instalado não está sendo lida pelo terminal. Tente fechar e reabrir o terminal completamente. Se persistir, execute:
+
+```bash
+echo $PATH
+```
+
+E verifique se aparece `/usr/local/bin` na lista. Se não aparecer, há um problema de configuração do shell que merece busca específica.
+
+**No Windows:** o instalador do Node.js adiciona `node` e `npm` ao PATH automaticamente, mas só após **reiniciar o terminal** (ou o computador, em alguns casos). Feche todo PowerShell aberto, abra um novo e tente novamente.
+:::
+
+::: {.callout-warning collapse="true"}
+## "EACCES: permission denied" ao instalar pacotes globais (Mac/Linux)
+
+Sintoma: ao rodar `npm install -g <pacote>`, aparece erro de permissão negada.
+
+**Causa:** a pasta padrão do npm para pacotes globais (`/usr/local/lib/node_modules`) é de propriedade do `root`, e seu usuário não tem permissão de escrita.
+
+**Solução simples e segura** — usar `sudo`:
+
+```bash
+sudo npm install -g <pacote>
+```
+
+Você vai precisar digitar a senha do seu usuário.
+
+**Solução mais limpa** (recomendada para uso intensivo): configurar o npm para instalar pacotes globais dentro da sua pasta pessoal, eliminando a necessidade de `sudo`. Procure por "npm prefix user directory" para tutoriais detalhados — não é necessário para o uso pontual deste curso.
+:::
+
+::: {.callout-warning collapse="true"}
+## "Versão do Node.js muito antiga"
+
+Sintoma: ferramentas reclamam de versão antiga do Node.js (`Node 18 or below detected, please upgrade to 20+`).
+
+**Como verificar sua versão:**
+
+```bash
+node --version
+```
+
+Se aparecer `v18.x.x` ou inferior, você precisa atualizar.
+
+**Como atualizar:**
+
+- **Mac e Windows:** baixe a nova versão LTS em [nodejs.org](https://nodejs.org) e rode o instalador. Ele substitui a versão antiga automaticamente.
+- **Linux (Ubuntu/Debian):** execute o comando do NodeSource para a versão atual da LTS:
+  ```bash
+  curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+  sudo apt install -y nodejs
+  ```
+- **Linux (Fedora):** `sudo dnf upgrade nodejs npm`.
+:::
+
+::: {.callout-warning collapse="true"}
+## "npm warn deprecated <pacote>" ao instalar
+
+Sintoma: ao instalar uma ferramenta com npm, aparecem várias linhas amarelas que começam com `npm warn deprecated`.
+
+**Causa:** algumas dependências internas do pacote estão marcadas como obsoletas pelos próprios autores.
+
+**O que fazer:** **nada.** Esses avisos vêm de dependências internas e não afetam o funcionamento da ferramenta que você está instalando. Pode ignorar.
+:::

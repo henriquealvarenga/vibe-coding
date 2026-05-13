@@ -1,0 +1,43 @@
+---
+title: "História e conceitos básicos"
+sidebar: bloco-terminal
+---
+
+Você abre uma janela preta com letras brancas piscando, digita uma palavra, pressiona Enter, e o computador faz alguma coisa. Sem ícones, sem mouse, sem botão de "OK". Para muita gente, essa é a primeira impressão do **Terminal** — e também é o ponto onde várias pessoas fecham a janela e nunca mais abrem. Este Bloco existe pra mudar isso. São nove capítulos curtos, com a meta de tirar você do *"tenho medo da tela preta"* para *"tenho conforto básico aqui"*.
+
+A boa notícia: o Terminal é a interface mais antiga do computador, mas também é a mais previsível. Não há atualizações que mudam onde fica o botão. Não há menus que escondem opções. Você digita um comando, ele faz uma coisa, e a saída aparece na tela. Quando você entende como funciona, vira ferramenta — não barreira.
+
+## Uma breve história
+
+Antes das interfaces gráficas com janelas, ícones e mouse, a única forma de interagir com um computador era através de texto. O usuário digitava comandos; o computador respondia — também em texto. Essa interação acontecia através de **terminais físicos**: máquinas compostas por um teclado e uma tela (ou impressora) conectadas a um computador central distante.
+
+Nos anos 1960 e 1970, os terminais eram a porta de entrada para os grandes mainframes das universidades e empresas. Programadores, cientistas e engenheiros passavam horas diante dessas telas escuras com letras verdes ou âmbar, digitando comandos para executar cálculos, processar dados e desenvolver software. O design daqueles terminais — fundo escuro, fonte monoespaçada, letras claras — atravessou seis décadas e continua exatamente assim na janela do Terminal moderno. É herança visual.
+
+Com a chegada dos computadores pessoais nos anos 1980, as interfaces gráficas (GUI) começaram a se popularizar. O Macintosh da Apple, lançado em janeiro de 1984 [@apple1984macintosh], e posteriormente o Windows da Microsoft tornaram os computadores acessíveis a pessoas sem conhecimento técnico. Bastava apontar e clicar.
+
+Mas o terminal não desapareceu. Ele permaneceu como ferramenta essencial para desenvolvedores, administradores de sistemas e usuários avançados. A razão é simples: a linha de comando oferece três coisas que a interface gráfica nem sempre consegue. **Precisão**, porque você diz exatamente o que quer, sem depender de menus que escondem opções. **Automação**, porque sequências de comandos podem ser salvas e executadas de novo. **Universalidade**, porque os comandos básicos funcionam praticamente igual em qualquer servidor Linux do mundo, em qualquer máquina remota acessada via SSH, em qualquer container Docker.
+
+## O que é o Terminal hoje?
+
+Quando falamos em "terminal" hoje, nos referimos a um **emulador de terminal** — um programa que simula aqueles antigos terminais físicos dentro do seu sistema operacional moderno. É uma janela onde você digita comandos de texto e recebe respostas do computador.
+
+Por trás do terminal existe um programa que interpreta seus comandos e os executa, chamado de **shell**. A distinção importa porque os dois são intercambiáveis:
+
+| Peça | O que faz |
+|---|---|
+| **Terminal (emulador)** | A janela em si — desenha as letras, lida com o teclado, mostra as cores. É só interface. |
+| **Shell** | O cérebro — recebe o que você digitou, interpreta, executa, devolve o resultado. |
+
+Pense no terminal como o aparelho de TV (a tela, os botões físicos), e no shell como a programação que está passando (o que efetivamente acontece). Você pode trocar de shell sem trocar de terminal — e o capítulo seguinte é exatamente sobre isso.
+
+No **Mac**, o aplicativo se chama **Terminal** e vem instalado por padrão.
+
+No **Windows**, há três opções convivendo: o **Prompt de Comando** (`cmd`, herança do MS-DOS), o **PowerShell** (mais moderno, com linguagem própria), e o **Windows Terminal** [@microsoftWindowsTerminal] — aplicativo que unifica os anteriores em uma interface única com abas, lançado pela Microsoft em 2019.
+
+No **Linux**, cada distribuição traz seu próprio emulador padrão (GNOME Terminal, Konsole, xterm, Alacritty, etc.) — todos equivalentes para o uso cotidiano. Pesquisador que acessa servidores de instituição (cluster, HPC, máquina virtual em nuvem) vai estar tipicamente em Linux remoto.
+
+## O que vem a seguir
+
+Este capítulo cobriu o **terminal**. O próximo é sobre o **shell** — o cérebro por trás da janela. Vamos ver quais shells existem (bash, zsh, PowerShell, etc.), por que o macOS mudou de bash para zsh em 2019, e por que essa diferença normalmente não atrapalha você.
+
+→ [02 · Shells](02-shells.qmd)

@@ -1,0 +1,256 @@
+---
+pagetitle: "Vibe Coding na Pesquisa Científica"
+page-layout: custom
+toc: false
+sidebar: false
+---
+
+```{=html}
+<div class="vc-home">
+
+  <!-- ============================ HERO ============================ -->
+  <section class="vc-hero">
+    {{< include _hero-bg.html >}}
+
+    <div class="vc-hero-content">
+      <span class="vc-hero-eyebrow">Uma Nova Sintaxe para a Ciência</span>
+      <h1 class="vc-hero-title">Vibe <span class="vc-accent">Coding</span> na Pesquisa Científica</h1>
+      <p class="vc-hero-subtitle">
+        Agentes de IA, análise de dados em <strong>R</strong>, <strong>Python</strong> e quarto
+        para publicação reprodutível na web.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================ MÓDULOS ============================ -->
+  <section id="modulos" class="vc-section">
+
+    <!-- ===== Prefácio ===== -->
+    <div class="vc-module-group">
+      <header class="vc-module-group-header">
+        <span class="vc-module-group-eyebrow">Antes de começar</span>
+        <h3 class="vc-module-group-title">Prefácio</h3>
+      </header>
+      <div class="vc-modules-grid">
+
+        <a class="vc-module-card" href="prefacio.qmd">
+          <span class="vc-module-card-num">¶</span>
+          <h3 class="vc-module-card-title">A história deste site</h3>
+          <p class="vc-module-card-subtitle">
+            Por que este recurso existe, como foi construído,
+            para quem é e como tirar o máximo dele.
+          </p>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- ===== Módulo 0 — Setup ===== -->
+    <div class="vc-module-group">
+      <header class="vc-module-group-header">
+        <span class="vc-module-group-eyebrow">Módulo 0</span>
+        <h3 class="vc-module-group-title">Setup</h3>
+      </header>
+      <div class="vc-modules-grid">
+
+        <a class="vc-module-card" href="M0-setup/B1-instalacoes/01-r-python.qmd">
+          <span class="vc-module-card-num">00</span>
+          <h3 class="vc-module-card-title">Instalações</h3>
+          <p class="vc-module-card-subtitle">
+            Pré-requisitos: como instalar R, Python, IDEs (Positron, RStudio, VS Code),
+            Quarto, Git, Claude, Codex, Gemini e Zotero.
+          </p>
+        </a>
+
+        <a class="vc-module-card" href="M0-setup/B2-apendice/01-nodejs-npm.qmd">
+          <span class="vc-module-card-num">*</span>
+          <h3 class="vc-module-card-title">Apêndice</h3>
+          <p class="vc-module-card-subtitle">
+            Material de referência opcional: Node.js e npm,
+            pré-requisito para instalar Codex e Gemini CLI.
+          </p>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- ===== Módulo 1 — Trabalhando com IA na pesquisa ===== -->
+    <div class="vc-module-group">
+      <header class="vc-module-group-header">
+        <span class="vc-module-group-eyebrow">Módulo 1</span>
+        <h3 class="vc-module-group-title">Trabalhando com IA na pesquisa</h3>
+      </header>
+      <div class="vc-modules-grid">
+
+        <a class="vc-module-card" href="M1-ia-pesquisa/B1-conceitos/01-ia-generativa.qmd">
+          <span class="vc-module-card-num">01</span>
+          <h3 class="vc-module-card-title">Conceitos Fundamentais</h3>
+          <p class="vc-module-card-subtitle">
+            O que é IA generativa, suas limitações, integridade acadêmica,
+            citação de IA em trabalhos e LGPD.
+          </p>
+        </a>
+
+        <a class="vc-module-card" href="M1-ia-pesquisa/B2-agentes/01-chatbot-agente.qmd">
+          <span class="vc-module-card-num">02</span>
+          <h3 class="vc-module-card-title">Agentes de IA</h3>
+          <p class="vc-module-card-subtitle">
+            De chatbot a agente: o que mudou,
+            e estudos de caso.
+          </p>
+        </a>
+
+        <a class="vc-module-card" href="M1-ia-pesquisa/B3-prompts/01-anatomia-prompt.qmd">
+          <span class="vc-module-card-num">03</span>
+          <h3 class="vc-module-card-title">Padrões de prompts</h3>
+          <p class="vc-module-card-subtitle">
+            Modelos reutilizáveis para as tarefas mais comuns de pesquisa: estrutura
+            de projeto, AGENTS.md customizado, limpeza de dados, análise estatística,
+            visualização, escrita acadêmica e Git.
+          </p>
+        </a>
+
+        <a class="vc-module-card" href="M1-ia-pesquisa/B4-limites/01-quando-ia-falha.qmd">
+          <span class="vc-module-card-num">04</span>
+          <h3 class="vc-module-card-title">Limites e armadilhas</h3>
+          <p class="vc-module-card-subtitle">
+            Onde a IA falha (alucinação, viés), por que humano continua responsável
+            pela decisão, e o quadro ético-regulatório (LGPD, ICMJE).
+          </p>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- ===== Módulo 2 — Fundamentos técnicos ===== -->
+    <div class="vc-module-group">
+      <header class="vc-module-group-header">
+        <span class="vc-module-group-eyebrow">Módulo 2</span>
+        <h3 class="vc-module-group-title">Fundamentos técnicos</h3>
+      </header>
+      <div class="vc-modules-grid">
+
+        <a class="vc-module-card" href="M2-fundamentos-tecnicos/B1-terminal/01-historia-e-conceitos.qmd">
+          <span class="vc-module-card-num">05</span>
+          <h3 class="vc-module-card-title">Terminal</h3>
+          <p class="vc-module-card-subtitle">
+            Linha de comando: shells, navegação, manipulação de arquivos
+            e os atalhos que economizam horas.
+          </p>
+        </a>
+
+        <a class="vc-module-card" href="M2-fundamentos-tecnicos/B2-ambientes/01-introducao.qmd">
+          <span class="vc-module-card-num">06</span>
+          <h3 class="vc-module-card-title">Ambientes de trabalho</h3>
+          <p class="vc-module-card-subtitle">
+            IDEs (Positron, RStudio, VS Code) —
+            onde o trabalho com agentes acontece.
+          </p>
+        </a>
+
+        <a class="vc-module-card" href="M2-fundamentos-tecnicos/B3-convencoes/01-introducao.qmd">
+          <span class="vc-module-card-num">07</span>
+          <h3 class="vc-module-card-title">Convenções técnicas</h3>
+          <p class="vc-module-card-subtitle">
+            Material de referência para consulta: nomeação, símbolos,
+            indentação, YAML, encoding, mensagens de erro. Para visitar
+            quando aparecer uma dúvida no fluxo do Módulo 3.
+          </p>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- ===== Módulo 3 — Análise de dados e escrita técnica ===== -->
+    <div class="vc-module-group">
+      <header class="vc-module-group-header">
+        <span class="vc-module-group-eyebrow">Módulo 3</span>
+        <h3 class="vc-module-group-title">Análise de dados e escrita técnica</h3>
+      </header>
+      <div class="vc-modules-grid">
+
+        <a class="vc-module-card" href="M3-analise/B1-markdown/01-markdown.qmd">
+          <span class="vc-module-card-num">08</span>
+          <h3 class="vc-module-card-title">Markdown, Quarto e Escrita Técnica</h3>
+          <p class="vc-module-card-subtitle">
+            Markdown, Quarto (chunks, multi-formato, YAML),
+            BibTeX e Zotero, e LaTeX para quem precisa.
+          </p>
+        </a>
+
+        <a class="vc-module-card" href="M3-analise/B2-dados/01-formatos.qmd">
+          <span class="vc-module-card-num">09</span>
+          <h3 class="vc-module-card-title">Dados</h3>
+          <p class="vc-module-card-subtitle">
+            CSV, Excel, JSON, Parquet, SQLite, <em>tidy data</em>
+            e a convenção raw/processed/output.
+          </p>
+        </a>
+
+        <a class="vc-module-card" href="M3-analise/B3-linguagens/01-python-e-r.qmd">
+          <span class="vc-module-card-num">10</span>
+          <h3 class="vc-module-card-title">Python e R</h3>
+          <p class="vc-module-card-subtitle">
+            Comparativo entre as duas linguagens: instalação, sintaxe, dataframes,
+            importação, transformação, descritiva, visualização, inferência, modelagem.
+          </p>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- ===== Módulo 4 — Publicação e reprodutibilidade ===== -->
+    <div class="vc-module-group">
+      <header class="vc-module-group-header">
+        <span class="vc-module-group-eyebrow">Módulo 4</span>
+        <h3 class="vc-module-group-title">Publicação e reprodutibilidade</h3>
+      </header>
+      <div class="vc-modules-grid">
+
+        <a class="vc-module-card" href="M4-publicacao/B1-git/01-versionamento.qmd">
+          <span class="vc-module-card-num">11</span>
+          <h3 class="vc-module-card-title">Git, GitHub e GitHub Pages</h3>
+          <p class="vc-module-card-subtitle">
+            Versionamento, Git, GitHub para colaboração,
+            Git assistido por IA e publicação estática.
+          </p>
+        </a>
+
+        <a class="vc-module-card" href="M4-publicacao/B2-reprodutibilidade/01-fair.qmd">
+          <span class="vc-module-card-num">12</span>
+          <h3 class="vc-module-card-title">Reprodutibilidade</h3>
+          <p class="vc-module-card-subtitle">
+            Princípios FAIR, ambientes reprodutíveis (renv, venv, uv),
+            Quarto como artefato, Zenodo, DOIs.
+          </p>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- ===== Módulo 5 — Capstone ===== -->
+    <div class="vc-module-group">
+      <header class="vc-module-group-header">
+        <span class="vc-module-group-eyebrow">Módulo 5</span>
+        <h3 class="vc-module-group-title">Capstone</h3>
+      </header>
+      <div class="vc-modules-grid">
+
+        <a class="vc-module-card" href="M5-capstone/B1-aplicacao/01-apresentacao.qmd">
+          <span class="vc-module-card-num">13</span>
+          <h3 class="vc-module-card-title">Projeto Integrador</h3>
+          <p class="vc-module-card-subtitle">
+            Tema, dataset, planejamento,
+            execução com IA, publicação.
+          </p>
+        </a>
+
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Rodapé global definido em _quarto.yml > website > page-footer -->
+
+</div>
+```

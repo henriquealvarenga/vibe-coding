@@ -1,0 +1,152 @@
+---
+title: "Quarto como artefato científico"
+---
+
+Você publica um artigo em revista de alto impacto. O artigo tem dez páginas. Por trás dele há: dezenas de páginas de notas e exploração; um ambiente computacional com versões específicas; dados brutos e dados limpos; vinte scripts que vão de extração à análise final; cinco figuras finais e dezenas de figuras descartadas; tabelas formatadas para artigo e tabelas exploratórias; um histórico de decisões metodológicas que ficou na cabeça dos autores. **Tudo isso desaparece quando o artigo é publicado** — só sobram dez páginas em PDF.
+
+Esse é o problema que o conceito de **research compendium** (compêndio de pesquisa) pretende resolver. Em vez de o artigo ser o **único** artefato publicado, o compêndio reúne tudo — dados, código, ambiente, prosa — num **pacote único, navegável, e reproduzível**. Quem lê o artigo pode descer ao compêndio para verificar análises, refazer cálculos, modificar parâmetros e ver como mudam.
+
+Quarto é, hoje, a ferramenta **mais natural** para construir compêndios desse tipo em pesquisa em saúde. Este capítulo explica por quê e mostra como.
+
+## A ideia: research compendium
+
+O termo *research compendium* foi popularizado por **Ben Marwick** (arqueólogo e cientista de dados na University of Washington) num par de papers seminais em 2017 e 2018 [@marwick2017computational; @marwick2018packaging]. A definição:
+
+> Um *research compendium* é uma forma de organizar arquivos de pesquisa que combina dados, código, e prosa textual em uma única estrutura coerente, idealmente versionada e reproduzível, que pode acompanhar um artigo científico como artefato publicável.
+
+Os princípios centrais:
+
+1. **Tudo num só lugar** — não dados num servidor, código no email, manuscrito no Word. Tudo num repositório Git.
+2. **Estrutura previsível** — pasta `data/`, `analysis/`, `manuscript/`, `figures/`. Quem clona consegue se orientar.
+3. **Reprodutível** — qualquer pessoa pode rodar do início ao fim e chegar nos mesmos resultados.
+4. **Citável** — tem um identificador persistente (DOI), pode ser referenciado em artigos.
+
+Esse modelo nasceu na arqueologia computacional mas se espalhou para epidemiologia, ecologia, psicologia, e — crescentemente — pesquisa em saúde. **Revistas como o American Journal of Epidemiology, BMC Medical Research Methodology, e Lancet Digital Health hoje recomendam ou exigem compêndios**.
+
+## Por que Quarto é particularmente adequado
+
+Quarto não foi criado especificamente para compêndios — foi criado como sucessor do R Markdown, sistema de publicação científica reproduzível. Mas as características que definem Quarto fazem dele a ferramenta natural para compêndios:
+
+**1. Combina texto, código e saída no mesmo arquivo.** Capítulo M3-B1-02 estabeleceu isso. O `.qmd` mistura prosa Markdown com chunks `{r}` ou `{python}` que executam de verdade. Isso elimina a separação tradicional entre "manuscrito" e "análise" — eles vivem juntos.
+
+**2. Múltiplos formatos de saída do mesmo source.** O mesmo `.qmd` gera HTML (compêndio web), PDF (manuscrito para revista), DOCX (revisão com coautor que só usa Word), e site Quarto inteiro (com várias páginas). Você não escreve quatro versões da análise.
+
+**3. Integração nativa com Git e GitHub.** Quarto + GitHub Pages (capítulo M4-B1-06) é o caminho menos-frição para publicar um compêndio na web. Atualizações no compêndio são automáticas.
+
+**4. Aceita R, Python, e mistura dos dois** (M3-B3-13). Compêndios de bioinformática moderna frequentemente precisam de ambas — Python para deep learning, R para estatística clássica. Quarto não força escolha.
+
+**5. Sistema de citações nativo.** Capítulo M3-B1-03 tratou — o Quarto integra `.bib` e `.csl` para gerar bibliografia formatada. Compêndio fica completo, com referências bibliográficas inline.
+
+**6. Sistema de freeze e cache.** Capítulo M3-B3-13 cobriu — análises pesadas não precisam re-rodar a cada render. Compêndios grandes ficam práticos de manter.
+
+## Anatomia de um compêndio Quarto
+
+A estrutura típica que combina os princípios de Marwick com a infraestrutura Quarto:
+
+```
+artigo-coorte-2026/
+├── README.md                      ← orientação inicial pra quem chega
+├── _quarto.yml                    ← configuração do site Quarto
+├── manuscrito.qmd                 ← o "artigo" propriamente — texto + análise embutida
+├── DESCRIPTION                    ← (opcional) descreve o projeto como pacote
+├── LICENSE                        ← licença explícita (CC BY 4.0, MIT, etc.)
+├── CITATION.cff                   ← arquivo padrão para citação (cap. 05)
+├── renv.lock                      ← lockfile R (M3-B3-04)
+├── .github/workflows/             ← GitHub Action que renderiza o site (M4-B1-06)
+├── data/
+│   ├── raw/                       ← dados brutos (intocáveis)
+│   └── processed/                 ← dados limpos (gerados por scripts/)
+├── R/                             ← funções reusáveis
+├── analysis/
+│   ├── 01-limpeza.qmd             ← cada etapa em um .qmd
+│   ├── 02-descritiva.qmd
+│   ├── 03-modelagem.qmd
+│   └── 04-figuras.qmd
+├── manuscript/
+│   ├── manuscrito.qmd             ← texto formal pra submissão (versão pdf)
+│   └── referencias.bib
+├── figures/                       ← figuras finais geradas automaticamente
+├── tables/                        ← tabelas finais geradas automaticamente
+└── docs/                          ← site Quarto renderizado (publicado via GitHub Pages)
+```
+
+Não há regra rígida — variações são livres. O importante é que o **leitor chegando no repositório consiga se orientar em segundos** e refazer a análise em minutos.
+
+## Padrões que automatizam essa estrutura
+
+Se você quer começar com um esqueleto que já segue convenções estabelecidas, há ferramentas que geram a estrutura inicial:
+
+**`rrtools` (R)** — pacote do Marwick que cria estrutura de compêndio em R. Gera DESCRIPTION, README, .Rprofile, estrutura de pastas, integração com `renv` e Docker. Comando único cria projeto pronto.
+
+**`workflowr` (R)** — alternativa popular, particularmente em genômica. Foco em geração automática de site web e versionamento via Git.
+
+**Quarto Project Templates** — `quarto create-project nome --template manuscript` gera projeto com estrutura adequada para artigo + análise embutida.
+
+Não importa qual ferramenta você escolhe — o importante é começar com **estrutura coerente** em vez de improvisar.
+
+::: {.callout-tip}
+## Comece simples
+Não tente o compêndio "perfeito" no primeiro projeto. Comece com:
+
+1. Repositório Git com `data/`, `scripts/`, `output/`, `manuscrito.qmd`.
+2. `renv.lock` commitado.
+3. README explicando como rodar.
+
+Esse mínimo já cumpre 80% do valor de um compêndio. Ferramentas como `rrtools` ajudam mas adicionam complexidade — vale aprender depois que a prática básica estiver enraizada.
+:::
+
+## A relação com o artigo publicado
+
+Modelo recomendado em 2026:
+
+1. **Compêndio no GitHub** — repositório completo, com tudo (dados, código, ambiente, manuscrito).
+2. **Site Quarto via GitHub Pages** — versão navegável do compêndio, acessível por URL.
+3. **Versão arquivada no Zenodo** — *snapshot* do compêndio no momento da publicação, com DOI permanente (capítulos 04 e 05 deste Bloco).
+4. **Artigo na revista** — com o **DOI do compêndio citado** no manuscrito.
+
+A combinação garante que daqui a 20 anos:
+
+- O **artigo** está preservado (revista cuida disso).
+- O **compêndio** está preservado (Zenodo cuida disso, com garantia de longo prazo via CERN).
+- A **versão "viva"** continua acessível (GitHub Pages, atualizável).
+
+Pesquisador externo lendo o artigo segue o link, chega no compêndio Zenodo (versão estável), navega, refaz análise. Nada se perde no tempo.
+
+## Compêndios em pesquisa em saúde
+
+Casos típicos onde o modelo de compêndio é especialmente valioso:
+
+**Estudos observacionais** com cohort grande, múltiplas análises, e necessidade de revisores/auditores conseguirem refazer cada cálculo.
+
+**Ensaios clínicos** com análise estatística pré-registrada — o compêndio inclui SAP (Statistical Analysis Plan), dados anonimizados, e código que reproduz cada figura.
+
+**Revisões sistemáticas e meta-análises** — o compêndio inclui critério de busca, dados extraídos, código de meta-análise, gráficos forest, análise de sensibilidade. **Compêndios são especialmente valorizados em meta-análises** porque evitam o problema clássico de não conseguir refazer um cálculo do artigo original.
+
+**Estudos com algoritmos de IA aplicados a imagem médica/EHR** — onde o algoritmo, o pré-processamento, e a avaliação precisam ser reproduzíveis para a comunidade verificar resultados.
+
+::: {.callout-warning}
+## Dados sensíveis e compêndios
+Compêndios em pesquisa médica frequentemente envolvem dados sensíveis (PHI, prontuários). A estratégia padrão:
+
+- **Dados brutos não vão para o repositório público.** Ficam em servidor institucional protegido. O compêndio público inclui apenas dados sintéticos ou agregados que reproduzem os principais resultados.
+- **Código vai público integralmente.** Mesmo sem dados, código permite replicar o método, e revisor pode verificar se o método é defensável.
+- **DUA (Data Use Agreement)** descreve como pesquisador externo pode obter dados originais, com aprovação de comitê.
+
+Esse caminho é compatível com FAIR — não tudo aberto, mas tudo bem geridos e descritos.
+:::
+
+## Conexão com IA
+
+Agentes ajudam em três frentes específicas em compêndios:
+
+**1. Estruturação inicial.** *"Crie a estrutura de compêndio para um artigo de coorte clínica em R + Quarto, com `renv`, GitHub Actions, e suporte a Docker."* — agente entrega esqueleto completo, com `_quarto.yml`, `Dockerfile`, README inicial, `.gitignore` apropriado.
+
+**2. Reformatação para revista específica.** *"Adapte este compêndio Quarto para o formato de submissão do New England Journal of Medicine."* — agente ajusta YAML, citação, formatação de tabelas/figuras.
+
+**3. Geração de README e CITATION.cff.** Arquivos meta-textuais como README e CITATION.cff são tediosos de escrever. Agente lê o repositório, gera versão inicial coerente — você revisa.
+
+## O que vem a seguir
+
+Compêndio é o "como organizar". Mas ele só vira **artefato científico de longo prazo** quando depositado em repositório especializado que garante preservação por décadas e atribui identificador permanente. O próximo capítulo cobre exatamente isso: o **Zenodo**, o repositório do CERN para artefatos científicos.
+
+→ [04 · Zenodo](04-zenodo.qmd)

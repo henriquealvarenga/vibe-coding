@@ -1,0 +1,238 @@
+---
+title: "Instalando o Quarto"
+---
+
+Você já tem as **linguagens** (R e Python) e a **IDE** (Positron). A próxima peça é o **Quarto** — o sistema que vamos usar para escrever, executar análises e publicar resultados de forma reprodutível ao longo de todo o curso.
+
+## O que é o Quarto
+
+**Quarto** é um sistema **gratuito e de código aberto** para escrita técnica e científica, mantido pela [Posit PBC](https://posit.co) (a mesma empresa do Positron e do RStudio). Em uma frase: Quarto permite que você escreva um documento que é, ao mesmo tempo, **texto** e **código que de fato roda** — e o resultado pode ser publicado em vários formatos:
+
+- páginas HTML (site, como este que você está lendo);
+- artigos em PDF, com formatação acadêmica;
+- documentos Word;
+- apresentações em slides (Reveal.js, PowerPoint, Beamer);
+- livros completos, com capítulos, sumário e índice remissivo;
+- posts e dashboards.
+
+O mesmo arquivo de origem (`.qmd`) gera todos esses formatos. É a ideia de **"escrever uma vez, publicar em qualquer lugar"** aplicada à ciência.
+
+::: {.callout-note}
+## Quarto, RMarkdown, Jupyter — qual a relação?
+Se você já ouviu falar em **RMarkdown** ou em **Jupyter Notebook**, o Quarto é o sucessor moderno desses dois mundos. Ele combina o melhor de cada um e funciona com R, Python, Julia e Observable JS, tudo na mesma sintaxe. Quem vem do RMarkdown vai sentir que muito é familiar — só que com superpoderes a mais.
+:::
+
+## Por que o Quarto neste curso
+
+Três motivos práticos:
+
+1. **O próprio site que você está lendo é feito em Quarto.** A página do "Por que R e Python", a do Anaconda, esta aqui — todas saem de arquivos `.qmd` renderizados pelo Quarto. Aprendendo Quarto, você ganha a habilidade de produzir o mesmo tipo de material.
+
+2. **Reprodutibilidade científica.** Em pesquisa, é comum revisar e atualizar análises várias vezes (revisor pediu nova variável, dataset chegou um arquivo extra, gráfico precisa virar tabela). Com Quarto, você muda o código e o documento todo se atualiza automaticamente — sem aquele ciclo de "rodar análise → copiar resultado → colar no Word → reformatar".
+
+3. **Padrão emergente em ciência aberta.** Revistas científicas, pré-prints e órgãos de fomento estão cada vez mais reconhecendo Quarto como formato adequado para artigos com código aberto. Saber Quarto é um diferencial real para quem publica.
+
+## O que vamos instalar
+
+Apenas uma peça: o **Quarto CLI** (*Command-Line Interface*) — o programa que faz a renderização dos documentos. Ele roda em segundo plano: você não interage diretamente com ele a maior parte do tempo (o Positron faz a ponte), mas precisa estar instalado para que tudo funcione.
+
+::: {.callout-tip}
+## Boa notícia: instalação simples, sem variantes
+Diferente de R e Anaconda, o instalador do Quarto **não tem versões separadas para Apple Silicon e Intel** no Mac — é um pacote único que funciona em qualquer chip. No Windows, também é um instalador único. Apenas no Linux há a separação habitual entre Debian/Ubuntu (`.deb`) e Fedora/Red Hat (`.rpm`).
+:::
+
+## Instalando o Quarto
+
+::: {.panel-tabset group="os"}
+
+### macOS
+
+**Passo 1. Baixe o instalador.**
+
+1. Acesse [quarto.org/docs/download](https://quarto.org/docs/download/).
+2. Na seção **macOS**, clique no botão de download. O arquivo é um `.pkg` (ex.: `quarto-1.8.27-macos.pkg`).
+
+**Passo 2. Execute o instalador.**
+
+1. Na pasta Downloads, dê duplo-clique no arquivo `.pkg`.
+2. Siga o assistente: **Continuar** → **Continuar** → **Concordar** com os termos → **Instalar**.
+3. Digite a senha do Mac quando solicitada.
+4. Aguarde a conclusão (geralmente em segundos — o Quarto é pequeno) e clique em **Fechar**.
+
+A instalação é silenciosa: o Quarto **não adiciona um ícone à pasta Aplicativos** porque é uma ferramenta de linha de comando, não um aplicativo gráfico. Você vai usá-lo a partir do Positron e do terminal — e os dois encontram o Quarto automaticamente.
+
+### Windows
+
+**Passo 1. Baixe o instalador.**
+
+1. Acesse [quarto.org/docs/download](https://quarto.org/docs/download/).
+2. Na seção **Windows**, clique no botão de download. O arquivo é um `.msi` (ex.: `quarto-1.8.27-win.msi`).
+
+**Passo 2. Execute o instalador.**
+
+1. Na pasta Downloads, dê duplo-clique no arquivo `.msi`.
+2. Se o Windows mostrar um aviso de segurança, clique em **Sim** ou **Executar mesmo assim**.
+3. Avance pelas telas do assistente (**Next** → **Next** → **Install**), aceitando as opções padrão.
+4. Quando concluído, clique em **Finish**.
+
+Como no Mac, o Quarto **não cria atalho no Menu Iniciar** — é uma ferramenta de linha de comando que o Positron e o terminal vão chamar quando precisarem.
+
+### Linux
+
+A Posit fornece pacotes nativos `.deb` (Debian/Ubuntu) e `.rpm` (Fedora/Red Hat). Acesse [quarto.org/docs/download](https://quarto.org/docs/download/) e baixe o pacote correspondente à sua distro.
+
+**Ubuntu / Debian / Linux Mint / Pop!_OS:**
+
+```bash
+cd ~/Downloads
+sudo apt install ./quarto-1.8.27-linux-amd64.deb
+```
+
+(Ajuste o nome do arquivo para a versão que você baixou.)
+
+**Fedora / RHEL / Rocky / CentOS:**
+
+```bash
+cd ~/Downloads
+sudo dnf install ./quarto-1.8.27-linux-amd64.rpm
+```
+
+Após a instalação, o comando `quarto` fica disponível em qualquer terminal.
+
+:::
+
+## Verificação
+
+Diferente das IDEs, o Quarto traz um comando próprio para conferir que tudo foi instalado corretamente — incluindo todos os componentes que ele usa internamente (Pandoc, Dart Sass, Deno). É bem útil rodar uma vez, principalmente para confirmar que **R e Python foram detectados**.
+
+**Passo 1. Abra o terminal.**
+
+::: {.panel-tabset group="os"}
+
+#### macOS
+
+Abra o **Terminal**:
+
+- Pressione `⌘ + Espaço` para abrir a busca do Spotlight, digite `Terminal` e pressione **Enter**, **ou**
+- Vá em **Aplicativos → Utilitários → Terminal**.
+
+#### Windows
+
+Abra o **PowerShell** ou o **Prompt de Comando**:
+
+- Pressione a tecla **Windows**, digite `PowerShell` e pressione **Enter**.
+
+#### Linux
+
+Abra o **Terminal** do seu ambiente gráfico (atalho geralmente `Ctrl+Alt+T`).
+
+:::
+
+::: {.callout-note}
+## Não conhece o terminal? Calma.
+Você não precisa entender o terminal a fundo agora — ele é o tema do **Módulo 1, Bloco 3 (Terminal)**. Aqui só vamos digitar dois comandos curtos. Pense no terminal como uma janela onde você digita um comando, pressiona Enter, e o computador responde.
+:::
+
+**Passo 2. Confira a versão do Quarto.**
+
+No terminal, digite o comando abaixo e pressione **Enter**:
+
+```bash
+quarto --version
+```
+
+Deve aparecer algo como:
+
+```
+1.8.27
+```
+
+Se o número da versão apareceu, **o Quarto está instalado e visível no sistema**.
+
+**Passo 3. Faça uma verificação completa.**
+
+Ainda no terminal, digite:
+
+```bash
+quarto check
+```
+
+Esse comando faz um auto-diagnóstico completo do Quarto. A saída tem várias seções, e cada uma deve terminar com um `[✓]` verde. Algo assim:
+
+```
+[✓] Checking versions of quarto binary dependencies...
+      Pandoc version 3.x.x: OK
+      Dart Sass version 1.x.x: OK
+      Deno version 1.x.x: OK
+[✓] Checking versions of quarto dependencies......OK
+[✓] Checking Quarto installation......OK
+      Version: 1.8.27
+      Path: /usr/local/bin/quarto
+[✓] Checking tools....................OK
+      TinyTeX: (not installed)
+      Chromium: (not installed)
+[✓] Checking LaTeX....................(None)
+      Tex is not installed.
+[✓] Checking basic markdown render....OK
+[✓] Checking Python 3 installation....OK
+      Version: 3.12.x
+      Jupyter: 5.x.x
+[✓] Checking R installation...........OK
+      Version: 4.5.0
+      LibPaths:
+        - /Library/Frameworks/R.framework/Versions/...
+[✓] Checking Knitr engine render......OK
+```
+
+**O que importa nessa saída:**
+
+- **Pandoc, Dart Sass, Deno: OK** — componentes internos do Quarto. Vêm embutidos no instalador.
+- **Python 3 installation: OK** — o Quarto encontrou o Python que você instalou pelo Anaconda.
+- **R installation: OK** — o Quarto encontrou o R do CRAN.
+- **TinyTeX: (not installed)** e **Tex is not installed** — **isso é normal por enquanto**. TinyTeX é necessário só para gerar PDFs com LaTeX; trataremos disso na seção seguinte.
+
+Se Python e R apareceram como **OK**, está tudo certo. Pode fechar o terminal.
+
+::: {.callout-warning collapse="true"}
+## E se Python ou R não forem detectados?
+Em alguns casos (especialmente no Windows), o Quarto pode não encontrar o Python do Anaconda automaticamente, mostrando algo como `(None)` em vez de `OK`. Isso geralmente significa que o Anaconda não foi adicionado ao PATH do sistema (comportamento padrão recomendado pelo próprio Anaconda).
+
+Por enquanto, **não é um problema**: o Positron faz a ponte com o Python do Anaconda independentemente do PATH do sistema. Se a renderização vier a falhar mais para frente, voltaremos a este ponto no capítulo de Quarto do Módulo 2.
+:::
+
+## Quarto e as IDEs
+
+A boa notícia é que você **não precisa configurar nada** — as IDEs deste curso já reconhecem o Quarto:
+
+- **Positron**: integração **nativa**. Reconhece arquivos `.qmd` automaticamente, oferece preview ao vivo, executa células de código com um clique.
+- **RStudio** (se você instalou): integração **nativa** desde a versão 2022.07. Mesma experiência do RMarkdown a que muitos já estão acostumados.
+- **VS Code** (se você instalou): precisa instalar a **extensão Quarto** do Marketplace. Abra o VS Code, clique no ícone de Extensões (na barra lateral esquerda), pesquise por **Quarto** e instale a extensão oficial da Posit. Se você está usando Positron, ignore: não precisa.
+
+## Para gerar PDF: TinyTeX (opcional)
+
+::: {.callout-tip}
+## Esta seção é opcional por enquanto
+A maior parte do curso usa **HTML** (páginas web) como formato de saída. Você só precisa do TinyTeX quando for gerar **PDF** com LaTeX, o que aparece principalmente no capítulo de **LaTeX** do Módulo 2 e em projetos de capstone. Se você não tem certeza se vai precisar, **pule esta seção** — pode voltar e instalar quando o capítulo de LaTeX chegar.
+:::
+
+Para gerar PDFs com qualidade científica (incluindo equações, símbolos especiais e formatação acadêmica), o Quarto utiliza o **LaTeX** por baixo dos panos. Em vez de obrigar você a instalar uma distribuição completa de LaTeX (que pode passar de **3 GB** em disco), o Quarto traz um instalador para uma versão mínima chamada **TinyTeX**, que ocupa cerca de **400 MB** e cresce conforme você precisa de pacotes específicos.
+
+**Para instalar o TinyTeX**, abra o terminal e digite:
+
+```bash
+quarto install tinytex
+```
+
+A instalação é automática e leva alguns minutos. Não é preciso fornecer senha de administrador — TinyTeX é instalado dentro da sua pasta pessoal.
+
+Para confirmar:
+
+```bash
+quarto check
+```
+
+A linha `TinyTeX: (not installed)` deve agora mostrar `TinyTeX: OK` com um caminho de instalação.
+
+## O que vem a seguir
+
+Com Positron e Quarto prontos, sua infraestrutura de **escrita e análise** está completa. O próximo capítulo cobre o **Zotero** — o gerenciador de referências bibliográficas que vai conectar sua biblioteca de artigos científicos diretamente ao Quarto, tornando as citações no texto e a lista de referências completamente automáticas.

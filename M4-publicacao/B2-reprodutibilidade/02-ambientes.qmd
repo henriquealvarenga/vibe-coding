@@ -1,0 +1,165 @@
+---
+title: "Ambientes reprodutíveis"
+---
+
+Você publica um artigo de coorte em 2026, com código aberto no GitHub. Tudo rodando, todos os números do artigo verificáveis a partir do código. Cinco anos depois, em 2031, um doutorando lê seu artigo, baixa o repositório, tenta rodar — e nada funciona. R atualizou para a versão 5.x; pacotes que você usou foram descontinuados; alguns retornam resultados ligeiramente diferentes em versões novas; o `tidyverse` mudou comportamento em três funções. **A análise não é reproduzível, mesmo com o código exato preservado**.
+
+Esse cenário é a razão pela qual reprodutibilidade exige preservar não apenas o **código** e os **dados**, mas também o **ambiente computacional** — a combinação específica de versões de R, Python, pacotes, bibliotecas do sistema e até do sistema operacional que produziu o resultado original. Este capítulo cobre as camadas progressivas dessa preservação, do mínimo (lockfiles) ao completo (containers e Binder).
+
+O capítulo M3-B3-04 já apresentou ambientes virtuais (`renv`, `uv`, `venv`) como ferramenta de **trabalho diário**. Aqui o foco é diferente: ambientes como **artefatos de reprodutibilidade institucional**, preservados junto da pesquisa para que daqui a anos a análise possa ser refeita.
+
+## Os níveis de reprodutibilidade
+
+Reprodutibilidade computacional não é binária — há **graus**. Marwick, em seu trabalho sobre *research compendia* [@marwick2017computational], descreve níveis crescentes que vale conhecer:
+
+| Nível | O que preserva | Quão reproduzível |
+|---|---|---|
+| **0. Nenhum** | Só o artigo | Quase nada — você confia no autor |
+| **1. Código** | Scripts versionados | Reproduzível se você tiver as mesmas versões de tudo |
+| **2. Código + dados** | Scripts + dados brutos | Reproduzível se você conseguir reinstalar o ambiente correto |
+| **3. Código + dados + lockfile** | + versões exatas de pacotes | Reproduzível em qualquer máquina com a mesma linguagem instalada |
+| **4. Código + dados + lockfile + container** | + sistema operacional + bibliotecas do sistema | Reproduzível em qualquer máquina com Docker ou similar |
+| **5. Código + dados + lockfile + container + serviço executável** | + ambiente que roda direto no navegador | Qualquer pessoa com navegador roda — sem instalar nada |
+
+Cada nível adiciona robustez ao custo de **complexidade de configuração**. A regra prática: **mire no nível 3 (lockfile) por padrão**; suba para 4 (container) em projetos críticos ou multi-equipe; suba para 5 (Binder) em material didático ou demos.
+
+## Nível 3: lockfiles
+
+A camada mínima viável de reprodutibilidade computacional. Ferramentas:
+
+- **R:** `renv` — `renv.lock` registra cada pacote e sua versão exata.
+- **Python:** `uv` (moderno) ou `pip` com `requirements.txt` — `uv.lock` ou `pyproject.toml` registra dependências.
+
+(Esses já foram apresentados em detalhe no M3-B3-04.)
+
+Para reprodutibilidade, o que conta é **commitar o lockfile no Git** junto com o código. Quem clona o repositório consegue recriar o ambiente exato:
+
+```bash
+# Para R:
+Rscript -e 'renv::restore()'
+
+# Para Python (com uv):
+uv sync
+```
+
+Em poucos minutos, todas as versões corretas dos pacotes estão instaladas. Os números da análise saem idênticos aos do artigo original.
+
+**Limitações do lockfile sozinho:**
+
+- Não preserva a versão da **linguagem em si** (R 4.4.2 vs R 5.0). Lockfile pede pacotes específicos, mas se a versão de R mudou, comportamentos podem mudar mesmo nos mesmos pacotes.
+- Não preserva **bibliotecas do sistema** (GDAL, PROJ, librsvg) das quais alguns pacotes dependem. Em macOS você instala via Homebrew; em Linux via apt; em Windows via... cabeça.
+- Não preserva o **sistema operacional**. Algumas análises produzem resultados ligeiramente diferentes em macOS vs Linux por diferenças em bibliotecas matemáticas (BLAS, LAPACK).
+
+Para a maior parte das análises clínicas/epidemiológicas, lockfile basta. Para análises sensíveis a precisão numérica (simulações estocásticas, modelos com muitas iterações), os limites começam a aparecer.
+
+## Nível 4: containers (Docker)
+
+O nível seguinte preserva **o sistema operacional inteiro** dentro de uma "caixa" portável. Essa tecnologia é o **Docker** — que merece um pouco de história.
+
+### O que é container, e de onde veio
+
+A ideia de **isolamento de processos** é antiga. UNIX dos anos 1980 já oferecia primitivas (`chroot`, `jails`). Em 2008, o kernel Linux ganhou **cgroups** e **namespaces**, dois mecanismos que permitiam isolar processos e seus recursos.
+
+Em **2013**, **Solomon Hykes** e a **dotCloud** (que depois renomeou para Docker Inc.) lançaram o **Docker** — uma forma simples de empacotar essas tecnologias. A ideia central: você descreve o ambiente num arquivo de texto (`Dockerfile`), e o Docker constrói uma **imagem** — pacote autocontido com sistema operacional minimalista, linguagem instalada, bibliotecas, dependências, e seu código. Essa imagem roda **igual em qualquer máquina** que tenha Docker.
+
+Docker virou padrão de fato em desenvolvimento de software a partir de 2014-2015 e em pesquisa científica reproduzível a partir de 2018-2020 (mais lento, porque pesquisadores precisam aprender uma camada extra).
+
+### Como aplicar em pesquisa
+
+Para um projeto de pesquisa, o `Dockerfile` típico é:
+
+```dockerfile
+# Imagem base: R + tidyverse já instalados
+FROM rocker/tidyverse:4.4.2
+
+# Bibliotecas do sistema necessárias
+RUN apt-get update && apt-get install -y libgdal-dev libproj-dev
+
+# Copia o projeto inteiro
+WORKDIR /projeto
+COPY . /projeto
+
+# Restaura ambiente exato via renv
+RUN R -e "renv::restore()"
+
+# Comando default ao rodar o container
+CMD ["R", "-e", "quarto::quarto_render()"]
+```
+
+Esse arquivo, junto do código e dos dados, é o **artefato completo de reprodutibilidade**. Qualquer pessoa com Docker instalado pode:
+
+```bash
+docker build -t meu-projeto .
+docker run meu-projeto
+```
+
+E em alguns minutos tem a análise rodando idêntica à sua, **independente de plataforma**. Mac, Linux, Windows — funciona igual.
+
+::: {.callout-note}
+## Imagens base que economizam tempo
+Você quase nunca constrói container do zero. A comunidade mantém imagens base pré-prontas:
+
+- **`rocker/`** (Rocker project) — imagens R com configurações específicas. `rocker/tidyverse` tem R + tidyverse, `rocker/verse` adiciona LaTeX e Quarto, `rocker/binder` é otimizado para Binder.
+- **`python:3.12-slim`** — imagem mínima de Python.
+- **`continuumio/anaconda3`** — Python com Anaconda completo.
+- **`ghcr.io/quarto-dev/quarto`** — Quarto pré-instalado.
+
+Começar com uma dessas e adicionar só o que falta é o caminho — não tente construir Linux + R + dependências do zero.
+:::
+
+### Limitações de Docker
+
+- **Curva de aprendizado.** Docker tem conceitos próprios (imagem, container, volume, network) que pesquisador típico não conhece. É investimento de algumas horas para aprender o básico.
+- **Tamanho.** Imagens Docker tipicamente ocupam 1-3 GB. Para depósito a longo prazo (Zenodo), isso é grande.
+- **Não é "imortal".** Containers Docker rodam em qualquer Docker, mas precisam de **alguma versão de Docker funcionando**. Se Docker como tecnologia for descontinuada em 20 anos, containers antigos podem se tornar difíceis de rodar. Tecnologia ainda relativamente jovem.
+
+Para a maior parte da pesquisa clínica/epidemiológica, **Docker é overkill**. Para projetos com bibliotecas complexas de bioinformática, deep learning, ou análise de imagem médica, vale o investimento.
+
+## Nível 5: Binder — execução no navegador
+
+**Binder** ([mybinder.org](https://mybinder.org)) é serviço gratuito que pega um repositório GitHub com configuração apropriada e **transforma em ambiente executável no navegador**. Sem instalar nada, qualquer pessoa pode rodar a análise — clica num botão no README do repositório, espera 30-60 segundos, e aparece um Jupyter ou RStudio funcional na aba do navegador, com seu código e dados.
+
+A magia: Binder lê arquivos como `runtime.txt`, `Dockerfile`, ou `install.R` no seu repositório, constrói a imagem na hora, e roda na infraestrutura própria. Para o leitor, é zero-fricção.
+
+**Para que serve em pesquisa:**
+
+- **Material didático.** Notebook com tutorial — leitor clica, roda, modifica, aprende.
+- **Demos para colaboradores.** Em vez de pedir para o colega instalar tudo, você manda link Binder, ele roda em 30 segundos.
+- **Replicação rápida de resultados-chave.** Revisor que quer verificar uma figura específica não precisa instalar nada.
+
+**Limitações:**
+
+- **Recursos limitados.** Sessão Binder gratuita tem RAM limitada (~2 GB), tempo de inatividade curto (~10 min), sem GPU. Inadequado para análises pesadas.
+- **Não persistente.** Mudanças não são salvas. Para análise iterativa real, você precisa do seu ambiente local.
+- **Depende do serviço.** Se Binder cair (instituicional, financeiro), os links param. Não é depósito de longo prazo.
+
+Para depósito definitivo, **Binder é complemento, não substituto** de container + repositório com DOI.
+
+## Como escolher
+
+A heurística simples:
+
+| Caso | Nível recomendado |
+|---|---|
+| Análise pessoal, projeto interno | 3 (lockfile) |
+| Artigo a publicar | 3 (lockfile) + Zenodo |
+| Material didático para alunos | 3 + Binder |
+| Projeto colaborativo multi-instituição | 4 (Docker) |
+| Bioinformática com pipeline complexo | 4 (Docker) |
+| Demo institucional pública | 4 + Binder |
+
+Para o curso e a maioria dos projetos cobertos por ele, **nível 3 basta** — `renv.lock` ou `uv.lock` no Git, depositado no Zenodo junto do artigo. Suba para 4 ou 5 só quando o projeto justificar.
+
+## Conexão com IA
+
+Agentes ajudam em duas frentes específicas em ambientes reprodutíveis:
+
+**1. Construção de Dockerfile.** *"Crie um Dockerfile para meu projeto Quarto + R + tidyverse + análise de sobrevida com pacote `survival`."* — agente devolve Dockerfile funcional, escolhendo imagem base apropriada (`rocker/verse`), adicionando dependências de sistema típicas, configurando renv. Operação que tomaria horas pesquisando documentação fica em minutos.
+
+**2. Diagnóstico de reprodutibilidade quebrada.** Em 2030, alguém tenta rodar seu artigo de 2026 e não consegue. Cole o erro, agente identifica: pacote descontinuado, função renomeada, comportamento mudado. Sugere correção (instalar versão antiga via `remotes::install_version()`, etc).
+
+## O que vem a seguir
+
+FAIR cuida dos dados (cap. 01); ambientes reproduzíveis cuidam do ambiente computacional (este capítulo). O próximo trata de **como apresentar tudo isso como artefato científico publicável** — *research compendium*, padrões emergentes em pesquisa reprodutível, e como o Quarto deixa esse modelo natural.
+
+→ [03 · Quarto como artefato científico](03-quarto-artefato.qmd)

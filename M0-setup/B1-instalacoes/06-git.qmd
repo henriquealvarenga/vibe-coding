@@ -1,0 +1,226 @@
+---
+title: "Instalando o Git"
+---
+
+Última parada do Módulo 0. O **Git** é o sistema de **controle de versão** que vai acompanhar todo o seu trabalho a partir daqui — análises, manuscritos, scripts, materiais didáticos. Ele permite rastrear cada mudança, voltar a versões antigas, colaborar com outros pesquisadores e publicar o resultado final na web.
+
+## O que é o Git
+
+**Git** é um programa que registra "fotografias" (chamadas *commits*) do seu projeto ao longo do tempo. Em vez de guardar cópias com nomes como `analise_v1.R`, `analise_v2.R`, `analise_FINAL.R`, `analise_FINAL_revisada.R` — uma prática que todo pesquisador conhece bem —, o Git mantém **um único projeto** e lembra automaticamente de cada mudança feita.
+
+A analogia mais útil é a de uma **máquina do tempo do código**:
+
+- Você fez uma mudança que quebrou tudo? Volte ao estado de ontem com um comando.
+- O revisor pediu uma análise alternativa, mas você não quer perder a original? Crie uma "linha do tempo paralela" (chamada *branch*), trabalhe nela e funda depois com a principal.
+- Quer saber quem mudou aquela linha de código no script de limpeza, e por quê? O Git mostra autor, data e uma mensagem explicando a mudança.
+
+Git foi criado em 2005 por **Linus Torvalds** (o mesmo do Linux) para gerenciar o código-fonte do kernel Linux. Hoje é o padrão de fato em ciência, indústria e, cada vez mais, em pesquisa acadêmica reprodutível.
+
+::: {.callout-note}
+## Git ≠ GitHub
+**Git** é o programa que roda no seu computador (vamos instalar agora).
+**GitHub** é um serviço online onde você hospeda projetos Git para compartilhar e colaborar.
+
+São coisas diferentes mantidas por empresas diferentes (Git é projeto livre da comunidade; GitHub é da Microsoft). Você pode usar Git sem GitHub. Vamos ver GitHub apenas no **Módulo 3**, quando chegarmos em **publicação e reprodutibilidade**.
+:::
+
+## Por que Git neste curso
+
+Três motivos:
+
+1. **Histórico completo do trabalho.** Tese, artigo ou análise — qualquer trabalho de pesquisa passa por dezenas de iterações. Com Git, você nunca perde uma versão, nunca duplica arquivos, e sempre sabe **o que mudou e por quê** em cada etapa.
+
+2. **Colaboração estruturada.** Com Git + GitHub (Módulo 3), múltiplos coautores podem trabalhar **no mesmo projeto ao mesmo tempo** sem sobrescrever o trabalho um do outro.
+
+3. **Publicação automática.** Sites em Quarto (incluindo este que você está lendo) podem ser publicados gratuitamente no **GitHub Pages** a partir de um repositório Git. Você atualiza o site empurrando uma nova versão para o GitHub — sem servidores, sem custos, sem complicação.
+
+## Instalando o Git
+
+::: {.panel-tabset group="os"}
+
+### macOS
+
+**Passo 1. Abra o Terminal e verifique se o Git já está instalado.**
+
+Boa parte dos Macs já vem com Git pré-instalado (instalado junto com as **Xcode Command Line Tools**, um conjunto de ferramentas de desenvolvimento que muitos apps acionam automaticamente).
+
+Abra o Terminal (**⌘ + Espaço**, digite `Terminal`, Enter) e digite:
+
+```bash
+git --version
+```
+
+**Caso 1: Git já está instalado.** Vai aparecer algo como `git version 2.49.0 (Apple Git-...)`. **Está pronto** — pode pular direto para a seção *"Verificando a instalação"* abaixo. Não precisa instalar nada.
+
+**Caso 2: Git não está instalado.** Vai aparecer uma janela do macOS perguntando se você quer instalar as **Command Line Developer Tools**. Clique em **Instalar** e aguarde alguns minutos. Quando concluir, repita `git --version` no Terminal — agora deve aparecer a versão.
+
+::: {.callout-tip collapse="true"}
+## Para versões mais novas: Homebrew (opcional)
+A versão de Git que vem com as Command Line Tools é estável, mas pode ficar para trás em relação à versão mais recente. Para sempre ter a versão atual, usuários de [Homebrew](https://brew.sh) podem instalar com:
+
+```bash
+brew install git
+```
+
+Para o que vamos fazer no curso, a versão das Command Line Tools é **mais que suficiente** — não precisa atualizar.
+:::
+
+### Windows
+
+O Git **não vem instalado por padrão** no Windows. Vamos instalar o pacote oficial **Git for Windows**, que inclui:
+
+- O Git em si (linha de comando);
+- O **Git Bash**, um terminal estilo Linux que usaremos em alguns momentos do curso;
+- O **Git Credential Manager**, que gerencia senhas de forma segura.
+
+**Passo 1. Baixe o instalador.**
+
+1. Acesse [git-scm.com/download/win](https://git-scm.com/download/win).
+2. Clique em **Click here to download** ou no botão para a versão **64-bit Git for Windows Setup**.
+
+**Passo 2. Execute o instalador.**
+
+1. Na pasta Downloads, dê duplo-clique no `.exe`.
+2. Se o Windows mostrar um aviso de segurança, clique em **Sim**.
+
+O instalador apresenta **muitas telas de configuração**. Para os fins deste curso, **mantenha todas as opções padrão**, simplesmente clicando **Next** em cada tela. Os defaults atuais do Git for Windows são bem escolhidos e funcionam para a maior parte dos usuários.
+
+::: {.callout-tip collapse="true"}
+## Algumas decisões do instalador, traduzidas
+Se você quiser entender o que está aceitando ao clicar Next em cada tela:
+
+- **Default editor**: editor que abrirá quando o Git pedir para você escrever uma mensagem de commit longa. O default sugerido (Vim) é poderoso mas tem curva de aprendizado. Se quiser algo mais amigável, escolha **Notepad** ou **Visual Studio Code as Git's default editor**.
+- **Default branch name for new repositories**: aceite a opção **Override the default branch name → main** (substitui o antigo `master` pelo padrão moderno `main`).
+- **Adjusting your PATH environment**: escolha a opção do meio (**Git from the command line and also from 3rd-party software**) — é o que permite ferramentas como Positron usarem Git.
+- **Choosing HTTPS transport backend**: a opção padrão (**Use the OpenSSL library**) é o caminho normal.
+- **Configuring the line ending conversions**: aceite **Checkout Windows-style, commit Unix-style line endings**. Esse é o default correto para projetos compartilhados entre sistemas.
+- **Configuring the terminal emulator**: **MinTTY** (default) é o terminal mais agradável.
+- **Choose the default behavior of `git pull`**: aceite **Default (fast-forward or merge)**.
+- **Choose a credential helper**: aceite **Git Credential Manager** (default).
+
+Se algum dia quiser revisar essas escolhas, é só rodar o instalador de novo — ele não desinstala nada.
+:::
+
+3. Clique em **Install** na última tela e aguarde a conclusão.
+4. Clique em **Finish**. Você pode desmarcar as caixas que oferecem ler notas de lançamento.
+
+### Linux
+
+Em quase todas as distribuições Linux, o Git **já vem pré-instalado**. Para confirmar, abra o terminal e digite:
+
+```bash
+git --version
+```
+
+**Se aparecer um número de versão**, está tudo pronto. Pode pular direto para a próxima seção.
+
+**Se aparecer "command not found"** (raro), instale com o comando da sua distro:
+
+**Ubuntu / Debian / Linux Mint / Pop!_OS:**
+
+```bash
+sudo apt update
+sudo apt install git
+```
+
+**Fedora / RHEL / Rocky / CentOS:**
+
+```bash
+sudo dnf install git
+```
+
+**Arch / Manjaro:**
+
+```bash
+sudo pacman -S git
+```
+
+:::
+
+## Verificando a instalação
+
+Confirme rapidamente que o Git está instalado e funcional. Abra o terminal correspondente ao seu sistema:
+
+- **macOS / Linux:** Terminal.
+- **Windows:** **Git Bash** (instalado junto com Git for Windows; aparece no Menu Iniciar).
+
+Digite:
+
+```bash
+git --version
+```
+
+Deve aparecer algo como:
+
+```
+git version 2.49.0
+```
+
+O número exato vai variar — qualquer versão começando com `git version 2.x.x` está bom para o curso.
+
+## Configuração inicial mínima
+
+Antes de fazer qualquer coisa com Git, é preciso configurar **três informações básicas**. Sem essa configuração, o Git mostra um aviso (e às vezes recusa) quando você tenta criar o seu primeiro registro de mudança.
+
+::: {.callout-warning}
+## Faça este passo agora
+Os três comandos abaixo são executados **uma única vez na vida do seu computador** — depois ficam configurados para sempre. Se você pular agora, vai bater nessa configuração no Módulo 3, no momento em que estiver tentando aprender outra coisa. Melhor já deixar feito.
+:::
+
+No mesmo terminal, digite os três comandos abaixo, **um de cada vez**, **substituindo** os valores entre aspas pelos seus dados pessoais:
+
+```bash
+git config --global user.name "Seu Nome Completo"
+git config --global user.email "seu.email@exemplo.com"
+git config --global init.defaultBranch main
+```
+
+O que cada um faz:
+
+| Configuração | O que faz |
+|---|---|
+| `user.name` | Nome que vai aparecer como autor de cada *commit* (registro de mudança). Use **seu nome real**, do jeito que assina trabalhos. |
+| `user.email` | E-mail que vai aparecer junto com cada *commit*. Use **o mesmo e-mail** que você vai usar (ou já usa) na conta GitHub. |
+| `init.defaultBranch` | Nome da linha do tempo principal ao criar um novo repositório. O padrão antigo era `master`; o padrão moderno é `main`, adotado pela comunidade nos últimos anos. |
+
+::: {.callout-note}
+## Esse e-mail vai ficar visível
+Quando você publicar projetos no GitHub (Módulo 3), o e-mail configurado em `user.email` aparece junto com cada commit no histórico público do projeto. Se isso for um problema, o GitHub oferece um e-mail anônimo do tipo `seu.usuario@users.noreply.github.com` — vamos cobrir isso no Módulo 3. Por enquanto, **o seu e-mail institucional ou pessoal regular é o mais simples**.
+:::
+
+Para conferir que tudo foi salvo corretamente:
+
+```bash
+git config --global --list
+```
+
+Deve aparecer algo como:
+
+```
+user.name=Seu Nome Completo
+user.email=seu.email@exemplo.com
+init.defaultbranch=main
+```
+
+Se você cometeu algum erro de digitação, basta rodar o comando de configuração de novo com o valor correto — o novo valor sobrescreve o antigo.
+
+## O Git e as IDEs
+
+A boa notícia: depois que o Git está instalado e configurado no sistema, **as IDEs do curso o detectam automaticamente** — você não precisa configurar nada nelas. Quando você abrir um projeto Git no Positron, vai aparecer uma aba lateral chamada **Source Control** mostrando arquivos modificados, com botões para fazer commits sem digitar comandos.
+
+Para o Módulo 0, é tudo o que precisamos. **Como usar o Git de verdade — comandos, fluxo de trabalho, branches, GitHub, GitHub Pages — é tema do Módulo 3**, dedicado integralmente a publicação e reprodutibilidade.
+
+## Você terminou o Módulo 0!
+
+Parabéns: seu computador agora está pronto para o curso. Se você seguiu todos os capítulos, instalou:
+
+- **R** e **Python** (linguagens);
+- **Positron** (e opcionalmente RStudio e VS Code) como IDE;
+- **Quarto** para escrita técnica e científica;
+- **Zotero** + Better BibTeX para gerenciar referências;
+- **Claude Desktop** (e opcionalmente Codex e Gemini CLI) como agentes de IA;
+- **Git** para controle de versão.
+
+Esse é o "kit completo" que vai acompanhá-lo até o capstone do curso. Pode haver pequenos ajustes mais à frente (como instalar uma extensão Quarto específica), mas o grosso do trabalho de configuração está feito.
+
+O **Módulo 1 (Fundamentos)** começa explorando os conceitos por trás dessas ferramentas: o que é IA generativa, como agentes funcionam, terminal, e os ambientes de trabalho. É o módulo que prepara o terreno conceitual antes de começar a fazer análises de verdade no Módulo 2.

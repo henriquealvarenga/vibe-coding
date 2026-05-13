@@ -1,0 +1,116 @@
+---
+title: "Encoding e caracteres especiais (UTF-8)"
+---
+
+Você abre um CSV recebido por e-mail e vê:
+
+``` text
+Paciente,DiagnoÃ³stico,ObservaÃ§Ã£o
+1,HipertensÃ£o,SeguimentoÃ é semanal
+```
+
+Em vez de "Diagnóstico", "Observação", "Hipertensão", "Seguimento é semanal". O dado não está corrompido. Cada caractere acentuado está sendo **interpretado pelo encoding errado** — o computador lê os mesmos bytes assumindo que representam letras diferentes.
+
+Esse capítulo explica de onde vem essa bagunça, como evitar, e como configurar suas ferramentas para que ela não aconteça.
+
+## O problema fundamental: bytes não são caracteres
+
+Computadores armazenam bytes (números entre 0 e 255). Caracteres ("a", "ç", "ñ", "中") são uma camada de **interpretação**: você precisa de uma tabela que diga *byte 0xE7 = letra ç*.
+
+Essa tabela é o **encoding** (ou *charset*). Se quem grava usa uma tabela e quem lê usa outra, o resultado é o que você viu acima.
+
+Uma micro-história em três etapas:
+
+- **ASCII (1963)** — primeira padronização, 128 caracteres: A–Z, a–z, 0–9, pontuação básica. Suficiente para inglês americano. Insuficiente para tudo o mais — não tem `ç`, `á`, `ñ`, ideogramas, alfabeto cirílico ou árabe.
+- **Família ISO-8859 (anos 1980-90)** — extensões de 8 bits para "regionalizar" o ASCII. ISO-8859-1 (Latin-1) inclui acentos das línguas da Europa ocidental; ISO-8859-7 inclui grego; ISO-8859-5 cirílico. Cada região com seu encoding próprio. Microsoft criou variantes próprias (Windows-1252, CP1252) ligeiramente diferentes do ISO oficial. Resultado: caos.
+- **Unicode + UTF-8 (anos 1990-presente)** — Unicode é o catálogo único de **todos** os caracteres do mundo (>150 mil hoje, incluindo emojis e ideogramas) [@unicode2024standard]. UTF-8 é o jeito mais comum de **codificar** Unicode em bytes — projetado por Ken Thompson e Rob Pike em setembro de 1992, padronizado pela IETF como RFC 3629 em 2003 [@yergeau2003utf8].
+
+UTF-8 venceu por três razões: é compatível com ASCII (todo arquivo ASCII puro **já é** UTF-8 válido); usa quantidade variável de bytes por caractere (1 para ASCII, 2-4 para o resto), economizando espaço; e é o padrão de fato da web desde meados dos anos 2000.
+
+## A regra prática
+
+**Para todo arquivo de texto que você criar ou ler neste curso: UTF-8.** Sem exceção.
+
+Hoje, em 2026, **mais de 98% das páginas web** usam UTF-8. R, Python, Quarto, Git, GitHub e os IDEs do curso (Positron, VS Code, RStudio) tratam UTF-8 como padrão. O problema aparece quando você importa dado vindo de:
+
+- **Excel salvando CSV** (Windows): tradicionalmente exporta em Windows-1252 (CP1252), não UTF-8.
+- **Sistema antigo de prontuário ou banco de dados** que ainda usa Latin-1.
+- **Colaborador no Windows** com configuração regional Português-Brasil sem ter ajustado para UTF-8.
+
+## Sintomas de encoding errado
+
+Os sinais visuais ajudam a diagnosticar **qual** confusão aconteceu:
+
+| O que você vê | O que era para ser | Diagnóstico |
+|---|---|---|
+| `informaÃ§Ã£o` | informação | Arquivo é UTF-8, lido como Latin-1/Windows-1252 |
+| `informa��o` ou `informa???o` | informação | Bytes UTF-8 lidos como ASCII puro (sem mapa para acentos) |
+| `informa\xe7\xe3o` | informação | Bytes Latin-1 mostrados em escape sem decodificação |
+| `informa$#@&o` | informação | Encoding completamente desconhecido |
+| `ï»¿Paciente,Idade` | `Paciente,Idade` | BOM (Byte Order Mark) UTF-8 lido como caracteres normais |
+
+O primeiro caso (`Ã§Ã£`) é, de longe, o mais comum em PT-BR — ocorre quando o arquivo é UTF-8 mas o leitor assume Latin-1.
+
+::: {.callout-note}
+## O BOM e o caractere fantasma
+**BOM** (Byte Order Mark) é uma sequência de 3 bytes invisíveis (`EF BB BF`) que algumas ferramentas escrevem no início de arquivos UTF-8 para sinalizar o encoding. Excel no Windows é o ofensor mais conhecido: o CSV exportado começa com um BOM que muitos parsers ingenuamente leem como caractere normal — daí o `ï»¿` antes do nome da primeira coluna.
+
+UTF-8 **não precisa** de BOM (a especificação é unívoca sem ele). A recomendação prática: **gere arquivos UTF-8 sem BOM** sempre que possível.
+:::
+
+## Onde encoding pode dar problema
+
+| Local | Risco | Mitigação |
+|---|---|---|
+| `read.csv()` ou `read.table()` em R | Em Windows, default historicamente Latin-1 | Use `readr::read_csv()` (default UTF-8) ou explicite `fileEncoding = "UTF-8"` |
+| `pd.read_csv()` em Python | Default já é UTF-8, mas dado errado dá `UnicodeDecodeError` | Explicite `encoding="utf-8"`, ou tente `encoding="latin-1"` para dado legado |
+| Excel salvando CSV | Default Windows-1252 (com BOM no `.xlsx → CSV UTF-8`) | Salvar como **"CSV UTF-8 (delimitado por vírgula)"** — opção explícita no menu |
+| Console Windows (cmd, PowerShell antigo) | Default CP850 ou CP1252 | Use Windows Terminal moderno (UTF-8 por default desde 2019) |
+| `.Rprofile` ou `.R` em Windows | R pode salvar em ANSI dependendo da config | Configure UTF-8 no IDE (próxima seção) |
+| YAML com acentos | Quase sempre OK (YAML é UTF-8 por padrão) | Confirme que o `.qmd` está em UTF-8 |
+
+## Como configurar UTF-8 nos IDEs do curso
+
+**Positron / VS Code.** Veja a barra inferior direita da janela — costuma mostrar o encoding atual ("UTF-8" ou outro). Se não estiver UTF-8, clique e escolha **"Reopen with Encoding → UTF-8"** (para arquivo já aberto) ou **"Save with Encoding → UTF-8"** (para gravar). Para tornar padrão: **Settings → "files.encoding": "utf8"**.
+
+**RStudio.** Menu **Tools → Project Options → Code Editing → Default Text Encoding → UTF-8**. Para configurar globalmente: **Tools → Global Options → Code → Saving → Default text encoding → UTF-8**.
+
+**No `.Rprofile` do projeto** (R em qualquer IDE):
+
+``` r
+# .Rprofile — força UTF-8 em operações de leitura
+options(encoding = "UTF-8")
+Sys.setlocale("LC_ALL", "pt_BR.UTF-8")  # locale com acentos
+```
+
+**No terminal** (Windows Terminal, iTerm2, GNOME Terminal, etc.) — todos os modernos usam UTF-8 por padrão. Se ver `?` no lugar de acentos, verifique a configuração de fonte/locale do terminal.
+
+## A armadilha do Excel salvando CSV
+
+A mais comum em pesquisa médica brasileira: dados vêm em planilha Excel; alguém exporta como CSV; arquivo abre torto em R/Python.
+
+**O caminho seguro no Excel** (Office moderno, Microsoft 365):
+
+1. Em vez de **"Salvar como → CSV"**, escolha **"Salvar como → CSV UTF-8 (delimitado por vírgula) (\*.csv)"** — opção explícita no menu desde o Excel 2016.
+2. Confirme o resultado abrindo o `.csv` em qualquer editor de texto (Positron, VS Code) e verificando que acentos aparecem corretos.
+
+**O caminho mais seguro de todos:** pular o CSV. Use `readxl::read_excel()` em R ou `pandas.read_excel()` em Python para ler `.xlsx` direto, sem passar por exportação intermediária. Esse caminho é coberto no capítulo M3-B2-03 (Excel).
+
+## Conexão com IA
+
+Encoding é onde agentes de IA ajudam de forma direta:
+
+- **Diagnóstico de "código maluco" no terminal ou em arquivo:** copie o trecho com os caracteres errados e pergunte "o que aconteceu com este encoding?". O agente reconhece o padrão (`Ã§Ã£` = UTF-8 lido como Latin-1; `\xe7` = Latin-1 sem decodificar; `ï»¿` = BOM) e te diz o que ajustar.
+- **Conversão de arquivo:** "este `.csv` está em Latin-1, converta para UTF-8 sem BOM" — código de conversão em uma linha (R: `readr::read_csv(file, locale = locale(encoding = "latin1")) |> readr::write_csv(file_utf8)`; Python: equivalente com `pandas`).
+- **Verificação de arquivo:** "qual encoding tem `dados.csv`?" — agentes podem rodar `file -i dados.csv` (Linux/Mac) ou `chardet` (Python) e responder.
+
+::: {.callout-warning}
+## Atenção: o agente também pode escrever encoding errado
+Quando você cola texto com acentos diretamente no chat e pede ao agente para gravar num arquivo, raramente dá problema (ferramentas modernas conversam em UTF-8). Mas em fluxos automatizados, em sistemas legados, ou quando o agente roda em servidor com locale antigo, o resultado pode escapar para Latin-1 sem aviso. Sempre confirme abrindo o arquivo gerado num editor que mostra o encoding (canto inferior direito do Positron/VS Code).
+:::
+
+## O que vem a seguir
+
+Encoding errado é uma classe de problema cujo erro **fala com você** — o `UnicodeDecodeError`, o `Ã§Ã£`, o BOM-fantasma. Saber ler esses sinais é metade do trabalho. O próximo capítulo trata dessa habilidade de forma direta: **como ler mensagens de erro** (*stack traces*) sem entrar em pânico, transformando-as de obstáculo em informação acionável.
+
+→ [11 · Lendo mensagens de erro (stack trace)](11-mensagens-erro.qmd)

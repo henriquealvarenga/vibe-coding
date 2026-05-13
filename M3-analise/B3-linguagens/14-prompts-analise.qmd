@@ -1,0 +1,185 @@
+---
+title: "Padrões de prompt para gerar código de análise"
+---
+
+Este é o capítulo que opera a tese central do curso. Você abriu o Módulo 2 esperando aprender sintaxe de R, estruturas de dados em Python, como rodar uma regressão logística, como fazer um gráfico de sobrevida. **Os capítulos antigos que cobririam essas operações foram deletados** — substituídos por este, e por uma referência ao livro do autor para quem quiser ir fundo. A razão é a tese que aparece desde a abertura do curso: **você descreve em português o que quer; o agente de IA escreve o código**. Se isso é verdade, fica estranho ensinar 8 capítulos de "como escrever código" — porque é exatamente o que a IA faz pra você.
+
+O que sobra é o que a IA **não faz** sozinha: **decidir o que perguntar, validar o que ela respondeu, e integrar o resultado no fluxo de pesquisa**. Esse é o conteúdo deste capítulo. Não é "engenharia de prompt" no sentido genérico (técnicas universais para arrancar qualquer coisa de qualquer modelo) — é um conjunto pequeno de princípios pragmáticos para quem está fazendo análise de dados de pesquisa médica e quer que o agente realmente sirva ao trabalho.
+
+## A mudança de pré-requisito
+
+Aprender programação tradicionalmente exigia: aprender sintaxe da linguagem (`for`, `if`, `<-` em R ou `=` em Python), aprender estruturas de dados (vetor, lista, data frame), aprender bibliotecas específicas (qual função do `dplyr` faz o quê), aprender a depurar erros. Centenas de horas de prática para virar fluente.
+
+Vibe coding muda isso. O pré-requisito **muda de "saber programar" para "saber descrever"**. As três habilidades que ganham valor:
+
+1. **Descrever a análise com precisão.** Não é "calcule a média"; é "calcule a média da pressão arterial sistólica por grupo etário (faixas 18-29, 30-44, 45-64, 65+), excluindo valores faltantes, com intervalo de confiança 95%, agrupado por sexo".
+
+2. **Validar o que o agente devolveu.** Código rodou? Tem o `n` esperado? As estatísticas batem com cálculo manual rápido? Há sinal de algo silenciosamente errado?
+
+3. **Iterar com critério.** Quando algo não bate, descrever especificamente o que está errado, não só "está errado, conserte". Conduzir o agente como você conduziria um residente capaz mas inexperiente.
+
+Essas três habilidades **dependem de entender pesquisa médica e estatística**, não de programar. É exatamente onde o pesquisador tem vantagem.
+
+## Os quatro princípios
+
+Há mais detalhes possíveis, mas tudo cabe em quatro princípios que valem para qualquer prompt de análise:
+
+### 1. Sempre forneça contexto sobre os dados
+
+O agente não pode adivinhar o que está em `dados.csv`. Antes de pedir análise, **mostre o que tem**. As três peças mínimas:
+
+- **Estrutura:** o que é uma linha? Um paciente? Uma internação? Um exame?
+- **Variáveis-chave:** quais colunas existem, em que tipo, com que significado.
+- **Tamanho:** `n` total, distribuição grosseira (% de cada grupo).
+
+Exemplo de prompt **insuficiente**:
+
+> "Quero comparar a pressão arterial entre os dois grupos."
+
+Exemplo de prompt **adequado**:
+
+> "Tenho um data frame `coorte.parquet` com 487 pacientes, 18-89 anos, randomizados em dois grupos (`grupo`: 'intervencao' n=243, 'controle' n=244). Variáveis principais: `pas_sistolica` (mmHg, integer, baseline), `pas_sistolica_12sem` (mmHg, mesma unidade, semana 12), `idade`, `sexo` ('M'/'F'), `comorbidades` (string com lista separada por vírgula). Quero comparar a redução de pressão arterial sistólica entre os dois grupos da semana 0 à semana 12, ajustando por idade e sexo. Use R com tidyverse. Mostre primeiro estatística descritiva por grupo, depois o teste apropriado."
+
+A diferença não é "ser educado com o agente". É que o segundo prompt **dá ao agente as informações que ele precisa para acertar de primeira**. Sem isso, o agente vai assumir coisas (provavelmente erradas) e gerar código que não roda ou que produz análise inadequada.
+
+::: {.callout-tip}
+## Atalho útil: `head()` e `summary()`
+Em vez de descrever variáveis manualmente, você pode rodar `head(dados, 10)` e `summary(dados)` no R, copiar o output, e colar no prompt. Em Python: `dados.head(10).to_string()` e `dados.describe()`. O agente entende essa estrutura e infere tipos e distribuições. Economiza tempo de descrição.
+:::
+
+### 2. Especifique o resultado desejado, não só a operação
+
+O agente não sabe **o que é resultado correto** sem você dizer. Especifique:
+
+- **Formato de saída:** "tabela formatada para artigo, com média (DP) por grupo, e p-valor"; ou "gráfico ggplot2 com barras agrupadas por grupo, eixo Y de 0 a 200, título e legenda em português"; ou "vetor de p-valores ajustados por Bonferroni, ordenado".
+
+- **Critérios estatísticos:** "use teste t se distribuição normal, Mann-Whitney se não", "regressão linear múltipla", "modelo de Cox para sobrevida", "ajuste para múltiplas comparações via Holm". Você decide o método; o agente implementa.
+
+- **Apresentação:** "comente cada bloco de código", "use `pipe` em vez de funções aninhadas", "salve o gráfico como PNG 300dpi em `output/figura-2.png`".
+
+A regra geral: o agente é melhor implementando que decidindo. **Você decide o método estatístico; o agente escreve o código**. Não delegue decisão metodológica.
+
+### 3. Valide o output antes de seguir
+
+Quando o agente devolve código + resultado, **três checagens rápidas** evitam bugs silenciosos:
+
+- **`n` bate.** O número de observações usadas no resultado é o esperado? Se você tem 487 pacientes mas o output diz "n=423 observações usadas", investigue por quê (NAs? filtro inesperado?).
+- **Estatísticas básicas batem.** Médias, medianas, contagens — comparáveis com o que você lembrava do `summary()` inicial? Discrepâncias grandes indicam problema.
+- **Direção dos efeitos faz sentido clínico.** Se a intervenção deveria reduzir pressão e o resultado mostra aumento, ou é achado importante (raro), ou é bug (mais comum).
+
+Não confie no output só porque rodou sem erro. **"Rodou sem erro"** é necessário mas insuficiente.
+
+### 4. Itere com especificidade, não com vagueza
+
+Quando algo não funciona, descreva **o que está errado especificamente**, não "está errado, conserte". Comparação:
+
+**Iteração ineficiente:**
+> "Não funciona."
+
+**Iteração útil:**
+> "O código rodou mas o `n` final foi 423 em vez dos 487 esperados — investigue se há filtro implícito ou casos com NA sendo descartados. E o teste t devolveu p < 0.001 mas as médias por grupo são quase idênticas (138 vs 137 mmHg). Pode ser tamanho de amostra inflando ou erro de cálculo — verifique."
+
+A segunda iteração **dá ao agente o material para corrigir**: o que está errado, em que direção, com que evidência. Sem isso, o agente vai fazer mudanças aleatórias que podem ou não ajudar.
+
+## Workflow completo: anatomia de uma sessão
+
+O fluxo típico de análise via vibe coding, do início ao resultado utilizável:
+
+**Passo 1: Contexto.** Abra `head()` e `summary()` no console. Copie o output. Cole no chat com descrição do estudo (delineamento, hipótese principal, variável de desfecho).
+
+**Passo 2: Descrição da análise.** Em PT-BR, descreva o que você quer extrair desses dados — métodos estatísticos específicos, variáveis envolvidas, formato de saída.
+
+**Passo 3: Recebe código.** Agente devolve script R ou Python (preferencialmente o que você indicou). Cole no editor da IDE (Positron, VS Code, RStudio).
+
+**Passo 4: Roda.** Executa o script no console. Observa output.
+
+**Passo 5: Valida.** Aplique as três checagens (`n`, estatísticas básicas, direção). Pode levar 30 segundos para análises simples, vários minutos para análises complexas. Esse tempo é o que **você precisa investir** — o agente fez o resto.
+
+**Passo 6: Itera ou aceita.** Se algo está errado, volta ao passo 2 com descrição específica do problema. Se está OK, segue para a próxima análise.
+
+**Passo 7: Documenta.** No final, peça ao agente: *"escreva os parágrafos de Métodos e Resultados em formato adequado para artigo, baseados nesta análise."* O agente devolve texto pronto para revisão humana.
+
+Esse fluxo — descrição → código → validação → texto — substitui o fluxo tradicional de "decorar sintaxe → escrever código → debugar → fazer gráfico → escrever Métodos manualmente". O ganho de tempo costuma ser de uma ordem de magnitude para análises rotineiras.
+
+## Anti-padrões comuns
+
+Algumas armadilhas frequentes — vale conhecer para evitar:
+
+**1. Pedir código sem objetivo claro.** *"Faça uma análise dos meus dados."* O agente vai chutar — pode rodar regressão linear quando você queria sobrevida, pode escolher variáveis errnadas, pode gerar gráficos inúteis. Sempre tenha **uma pergunta clínica específica** antes de pedir código.
+
+**2. Colar mensagem de erro sem contexto.** *"Esse erro: 'object 'x' not found'. Conserte."* O agente não sabe o que é `x`, em que código, em que momento. **Sempre cole o erro junto com o trecho de código que produziu o erro**, e idealmente a saída completa do console.
+
+**3. Confiar em conversões silenciosas.** Quando o agente "consertou" os dados, ele pode ter feito coisas que você não percebeu — descartado linhas, mudado tipos, recodificado categorias. **Sempre confira `n` e amostras** depois de "consertos".
+
+**4. Não fixar `set.seed()` em análises com aleatoriedade.** Bootstrap, simulação, validação cruzada, *random forest* — qualquer método com aleatoriedade dá resultado ligeiramente diferente a cada execução. Sem `set.seed()`, **a análise não é reproduzível**, e o agente nem sempre lembra de adicionar. Verifique sempre que houver aleatoriedade.
+
+**5. Aceitar análise estatisticamente inadequada porque o código rodou.** O agente sabe rodar uma ANOVA. Ele nem sempre sabe se ANOVA é o teste **certo** para o seu desenho experimental. Se a análise envolver delineamento complexo (medidas repetidas, dados aninhados, censura), **revise a escolha metodológica com olhos humanos** — o agente é menos confiável aqui.
+
+::: {.callout-warning}
+## A escolha do método ainda é sua
+A IA é boa em **executar** análise estatística; é mais frágil em **escolher** o método correto para cada situação. Especialmente em delineamentos não-padrão (cluster RCTs, *step-wedge*, dados longitudinais com missing pattern complexo, sobrevida com risk competidor), agentes podem propor análises que parecem razoáveis mas são metodologicamente inadequadas.
+
+A regra: **decisão metodológica é responsabilidade humana**. Se você não tem certeza qual teste usar, consulte estatístico, leia bibliografia da área, mas **não terceirize a decisão para a IA**. O agente faz o que você manda — se a ordem está errada, o resultado também estará.
+:::
+
+## AGENTS.md: contrato persistente
+
+Repetir contexto a cada nova conversa é desperdício. Para projetos sérios, **fixe convenções e contexto em um arquivo `AGENTS.md`** na raiz do projeto. Esse arquivo é lido automaticamente por agentes modernos (Claude Code, Codex CLI, Cowork) e funciona como "memória persistente" — você não precisa explicar de novo a cada vez que abre o projeto.
+
+Exemplo mínimo de `AGENTS.md` para projeto de análise de coorte:
+
+```markdown
+# Contexto do projeto
+
+Estudo de coorte sobre [tema]. n=487 pacientes, follow-up 12 meses.
+Variável principal de desfecho: `pas_sistolica_12sem`.
+
+## Convenções
+
+- Linguagem: R com tidyverse. Não use base R quando dplyr resolver.
+- Sempre use `set.seed(12345)` em métodos com aleatoriedade.
+- Para gráficos: ggplot2, salve em `output/` em PNG 300dpi.
+- Para tabelas: `gtsummary` para artigo, `kable` para preview.
+
+## Convenções estatísticas
+
+- Comparações entre 2 grupos: t de Welch (não assume variância igual).
+- Comparações entre 3+ grupos: ANOVA + Tukey HSD ou Kruskal-Wallis + Dunn.
+- Sobrevida: Kaplan-Meier com log-rank; Cox para ajuste.
+- Múltiplas comparações: ajuste por Holm-Bonferroni.
+
+## O que NÃO fazer
+
+- Não invente análises não solicitadas.
+- Não modifique `dados/raw/` — só leitura.
+- Não comite arquivos com PHI (CPF, prontuário) por engano.
+```
+
+O capítulo `M1-B2-05 O arquivo AGENTS.md` cobre o tema em detalhe. Para análise de dados, esse arquivo economiza tempo significativo ao longo de um projeto.
+
+## Reprodutibilidade quando a IA escreve o código
+
+Vibe coding produz código de verdade — código que vai pra `scripts/01-limpeza.R`, vai pro Git, vai pro `.qmd` final. Esse código tem a mesma exigência de reprodutibilidade que código escrito à mão. O fluxo:
+
+1. Agente gera o código.
+2. Você cola no editor, salva como arquivo (`scripts/02-analise.R`).
+3. **Commita no Git** com mensagem descritiva (`git commit -m "Análise comparativa de PA, regressão ajustada por idade/sexo"`).
+4. O ambiente isolado (`renv` em R, `uv` em Python) garante que o código rode com as mesmas versões no futuro.
+5. **Documente uso de IA** no Métodos do artigo, conforme orientações do M1-B1-05 (Documentar uso de IA) e do ICMJE.
+
+A IA escrever o código **não dispensa** as outras camadas de reprodutibilidade. Pelo contrário — torna mais importante, porque sem disciplina, código gerado por IA pode virar caixa-preta que nem você entende seis meses depois.
+
+## Conexão com os módulos seguintes
+
+Este capítulo fecha o Bloco *Python e R* e o Módulo 2 inteiro. Os módulos finais aprofundam pontos específicos que apareceram aqui:
+
+- **Módulo 3 (Publicação e reprodutibilidade)** — versionamento Git, GitHub Pages, lockfiles, princípios FAIR de dados, DOI para datasets.
+- **Módulo 4 (Capstone)** — projeto integrador onde você aplica vibe coding na docência, do levantamento de dados ao site publicado.
+
+A combinação de vibe coding + Quarto + Git + ambientes isolados que veremos a partir daqui é, em síntese, a operacionalização da tese do curso: **pesquisa médica reprodutível, com texto e código convivendo, escrita em colaboração com IA, publicada em formatos abertos**.
+
+## O que vem a seguir
+
+Você fechou o Bloco *Python e R*, e com ele o **Módulo 2** inteiro. O **Módulo 3** trata de duas coisas que costuram tudo que vimos até aqui: **versionamento e publicação reprodutível**. Git para rastrear mudanças. GitHub para colaborar e publicar. GitHub Pages para hospedar o site Quarto. Princípios FAIR para datasets. Reprodutibilidade institucionalmente reconhecível.
+
+→ [Módulo 3 · Git, GitHub e GitHub Pages](../../M4-publicacao/B1-git/01-versionamento.qmd)

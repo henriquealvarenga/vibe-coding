@@ -1,0 +1,94 @@
+---
+title: "Positron"
+---
+
+Positron é a IDE recomendada deste curso. Um modo simples de descrever o que ele é: pegue o **VS Code** (editor de código mais usado do mundo) como base técnica, herde a experiência do **RStudio** (a IDE clássica de ciência de dados), tire as fricções de cada um, junte e renomeie. É um produto novo no calendário (anunciado em 2024), mas com herança longa, e a história dessa herança vale conhecer.
+
+## A linhagem
+
+Para entender o Positron, vale entender as duas linhagens que ele combina.
+
+### A linhagem RStudio (2009 → 2022)
+
+Em 2009, **J.J. Allaire** — empreendedor de software com histórico em produtos de programação web (foi cofundador da Allaire Corporation, criadora do ColdFusion nos anos 1990, vendida à Macromedia em 2001) — fundou uma startup chamada **RStudio Inc.** com a missão específica de criar uma IDE moderna para a linguagem R. R era, na época, uma linguagem dominante em estatística mas com ferramentas pobres: editores genéricos, console isolado, fluxo confuso. Allaire viu a oportunidade.
+
+A primeira versão do **RStudio IDE** [@rstudio2024ide] saiu em fevereiro de 2011. Em pouco tempo virou padrão absoluto em estatística, biostatística, epidemiologia, e ensino de R no mundo todo. A partir dali, a empresa cresceu construindo uma família de produtos em volta do R: pacotes (`tidyverse`, `shiny`, `rmarkdown`), serviços corporativos (Posit Workbench, Posit Connect), conferências (rstudio::conf, depois positconf).
+
+Em **agosto de 2022**, a empresa mudou de nome de RStudio Inc. para **Posit PBC** (*Public Benefit Corporation*, um tipo de empresa norte-americana que combina fins lucrativos com missão social explícita). A razão alegada foi pragmática: o produto principal não era mais "uma IDE para R" — era uma família de ferramentas para ciência de dados em geral, incluindo Python e Quarto. Manter o nome RStudio para a empresa criava confusão. RStudio (a IDE) continua existindo e sendo mantida; o que mudou foi o nome do guarda-chuva corporativo. Capítulo seguinte (`03-rstudio.qmd`) trata da IDE em si.
+
+### A linhagem VS Code (2015 → presente)
+
+Paralelamente, a Microsoft havia lançado o **Visual Studio Code** em 2015. Ao contrário do Visual Studio "completo" (pesado, comercial, focado em desenvolvimento Windows profissional), o VS Code foi construído como editor leve, gratuito, multi-plataforma, e open source no núcleo.
+
+O que mudou o jogo: o VS Code foi construído sobre **Electron** (framework que permite criar aplicativos desktop usando tecnologias web — HTML, CSS, JavaScript), e seu núcleo foi liberado como **Code OSS** (*Open Source Software*) sob licença MIT. A Microsoft usa esse núcleo para construir o "Visual Studio Code" oficial (com telemetria, branding, *marketplace* proprietário), mas qualquer outra organização pode pegar o Code OSS e fazer seu próprio produto em cima — foi exatamente isso que outras IDEs (Cursor, Windsurf, Theia, e agora Positron) fizeram.
+
+VS Code virou o editor de código mais usado do mundo. Capítulo `04-vscode.qmd` trata dele em detalhe.
+
+### A síntese: Positron (2024)
+
+Em 2024, a Posit anunciou o **Positron** [@positron2024]. A jogada: pegar o Code OSS como fundação (ganhando de graça toda a maturidade do ecossistema VS Code — atalhos, paleta de comandos, extensões via Open VSX, suporte multi-linguagem) e construir por cima a experiência de uso que tornou o RStudio sucesso (painéis dedicados a dados, plots, variáveis; integração profunda com R, Python e Quarto; workflow centrado em sessão interativa).
+
+```
+                                  ┌──────────────────┐
+                                  │  Positron        │
+                                  │  (Posit, 2024)   │
+                                  └────────▲─────────┘
+                                           │
+                                           │ herda foco em
+                                           │ ciência de dados do RStudio (2011)
+                                           │
+   ┌──────────────┐    base       ┌────────┴─────────┐
+   │  Code OSS    │ ────────────▶ │  VS Code         │
+   │  (núcleo     │   da própria  │  (Microsoft,     │
+   │   open       │   Microsoft   │   2015)          │
+   │   source)    │               └──────────────────┘
+   └──────────────┘
+```
+
+Positron está **em estágio inicial** — em 2026 o produto ainda é considerado preview público, com lançamentos frequentes e algumas arestas. Mas é funcional para o curso inteiro.
+
+## O que diferencia o Positron
+
+Comparado com VS Code "puro" usado para R/Python:
+
+- **R e Python prontos sem configurar.** No VS Code, suporte a R e Python depende de extensões instaladas e configuradas pelo usuário (extensões oficiais do R, do Python, do Jupyter, do Quarto, todas separadas). No Positron, abrir o programa já entrega tudo isso integrado.
+
+- **Console é cidadão de primeira classe.** No VS Code, console interativo é frescura — geralmente você roda código célula a célula em notebook ou comando direto no terminal. No Positron, o console persiste, mantém um REPL vivo de R ou Python (escolha sua), e a "vida" da sessão acontece ali.
+
+- **Painéis dedicados a dados, plots e variáveis.** O *Variables Pane* mostra tudo que está em memória; o *Data Explorer* abre data frames como planilha interativa com filtros e estatísticas; o *Plots Pane* coleciona gráficos gerados na sessão (com histórico para você navegar). Tudo isso herdado do RStudio.
+
+- **Integração nativa com Quarto.** Editar um `.qmd` no Positron tem preview ao vivo, syntax highlighting de chunks de código, *outline* de seções, e o comando "Render" disponível na paleta. Funciona pronto para uso, sem extensões a instalar.
+
+Comparado com RStudio:
+
+- **Polyglot por design.** RStudio foi desenhado primariamente para R; Python é suportado mas como cidadão de segunda classe. Positron trata R, Python (e outras linguagens via Code OSS) com paridade.
+
+- **Plataforma extensível.** Por herdar a arquitetura de extensões do VS Code, Positron pode usar o ecossistema do **Open VSX** ([open-vsx.org](https://open-vsx.org)) — uma alternativa aberta ao marketplace proprietário da Microsoft — que tem milhares de extensões disponíveis. RStudio tem *addins* mas são bem mais limitados.
+
+- **Mais moderno em recursos visuais.** Renderização acelerada, suporte a temas, tipografia melhor, abas e painéis flexíveis.
+
+## O estado atual em 2026
+
+Algumas coisas a saber sobre o Positron como ele está hoje:
+
+- **É preview público** — versões saem com frequência, e algumas funcionalidades específicas do RStudio (como o `R Notebooks` antigo, ou alguns *addins* de pacotes muito específicos) ainda não têm equivalente direto.
+- **Distribuído gratuitamente** pela própria Posit em [positron.posit.co](https://positron.posit.co). Instalação coberta no capítulo `M0-B1-02 IDEs`.
+- **Aceita extensões do Open VSX** automaticamente, e algumas do marketplace oficial do VS Code com configuração manual.
+- **Suporte de longo prazo da Posit** — a empresa apostou no Positron como produto principal de IDE, e RStudio segue como produto paralelo.
+
+::: {.callout-tip}
+## Migrar do RStudio para o Positron
+Se você já usa RStudio, a migração para Positron é direta — atalhos básicos foram preservados (`Cmd+Enter` para rodar linha, etc.), painéis seguem layout parecido, suporte a `.qmd` é equivalente. O que muda é a aparência geral (mais escuro, mais minimalista, com paleta de comandos no estilo VS Code via `Cmd+Shift+P`). Vale tentar uma semana antes de decidir.
+:::
+
+## Conexão com IA
+
+A Posit está integrando agentes de IA no Positron via **Posit Assistant**, ainda em estágio inicial em 2026. Mas o caminho mais usado hoje é diferente: **rodar agentes CLI no terminal embutido**. Como Positron herda o terminal integrado do VS Code, você pode abrir um terminal dentro da própria IDE e invocar Claude Code, Codex CLI ou Gemini CLI ali — eles operam sobre o projeto aberto, têm acesso ao mesmo workspace, e suas alterações aparecem refletidas imediatamente nos painéis de arquivos da IDE.
+
+Esse é, na prática, o workflow recomendado deste curso: **Positron como ambiente, agente CLI no terminal embutido**. Você pede ao agente em português o que quer; ele edita os `.qmd`, os scripts, os YAMLs; você vê as mudanças aparecerem nos painéis e pode revisar antes de commitar.
+
+## O que vem a seguir
+
+O próximo capítulo trata da IDE que ainda hoje é a mais usada em pesquisa estatística no mundo: o **RStudio**. Por que existe, quando ainda faz sentido escolher RStudio em vez de Positron, e o que esperar dele.
+
+→ [03 · RStudio](03-rstudio.qmd)

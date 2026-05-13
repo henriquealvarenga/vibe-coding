@@ -1,0 +1,263 @@
+---
+title: "Prompt para AGENTS.md focado em comportamento"
+---
+
+Você já sabe o que é o `AGENTS.md` — arquivo de contexto persistente, na raiz do projeto, que agentes de IA leem automaticamente antes de cada conversa. No capítulo anterior você usou um prompt para gerar a estrutura inicial do projeto e fez o primeiro commit. Falta a peça que conecta os dois: **calibrar a parte mais delicada do `AGENTS.md` — o bloco "Comportamento do agente" — para o seu projeto específico**.
+
+
+O `AGENTS.md` responde uma pergunta: **"em quais decisões eu não quero ter que repetir minha preferência a cada conversa?"**. Se a resposta é *"sempre quero que o agente planeje antes de criar mais de três arquivos"*, vai no `AGENTS.md`. 
+
+## As decisões de comportamento
+
+Cada decisão abaixo é regra que se aplica a **toda** conversa naquele projeto. As três primeiras são as que mais previnem acidente; as quatro últimas, as que mais melhoram qualidade do output.
+
+### 1. Plan-first em mudanças estruturais
+
+Antes de criar mais de três arquivos novos, fazer refatoração ampla, ou mexer em configuração compartilhada (`_quarto.yml`, sidebar, navbar, `.gitignore`), o agente apresenta o plano completo e **aguarda confirmação explícita**. Edição local em arquivo já existente segue direto.
+
+Por que importa: refatoração ampla sem revisão tem alto custo de reversão — você descobre o problema cinco minutos depois, quando já está em quinze arquivos. Sem essa regra, o agente oscila entre perguntar demais e cansar você ou fazer doze mudanças sem revisão. Você nunca sabe qual modo vai pegar.
+
+### 2. Lista taxativa de ações que pedem confirmação
+
+Não basta "use bom senso". Lista nominal:
+
+- Criar, renomear, mover ou deletar arquivos.
+- Comandos destrutivos: `rm -rf`, `git push --force`, `git reset --hard`, `DROP TABLE`, `--allow-root`.
+- Instalar ou remover dependência (mexe em `renv.lock`, `pyproject.toml`, `uv.lock`).
+- Mudar configuração de publicação (Quarto YAML, GitHub Pages, deploy).
+
+Por que importa: "bom senso" não é regra, é convite à improvisação. E improvisação inconsistente cansa o humano que ora aprova decisão miúda, ora descobre depois que mudança grande passou sem revisão.
+
+### 3. Verificação antes de afirmar fatos voláteis
+
+Versões de software, datas de release, capacidades de produto, comportamentos de API, citações bibliográficas — qualquer fato que possa ter mudado desde o conhecimento do modelo, o agente busca em fonte primária antes de afirmar. Se não consegue verificar, **marca explicitamente como "não verificado"** em vez de afirmar com confiança.
+
+Por que importa: o comportamento padrão do agente é preencher lacunas com o plausível. Em chat casual, isso é tolerável. Em projeto acadêmico, vira erro citável. A regra inverte o default: na dúvida, declara dúvida.
+
+### 4. Não-fabricação como regra dura, com exemplos do que conta
+
+Não basta dizer "não invente referências". Precisa especificar o que conta como fabricação, porque o agente lê "exemplo didático" como permissão de inventar. Listar:
+
+- Citação fictícia dentro de exemplo de código (`# ver Smith 2011`) **conta** como fabricação.
+- Link plausível mas inexistente **conta**.
+- Output estatístico sem ter rodado o código **conta**.
+- Versão de software inferida a partir do nome (`pacote v3.2.1`) **conta**, se não foi verificada.
+
+Por que importa: sem essa granularidade, o agente respeita a regra na superfície (não inventa autores famosos) mas viola na minúcia (inventa autores plausíveis em comentários de código). E minúcia em projeto acadêmico vai virar problema na revisão.
+
+### 5. Comentários e tom de redação
+
+Comentários em código explicam **por que**, não **o que**. Texto em `.qmd` segue o tom do projeto: didático-conversacional, prosa em vez de listas quando possível, callouts (`note`/`tip`/`warning`) quando ajudam clareza, tabelas comparativas onde economizam parágrafos, sem hard-wrap nos parágrafos.
+
+Por que importa: o estilo padrão do agente é listar tudo em bullets e comentar o óbvio. Sem regra explícita de tom, o resultado é texto que parece índice e código que parece tutorial para iniciante. Em projeto onde o agente também escreve documentação ou capítulos do site, a regra de tom é o que mantém voz consistente.
+
+### 6. Convenções de nomeação que valem para todo arquivo
+
+Case por extensão (kebab-case para `.qmd`, snake_case para `.R`/`.py`), prefixos numéricos *zero-padded* (`01-`, `02-`), nomes que descrevem intenção e não versão. **Essa seção é estrutural** — não muda quando a análise muda — e por isso pertence ao `AGENTS.md`.
+
+### 7. Documentação de uso de IA
+
+Quando o agente contribui para artefato de pesquisa (manuscrito, análise, script), o uso é documentado conforme recomendações do ICMJE: comentário no cabeçalho do script identificando contribuição agêntica, e seção "Reconhecimento de uso de IA" no manuscrito quando o conteúdo gerado é substantivo. A regra precisa estar no `AGENTS.md` porque, sem ela, o uso vira invisível — e meses depois ninguém sabe o que foi humano e o que foi IA.
+
+## Caso especial: prompts longos contra alucinação
+
+A regra de não-fabricação (item 4 acima) é a mais difícil de calibrar. Diferente de *"plan-first"* — onde fazer ou não fazer é binário —, *"não invente"* exige descrever **o que conta como invenção**, **como se manifesta**, e **o que fazer quando você não tem certeza**. Sem essa especificidade, o agente lê a regra como aspiração, e a primeira vez que encontra um buraco no contexto, preenche.
+
+Circulou online, em 2025-2026, um prompt longo de antialucinação que detalha esse comportamento até o nível de "antes de responder, audite cada afirmação". Independentemente da origem, é instrutivo porque mostra a granularidade necessária para a regra funcionar:
+
+::: {.callout-note collapse="true"}
+## Prompt antialucinação (origem atribuída à OpenAI, não verificada)
+
+> Operate as an expert assistant under a strict Truth & Transparency Protocol. Objectives: factual accuracy, rigorous verification, transparent sourcing, and explicit uncertainty. Verify first, answer second. Never guess or fabricate. Prefer accuracy over speed and separate facts from interpretations. Make assumptions and limits explicit.
+>
+> Sources: prefer official standards/docs, peer-review, vendor/maintainer docs, reputable institutions/media, named experts. Check recency, authority, relevance. When sources conflict, show dated positions with citations, compare evidence, and conclude with a confidence level.
+>
+> Response order: 1) Answer—direct and concise. 2) Evidence—citations with author/org, title, publisher, date, URL. 3) Method & Checks—assumptions, logic; for numbers/code show inputs, units, equations, digit-by-digit steps, sanity check. 4) Limits & Confidence—end with Confidence: Low/Medium/High. 5) Timestamp & Locale—"As of YYYY-MM-DD (Timezone), sources checked."
+>
+> Rules: cross-check key claims with >=2 credible sources when feasible; cite all important or time-sensitive claims; avoid personal data; no background work promises.
+>
+> Workflow: clarify claims -> select sources (note dates/versions) -> corroborate -> resolve conflicts -> quantify/check -> handle uncertainty ("I cannot confirm this; need X") -> assemble -> self-audit.
+>
+> Avoid: speculation, overconfidence, outdated/unverifiable claims, biased framing, missing citations, hidden assumptions.
+>
+> From now on You MUST:
+>
+> - Always tell the truth — never invent, speculate, or guess.
+> - Base all statements on verifiable, factual, up-to-date sources.
+> - Clearly cite the source of every claim in a transparent way (no vague references).
+> - Explicitly state "I cannot confirm this" if something is uncertain.
+> - Prioritize accuracy over speed — take the necessary time to respond carefully.
+> - Maintain objectivity — remove personal bias, opinions, or unsupported interpretations.
+> - Only present interpretations supported by credible evidence.
+> - Explain reasoning step-by-step, especially when accuracy matters.
+> - Show how any numerical figure was calculated.
+> - Present information clearly and transparently so the user can trust it.
+>
+> You MUST AVOID:
+>
+> - Fabricating facts, quotes, or data.
+> - Using outdated or unreliable sources without warning.
+> - Omitting source details for any claim.
+> - Presenting speculation, rumor, or opinion as fact.
+> - Using AI-generated citations that don't correspond to real sources.
+> - Answering if unsure without disclosing uncertainty.
+> - Making confident statements without proof.
+> - Using filler or vague wording to cover uncertainty.
+> - Giving misleading partial truths.
+> - Prioritizing sounding good over being correct.
+>
+> **Final Failsafe Step (Before Responding).** Ask internally: *"Is every statement in my response true, sourced, and transparently explained?"* If not, revise before responding.
+:::
+
+::: {.callout-warning}
+## Não cole esse prompt inteiro no `AGENTS.md`
+Tem cerca de 60 linhas, é todo em inglês, e o agente lê o arquivo do começo ao fim em **toda** conversa. Regras infladas perdem sinalização: o agente passa por elas em modo *skim*. O que funciona é **destilá-lo** em umas 10-15 linhas em PT-BR para o bloco "Comportamento do agente" do seu `AGENTS.md`.
+:::
+
+A destilação que eu colocaria — adaptada ao tom e idioma do projeto:
+
+```{.markdown filename="trecho do AGENTS.md"}
+## Verificação e não-fabricação
+
+- Verificar antes de afirmar. Versões, datas, capacidades de
+  produto, citações: buscar fonte primária antes de declarar.
+- Citar com transparência. Toda afirmação carregada de fato
+  deve ter origem identificável (autor, título, data, link).
+- Declarar incerteza explicitamente. "Não consegui confirmar"
+  é resposta válida; afirmar com confiança sem evidência, não.
+- Mostrar cálculos. Números no texto vêm acompanhados do
+  raciocínio que os produziu (não "aproximadamente 30%").
+- Nunca fabricar. Inclui: citações em comentários de código,
+  outputs estatísticos não rodados, versões inferidas, links
+  plausíveis. "Exemplo didático" não é exceção.
+- Auditar antes de responder. Em cada turno, verificar
+  internamente: cada afirmação é verdadeira, atribuída a uma
+  fonte, e explicada com transparência? Se não, revisar antes
+  de mandar.
+```
+
+Essa versão preserva o que importa do prompt original (verificação, citação, declaração de incerteza, antifabricação granular, auditoria final) sem inflar o arquivo. Cabe num bloco do `AGENTS.md`, é lido com atenção pelo agente, e fala diretamente ao caso de pesquisa em saúde.
+
+::: {.callout-tip}
+## Quando usar o prompt longo
+O prompt longo serve mais como **prompt de turno** em consulta crítica do que como `AGENTS.md`. Se você está cobrindo a literatura para a discussão do artigo, ou validando um claim de revisor, cole o prompt inteiro no início daquela conversa específica. Para o dia a dia, a destilação no `AGENTS.md` basta.
+:::
+
+## O prompt-modelo para gerar o `AGENTS.md` calibrado
+
+Com a moldura clara, o prompt para gerar o `AGENTS.md` do seu projeto fica direto. Ele entrega ao agente o conteúdo de partida das cinco seções estruturais (já em PT-BR, prontas para o agente adaptar ao seu projeto) e abre uma entrevista para calibrar as duas seções que dependem do seu modo de trabalho — **Comportamento do agente** e **Especificidades deste projeto**.
+
+> Vou criar o `AGENTS.md` deste projeto — arquivo de contexto persistente que agentes de IA (Claude Code, Codex, Gemini CLI, Cowork) leem automaticamente antes de cada conversa. Quero um arquivo curto, em PT-BR, organizado em sete seções. Para cinco delas eu já tenho conteúdo de partida que você deve **usar como base**, adaptando ao meu projeto. As outras duas — **Comportamento do agente** e **Especificidades deste projeto** — você vai calibrar comigo via entrevista.
+>
+> ---
+>
+> **Conteúdo de partida — adapte ao meu projeto e mantenha:**
+>
+> ````markdown
+> ## Sobre este projeto
+>
+> - **Tipo:** [PREENCHER: ex. site Quarto de pesquisa, análise de coorte, RCT, revisão sistemática].
+> - **Idioma de escrita:** [PREENCHER: PT-BR / EN / outro].
+> - **Stack:** [PREENCHER: ex. Quarto + R + Python + Git].
+> - **Bibliografia:** [PREENCHER caminho do `.bib` e do `.csl`, ou "não aplicável"].
+>
+> ## Convenções de nomeação (consistência > preferência)
+>
+> - **Arquivos `.qmd`** (viram URLs no site): *kebab-case* minúsculo, sem acentos, sem espaços. Exemplo: `analise-sobrevida.qmd`, NÃO `Analise_Sobrevida.qmd`.
+> - **Arquivos `.R`, `.py`, `.ipynb`** (código): *snake_case* minúsculo, sem acentos. Exemplo: `analise_sobrevida.R`. Hífen quebra import no Python.
+> - **Variáveis, funções e colunas de dataframe:** *snake_case* minúsculo (convenção do tidyverse e do PEP 8). Exemplo: `idade_anos`, `calcular_media`, `df$pressao_arterial`.
+> - **Constantes** (parâmetros que não mudam em runtime): `UPPER_SNAKE_CASE`. Exemplo: `ALPHA_NIVEL = 0.05`, `IDADE_MIN_INCLUSAO = 18`.
+> - **Nomes descrevem intenção, não implementação ou versão.** Bom: `analise_sobrevida_por_grupo.R`. Ruim: `script_v3_final.R`.
+> - **Nunca usar sufixos de versão** como `_v2`, `_final`, `_FINAL_DEFINITIVO`. Versionamento é responsabilidade do Git, não do nome do arquivo.
+> - **Filesystem case-insensitive (macOS/Windows):** localmente, `Claude.qmd` e `claude.qmd` parecem o mesmo arquivo, mas em servidor Linux são URLs diferentes. Sempre use minúsculas desde o início.
+> - **Nunca misture convenções no mesmo projeto.**
+>
+> ## Configurações externalizadas
+>
+> - Parâmetros do projeto (caminhos, limiares estatísticos, *seeds*, critérios de inclusão) ficam em `config.yml` ou `_variables.yml` na raiz, **nunca espalhados como literais pelos scripts**.
+> - Lockfiles obrigatórios para reprodutibilidade: `renv.lock` (R) e/ou `pyproject.toml` + `uv.lock` (Python).
+>
+> ## Comentários no código
+>
+> - Explicam o **por que** de uma decisão (escolha de teste estatístico, justificativa de transformação), não **o que** o código faz (que o próprio código já mostra).
+> - Não comente o óbvio (`# soma a + b`).
+>
+> ## Tom de redação dos textos
+>
+> - Didático, conversacional, mas rigoroso.
+> - Usar callouts do Quarto: `note`, `tip`, `warning` conforme apropriado.
+> - Usar tabelas comparativas quando ajudarem clareza.
+> - Blocos de código com `filename` quando útil para o leitor.
+> - "O que vem a seguir" no fim de cada capítulo, ligando ao próximo.
+> - Cortar redundância. Não inflar texto.
+> ````
+>
+> ---
+>
+> **Seções que vamos calibrar agora via entrevista:**
+>
+> O foco principal é **Comportamento do agente**. **Não me entregue arquivo pronto** — me entreviste primeiro, uma decisão por vez. Para cada item abaixo, faça uma pergunta com 2-3 opções concretas, espere minha resposta, e só passe ao próximo:
+>
+> 1. **Plan-first.** Quão agressivo? (Sempre planejar / Planejar só em mudança estrutural — criar mais de N arquivos, renomear pastas, mexer em config compartilhada / Executar direto e me avisar depois.)
+> 2. **Confirmação humana.** Lista de ações que sempre pausam para minha aprovação. Sugira o conjunto inicial (criar/renomear/mover/deletar arquivos; comandos destrutivos; instalar/remover dependência; mudar config de publicação); eu adiciono e removo.
+> 3. **Verificação de fatos voláteis.** Como tratar versões, datas, capacidades de produto, citações bibliográficas quando você não consegue verificar em fonte primária? (Marcar "não verificado" / Pular afirmação / Pedir confirmação humana.)
+> 4. **Não-fabricação granular.** Confirme se a regra de não inventar vale também para: citações em comentários de código (`# ver Smith 2011`), exemplos didáticos, outputs estatísticos não rodados, links plausíveis mas não checados, versões de software inferidas. Quero a regra mais dura possível.
+> 5. **Comandos destrutivos.** Lista do que sempre exige confirmação explícita: `rm -rf`, `git push --force`, `git reset --hard`, `DROP TABLE`, `--allow-root`, outros que sugerir.
+> 6. **Estilo de redação específico.** Algo a adicionar ao tom-padrão acima? (Sem hard-wrap em parágrafos de `.qmd` / Prosa em vez de listas onde possível / Outro / Não acrescentar nada.)
+> 7. **Documentação de uso de IA.** Como registrar contribuição do agente em scripts e manuscritos. (ICMJE: comentário no cabeçalho do script + seção "Reconhecimento de uso de IA" no manuscrito / Outro / Não documentar.)
+>
+> Depois, me pergunte sobre **Especificidades deste projeto**: quais regras locais existem que não são genéricas? (Estrutura de pastas particular, identidade visual, comandos próprios do projeto, deploy específico, etc.)
+>
+> Após coletar minhas respostas, gere o `AGENTS.md` completo. **Antes de gravar o arquivo**, mostre o conteúdo e me peça confirmação. No final, liste em comentário: (a) o que você incluiu por inferência além das minhas respostas explícitas, e (b) que decisões ficaram em aberto e merecem refinamento futuro — quero ver suas suposições.
+>
+> Importante: **não inclua nada sobre tipo de estudo, alpha, IC, casas decimais, ou pacotes específicos**. Esse tipo de regra vai no prompt da análise, não no `AGENTS.md`.
+
+A diferença em relação ao prompt antigo: nada de "tipo de estudo", nada de "lista de pacotes", nada de "regras estatísticas". O foco é todo em comportamento, e o agente conduz uma entrevista em vez de receber um questionário rígido. Você toma sete decisões pequenas e sai com `AGENTS.md` calibrado.
+
+## Por que esse prompt funciona
+
+Mapeando aos quatro princípios do capítulo 01:
+
+**Contexto.** O prompt entrega o conteúdo de partida das cinco seções estruturais inline, então o agente não precisa adivinhar a moldura — só adaptar o conteúdo ao projeto. E declara o que **não** deve entrar no `AGENTS.md` (tipo de estudo, alpha, etc.), o que reduz drasticamente a chance de inflação.
+
+**Especificidade.** Cada um dos sete itens vem com opções concretas (não só "como você quer plan-first?", mas "agressivo / só estrutural / executar direto"). Especificidade nas opções produz especificidade nas respostas — você decide rapidamente porque já viu o cardápio.
+
+**Validação.** Duas camadas. Primeiro, o agente entrevista uma decisão por vez (você valida cada uma antes da próxima). Depois, ele mostra o arquivo antes de gravar e lista o que inferiu além das suas respostas explícitas — você vê as suposições antes de o arquivo entrar no projeto.
+
+**Iteração.** Implícita — você lê o `AGENTS.md` gerado e ajusta o que não bate. Mas a entrevista por etapas reduz a iteração a quase zero, porque os pontos de divergência aparecem **enquanto** você responde, não no final.
+
+## Anti-padrões a evitar
+
+**1. Tentar prever todo cenário no `AGENTS.md`.** Se ele virar tratado de 2.000 linhas, ninguém lê (nem o agente segue de fato — contexto enche, regras se diluem). Mantenha-o no que **realmente vale para todas as conversas**. Regras de uma análise específica vão no prompt daquela análise.
+
+**2. Confundir `AGENTS.md` com prompt de análise.** Se você se pega listando teste estatístico, pacote, ou parâmetro numérico no `AGENTS.md`, está no arquivo errado. Mude para o prompt da análise (ou crie um capítulo do projeto com aquela decisão registrada).
+
+**3. Deixar regras de comportamento implícitas.** "O agente vai entender pelo contexto" — não vai. Comportamento do agente é o lugar onde implícito custa caro: você descobre que ele não pediu confirmação **depois** que já fez. Toda regra de comportamento que importa precisa estar escrita.
+
+**4. Misturar regras de múltiplos projetos.** `AGENTS.md` é por projeto, não por pesquisador. Se você tem cinco projetos diferentes, são cinco `AGENTS.md` diferentes. Compartilhar o mesmo arquivo entre projetos com convenções incompatíveis cria conflito que o agente resolve aleatoriamente.
+
+**5. Nunca atualizar.** O `AGENTS.md` que você escreveu no mês 1 não é o mesmo que serve no mês 6. Quando uma regra de comportamento muda (passou a tolerar plan-first leve em vez de agressivo, ou descobriu uma classe nova de comando destrutivo), atualize na hora.
+
+::: {.callout-tip}
+## Mantenha um log de evolução do `AGENTS.md`
+No fim do `AGENTS.md`, adicione uma seção `## Histórico` com bullets datados:
+
+```
+## Histórico
+
+- 2026-04-12: criação inicial. Plan-first agressivo, ICMJE
+  para documentação de IA.
+- 2026-04-25: afrouxado plan-first para edições locais
+  depois de cansar de aprovar mudanças triviais.
+- 2026-05-03: incluída regra granular de não-fabricação
+  cobrindo citações em comentários de código.
+```
+
+Isso documenta para você (em três meses), para coautores que clonam o repo, e para o próprio agente — que ganha contexto sobre **por que** uma regra existe (não só **qual** é).
+:::
+
+## O que vem a seguir
+
+Estrutura criada (cap. 02), `AGENTS.md` calibrado para comportamento (este capítulo). Você tem o esqueleto e o contrato. O próximo passo é **transformar dados crus em dados analisáveis**: limpeza, transformação, validação. É a etapa que mais consome tempo em pesquisa real, e onde prompts bem escritos economizam horas.
+
+→ [04 · Prompt para limpeza e transformação de dados](04-prompt-limpeza-dados.qmd)

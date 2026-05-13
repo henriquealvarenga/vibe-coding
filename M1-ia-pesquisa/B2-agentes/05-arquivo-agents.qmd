@@ -1,0 +1,107 @@
+---
+title: "O arquivo `AGENTS.md`"
+---
+
+Você já conhece os três agentes principais (Claude, Codex, Gemini) e sabe a diferença entre conversar com um chatbot e trabalhar com um agente. Falta uma peça importante: como **dizer ao agente, de uma vez por todas, as regras do seu projeto** — sem precisar repetir em cada *prompt*.
+
+Esse é o papel do `AGENTS.md`.
+
+## O que é o `AGENTS.md`
+
+`AGENTS.md` é um arquivo de **contexto persistente** que vive na raiz do seu projeto. Os agentes leem esse arquivo automaticamente, **antes** do seu *prompt*, em toda conversa. As regras dentro dele se aplicam sem precisar serem mencionadas a cada interação.
+
+A pergunta-chave para decidir o que vai ali dentro é simples:
+
+> *"Eu quero essa regra aplicada em **todas** as conversas neste projeto?"*
+
+Se sim → vai no `AGENTS.md`.
+Se não (é específico desta tarefa) → vai no *prompt* da conversa.
+
+## Por que `AGENTS.md` e não `CLAUDE.md`?
+
+Cada empresa tinha originalmente seu próprio nome de arquivo: a Anthropic usava `CLAUDE.md`, a OpenAI propôs `AGENTS.md`, o Google adotou `GEMINI.md`. Em **dezembro de 2025**, OpenAI, Anthropic e outras empresas formaram a **Agentic AI Foundation** sob a Linux Foundation, e o `AGENTS.md` virou o **padrão aberto cross-tool**.
+
+Hoje (maio de 2026):
+
+- **Codex** (OpenAI): lê `AGENTS.md` por padrão (sempre leu — foi a OpenAI que criou).
+- **Claude Code** (Anthropic): lê `AGENTS.md` como *fallback* quando não há `CLAUDE.md`.
+- **Gemini CLI** (Google): lê `AGENTS.md` nativamente.
+- **Cursor, GitHub Copilot, VS Code** e mais 60.000+ projetos: também adotam.
+
+Conclusão prática: **um único `AGENTS.md` cobre os três agentes deste curso**. Não precisa criar `CLAUDE.md` nem `GEMINI.md` separadamente, a menos que você queira regras específicas para um agente.
+
+## O `AGENTS.md` deste curso
+
+O bloco abaixo é o `AGENTS.md` que está na raiz deste próprio site Quarto — é o que os agentes leem quando trabalham aqui dentro. Você pode **copiá-lo inteiro** (botão de copiar no canto superior direito do bloco) e usar como ponto de partida no seu próprio projeto.
+
+A última seção, **"Especificidades deste projeto"**, é a parte para você customizar. Apague-a ou substitua pelas regras do seu projeto. As demais seções são genéricas e podem ficar como estão.
+
+```{.markdown filename="AGENTS.md"}
+{{< include /AGENTS.md >}}
+```
+
+## O que cada seção faz
+
+Vale entender por que cada bloco está aí, para você adaptar com critério.
+
+### Sobre este projeto
+
+Identifica o tipo de projeto, idioma, *stack* tecnológica e local da bibliografia. **Permite ao agente entender o contexto antes de começar a trabalhar.**
+
+### Convenções de nomeação
+
+Resolve a ambiguidade que mais cria retrabalho em projetos: como nomear arquivos, variáveis e funções. Distingue `.qmd` (*kebab-case*, viram URLs) de `.R`/`.py` (*snake_case*, código). Inclui o aviso sobre *filesystem case-insensitive* — esse detalhe sozinho já evita classes inteiras de bug em produção.
+
+### Configurações externalizadas
+
+Mantém parâmetros (limiares estatísticos, caminhos, *seeds*) fora dos *scripts*, num arquivo único. Quem revisa o estudo encontra todos os parâmetros num lugar; quem reproduz o estudo muda um arquivo, não dezenas.
+
+### Comentários no código
+
+Comentários explicam o **por que**, não o **que**. Texto agêntico tem tendência a comentar o óbvio — esta regra controla o instinto.
+
+### Comportamento do agente
+
+*Plan-first*, pedir permissão antes de mexer em arquivos, não fabricar referências, verificar fatos antes de afirmar. Esse bloco é o que mais reduz acidente em uso agêntico.
+
+### Tom de redação
+
+Define o estilo dos textos: didático, *callouts*, tabelas, "O que vem a seguir" no fim. Útil em projetos onde o agente também escreve documentação ou capítulos do site.
+
+### Especificidades deste projeto
+
+A última seção é onde entram as regras que **não** são genéricas: aqui é a estrutura `M{n}/B{n}` deste curso, *navbar* com casinha, paleta EDL. Quem usar este `AGENTS.md` como template em outro projeto vai apagar ou substituir essa seção pelas próprias.
+
+## Como usar no seu próprio projeto
+
+Três passos:
+
+1. **Crie um arquivo `AGENTS.md` na raiz** do seu projeto (no mesmo nível do `.gitignore` e do `_quarto.yml`).
+2. **Cole o conteúdo** copiado do bloco acima.
+3. **Edite a seção "Especificidades deste projeto"** com as regras do seu próprio projeto. As demais seções são genéricas e podem ficar como estão (ou ser refinadas).
+
+Pronto. Da próxima vez que você abrir Claude Code, Codex ou Gemini CLI nessa pasta, o agente lê o `AGENTS.md` antes do seu primeiro *prompt* — e segue as regras automaticamente.
+
+::: {.callout-tip}
+## Regra prática para evoluir o `AGENTS.md`
+Se você se pegou repetindo a mesma instrução em vários *prompts*, **mova ela para o `AGENTS.md`**. É sinal de que aquela regra não é específica de uma tarefa — é regra do projeto.
+:::
+
+## Limites do `AGENTS.md`
+
+Para fechar com honestidade, três pontos:
+
+- **Não é mágico.** O agente lê, mas pode esquecer ou desviar em conversas longas, especialmente quando o contexto enche. Boa prática: relembrar pontos críticos no *prompt* mesmo quando estão no `AGENTS.md`, em tarefas onde aquela regra é central.
+- **Cada agente trata diferentemente.** Claude tende a respeitar mais as regras invariantes; Codex às vezes precisa ser lembrado; Gemini ainda está consolidando comportamento. As diferenças são sutis, mas reais.
+- **Atualizar o arquivo é responsabilidade sua.** Quando uma decisão estrutural muda no projeto (renomear convenção de pastas, trocar *stack*, adicionar novas regras), atualize o `AGENTS.md` na mesma hora — senão o agente segue a regra antiga, que foi a que ele leu.
+
+## O que vem a seguir
+
+Encerramos aqui o **Bloco 2 — Agentes de IA**. Você sabe agora:
+
+- O que é IA generativa e como funciona (M1-B1).
+- A diferença entre *chatbot* e agente (M1-B2-01).
+- Os três agentes recomendados: Claude (M1-B2-02), Codex (M1-B2-03), Gemini (M1-B2-04).
+- Como configurar o agente para o seu projeto via `AGENTS.md` (este capítulo).
+
+A partir do **Bloco 3 — Terminal**, descemos para a infraestrutura prática: o terminal como o lugar onde Claude Code, Codex CLI, Git e Quarto operam. Nove capítulos curtos para você sair do *"tenho medo da tela preta"* para *"tenho conforto básico aqui"*.

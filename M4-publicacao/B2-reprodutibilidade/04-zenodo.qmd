@@ -1,0 +1,136 @@
+---
+title: "Zenodo"
+---
+
+GitHub é excelente para versionar e colaborar — mas tem uma limitação séria como infraestrutura de **arquivamento científico**: ele é uma empresa privada (subsidiária da Microsoft desde 2018). Não há garantia formal de que repositórios continuem acessíveis em 30 anos. A política atual diz que sim, mas políticas mudam, empresas mudam de mão, decisões de produto também. Para pesquisa que precisa ser preservada **por décadas, com garantia institucional**, GitHub não é o lugar.
+
+A solução que a comunidade científica europeia construiu é o **Zenodo** — repositório de artefatos de pesquisa mantido pelo **CERN** (European Organization for Nuclear Research, Suíça), em parceria com a OpenAIRE da União Europeia. Lançado em **2013**, hoje hospeda milhões de datasets, código, artigos, apresentações, vídeos e qualquer outro tipo de artefato científico. **É gratuito, com garantia de preservação por pelo menos 20 anos**, e emite DOI para tudo que recebe.
+
+Este capítulo explica o que Zenodo é, por que ele importa, e como integrá-lo ao fluxo de pesquisa que vimos até aqui.
+
+## A história e o contexto
+
+O CERN é uma das instituições científicas mais antigas e respeitadas do mundo — fundado em 1954, palco da descoberta do bóson de Higgs em 2012, lugar onde Tim Berners-Lee inventou a World Wide Web em 1989. Tem **infraestrutura computacional massiva** para acomodar petabytes de dados de física de partículas, e — crucialmente — **um compromisso institucional permanente com preservação de dados científicos**.
+
+Em 2013, com financiamento da Comissão Europeia (programa OpenAIRE), o CERN lançou o **Zenodo** — uma plataforma para que pesquisadores de **qualquer área**, em **qualquer parte do mundo**, depositem artefatos científicos para preservação a longo prazo. A motivação era explícita: havia muito repositório especializado (GenBank para sequências genéticas, ICPSR para ciências sociais), mas faltava lugar genérico, gratuito, e confiável para o pesquisador médio depositar dados, código, slides, ou qualquer coisa.
+
+A trajetória desde 2013 foi de crescimento estável. Em 2026, Zenodo hospeda mais de **3 milhões de registros**, com taxa de crescimento que dobra a cada poucos anos. Virou parte da infraestrutura de fato de ciência aberta — quando uma revista exige "deposite seus dados num repositório citável", **Zenodo é resposta padrão**.
+
+## O que torna Zenodo adequado
+
+Cinco características específicas:
+
+**1. Gratuito, sem limite prático.** Não há custo. Limites técnicos: 50 GB por registro (com pedido especial pode-se subir mais), sem limite de número de registros. Para pesquisa típica em saúde, capacidade é folgada.
+
+**2. Garantia de preservação institucional.** O Zenodo está sob mandato do CERN e da OpenAIRE/UE. **Compromisso público de pelo menos 20 anos** de preservação, com plano de transferência caso o serviço seja descontinuado. Se o CERN deixar de operar (improvável), há acordos para transferir o conteúdo para outras instituições europeias de preservação.
+
+**3. DOI para tudo.** Cada registro recebe um DOI emitido via **DataCite** (capítulo `05-doi`). Esse DOI é citável em artigos, indexável em buscas, e — crucialmente — **persistente**: o link nunca muda, mesmo se o registro for atualizado.
+
+**4. Versionamento de registros.** Diferente de GitHub (que versiona código), Zenodo versiona **registros completos**. Cada versão tem DOI próprio, mas há um "DOI conceito" que aponta sempre para a versão mais recente. Permite citar versão específica ou "última versão" conforme apropriado.
+
+**5. Integração com GitHub.** A peça que torna o fluxo prático: você pode **conectar repositório GitHub ao Zenodo**, e cada *release* no GitHub vira automaticamente um registro Zenodo com DOI. Sem trabalho manual extra.
+
+## A integração GitHub → Zenodo
+
+O caso de uso central para pesquisa em saúde. O fluxo:
+
+1. **Login no Zenodo** com sua conta GitHub. Vai em [zenodo.org](https://zenodo.org), escolhe "Sign up via GitHub".
+2. **Ativa a integração para um repositório.** Em Zenodo: Settings → GitHub → encontra seu repositório → flip do switch para "On".
+3. **Faz uma release no GitHub.** Quando seu projeto chega em estado "publicável" (compêndio finalizado, paper submetido), você marca uma versão estável: GitHub → Releases → Create new release → digita versão (`v1.0.0`) → Publish release.
+4. **Zenodo automaticamente cria o registro.** Em poucos minutos, um registro Zenodo aparece com:
+   - Nome, autor, descrição (importados do repositório).
+   - Arquivo `.zip` do repositório no momento da release.
+   - **DOI emitido**.
+5. **Você cita o DOI no artigo.** No manuscrito: *"Code and analysis available at [DOI do Zenodo]."*
+
+A genialidade do fluxo: **zero esforço extra**. Você já estava commitando no GitHub. Você já marcava releases. Tudo o que muda é que agora cada release vira artefato preservado a longo prazo, citável, FAIR-compatível.
+
+::: {.callout-tip}
+## Como configurar o registro Zenodo
+Antes da primeira release, vale ajustar dois arquivos no repositório que o Zenodo lê:
+
+**`.zenodo.json`** — metadados explícitos:
+
+``` json
+{
+  "title": "Análise de coorte: efeitos de antihipertensivo X",
+  "description": "Compêndio reproduzível do artigo Silva et al. 2026.",
+  "creators": [
+    {"name": "Silva, Henrique", "orcid": "0000-0001-2345-6789"},
+    {"name": "Costa, Maria"}
+  ],
+  "license": "MIT",
+  "keywords": ["epidemiologia", "hipertensão", "coorte"],
+  "related_identifiers": [
+    {"identifier": "10.1234/jama.2026.001", "relation": "isSupplementTo", "scheme": "doi"}
+  ]
+}
+```
+
+**`CITATION.cff`** — arquivo padrão de citação (cap. 05).
+
+Esses dois arquivos garantem que metadados na release sejam ricos e corretos. Sem eles, Zenodo importa o mínimo e você precisa editar manualmente.
+:::
+
+## Tipos de upload
+
+Zenodo aceita praticamente qualquer artefato:
+
+| Tipo | Exemplos |
+|---|---|
+| **Dataset** | CSV, Parquet, banco SQLite, FASTQ |
+| **Software** | Repositório GitHub via release (caso típico) |
+| **Publication** | Artigo (preprint), tese, capítulo de livro |
+| **Poster** | PDF de poster apresentado em congresso |
+| **Presentation** | Slides PDF/PPTX |
+| **Video/Audio** | Aulas, palestras, demos |
+| **Image** | Figuras, infográficos |
+| **Other** | Qualquer outro artefato científico |
+
+Não há restrição de tema — Zenodo é generalista por design.
+
+## Limites e cuidados
+
+Algumas coisas para saber:
+
+**1. Uma vez publicado, não dá para editar arquivos.** Zenodo aplica princípio de imutabilidade. Você pode publicar **nova versão** (com DOI próprio, mantendo histórico), mas não modificar arquivos da versão antiga. Isso é proposital — preservação científica exige imutabilidade.
+
+**2. Metadados podem ser editados.** Diferente dos arquivos, metadados (título, descrição, autores) você pode atualizar a qualquer momento. Útil para corrigir typos, adicionar coautor que faltou.
+
+**3. Tamanho de 50 GB por registro é limite normal.** Se sua pesquisa tem dados grandes (genômica, neuroimagem), peça aumento via formulário oficial. Casos legítimos são aprovados.
+
+**4. Não é depósito de dados sensíveis identificáveis.** Zenodo é público por padrão. Há opção de "Restricted Access" mas é desencorajada para datasets clínicos identificáveis. Para PHI, use repositórios institucionais ou plataformas especializadas (PhysioNet para ECG/UTI, MIMIC para EHR).
+
+**5. Licença é decidida no momento da publicação.** Zenodo apresenta lista padrão (CC BY, CC0, MIT, GPL, etc.). Escolha bem — uma vez publicada, mudança requer nova versão.
+
+## Alternativas e quando usar cada
+
+Zenodo não é o único:
+
+| Repositório | Caráter | Quando preferir |
+|---|---|---|
+| **Zenodo** | Generalista, CERN, gratuito | Default — sem razão específica para outro |
+| **Figshare** | Generalista, comercial (Digital Science) | Compatível, alguns institutos têm acordo |
+| **OSF (Open Science Framework)** | Foco em ciências sociais e psicologia | Para projetos colaborativos com pré-registro |
+| **Dryad** | Específico para datasets associados a artigos | Para datasets que acompanham artigos peer-reviewed |
+| **PhysioNet** | Específico para fisiologia / sinais médicos | ECG, UTI, prontuários de UTI (MIMIC) |
+| **GenBank, ENA** | Específico para sequências genéticas | Bioinformática (uso obrigatório por convenção do campo) |
+| **Repositórios institucionais brasileiros** | Por universidade | Quando exigido por política institucional |
+
+Para pesquisa médica generalista, **Zenodo é a escolha padrão**. Para subáreas específicas (genômica, neuroimagem), há repositórios especializados que valem mais.
+
+## Conexão com IA
+
+Agentes ajudam com Zenodo em três frentes:
+
+**1. Geração de `.zenodo.json` e `CITATION.cff`.** Você cola o README, agente extrai metadados (autores, descrição, keywords) e gera os dois arquivos no formato correto.
+
+**2. Identificação de licença apropriada.** *"Vou depositar dados de coorte (anonimizados) e código R de análise. Que licença é apropriada?"* — agente explica trade-offs entre CC BY, CC0, CC BY-NC, com contexto de pesquisa em saúde.
+
+**3. Diagnóstico de problemas de release.** Se Zenodo não importou o registro automaticamente após release no GitHub, agente investiga (integração não ativada, repositório privado, problema de webhook) e sugere correção.
+
+## O que vem a seguir
+
+Zenodo emite **DOI** para cada artefato. Mas o que é DOI exatamente, de onde veio, e como ele se diferencia de URL? E quando vale citar **código** com DOI em vez de só artigo? O próximo capítulo trata especificamente do **DOI** como identificador persistente em ciência.
+
+→ [05 · DOI](05-doi.qmd)

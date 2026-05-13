@@ -1,0 +1,175 @@
+---
+title: "Markdown"
+sidebar: bloco-markdown
+---
+
+Você abre o repositório de uma ferramenta nova no GitHub. Antes mesmo de baixar nada, lê o `README` na própria página: título grande, parágrafos com palavras em negrito, uma lista do que a ferramenta faz, um trecho de código entre fundo cinza, um link clicável para a documentação. Tudo formatado, tudo legível. O autor não usou Word, Google Docs, nem editor visual. Escreveu um arquivo de texto puro chamado `README.md` em uma linguagem de marcação que decora o texto sem esconder a estrutura. Essa linguagem é o **Markdown** — e este capítulo é sobre ela.
+
+Markdown é a base sobre a qual o Quarto se constrói. O capítulo seguinte deste Bloco mostra o que o Quarto adiciona; aqui interessa o que vem antes: a sintaxe pura, os princípios que justificam ela, e por que aprender em quinze minutos foi a promessa original que ela cumpre.
+
+## O que é Markdown
+
+Markdown é uma **linguagem de marcação leve**, criada em 2004 por **John Gruber** com a colaboração de **Aaron Swartz**, com a proposta explícita de ser legível como texto puro mesmo sem renderização. A motivação original veio do hábito antigo de e-mails em texto puro, onde convenções informais já existiam — `*palavra*` para ênfase, `_palavra_` para itálico, `> texto` para citação, `--` para linha divisória. Gruber sistematizou essas convenções em uma especificação, escreveu um conversor em Perl que transformava o texto em HTML, e publicou em [daringfireball.net/projects/markdown](https://daringfireball.net/projects/markdown).
+
+A virtude central que justificou a adoção massiva é uma só: **o source é tão legível quanto o output**. Quando você abre um `.docx` num editor de texto, vê uma barafunda de XML com tags ininteligíveis. Quando você abre um `.md`, vê o texto. As marcações (`#`, `**`, `-`, `[link](...)`) são pequenas o bastante para não atrapalharem a leitura, mas explícitas o bastante para o computador interpretar.
+
+Esse princípio tem três consequências práticas que importam pro fluxo de pesquisa científica:
+
+1. **Funciona em qualquer editor de texto.** Você pode escrever Markdown no Bloco de Notas, no `nano` por SSH, no celular, num e-mail. Não há dependência de software proprietário.
+2. **É amigável com Git.** Como é texto puro com mudanças linha a linha, o `git diff` mostra exatamente o que foi alterado — palavra por palavra. Isso é impraticável com Word.
+3. **É amigável com IA.** Modelos de linguagem foram treinados em montanhas de Markdown (todo GitHub, todo Stack Overflow, toda discussão técnica nos últimos quinze anos). Quando você pede um agente para escrever um relatório, a saída sai em Markdown nativamente.
+
+## A sintaxe em uma página
+
+Markdown se aprende em quinze minutos porque a superfície é minúscula. Tudo que segue cobre noventa por cento dos casos de uso:
+
+### Cabeçalhos
+
+``` markdown
+# Título principal
+## Seção
+### Subseção
+#### Sub-subseção
+```
+
+A quantidade de `#` define o nível. Depois do `#` vai um espaço e o título. Convenção: usar no máximo até `####` em texto comum; se você precisa de cinco níveis, provavelmente precisa reorganizar a estrutura.
+
+### Ênfases
+
+``` markdown
+*itálico*  ou  _itálico_
+**negrito**  ou  __negrito__
+***negrito itálico***
+~~tachado~~ (extensão GFM, suportada em Quarto)
+```
+
+### Listas
+
+``` markdown
+- item não-ordenado
+- outro item
+  - sub-item (dois espaços de indentação)
+- voltou ao nível principal
+
+1. item ordenado
+2. segundo item
+3. terceiro
+```
+
+A numeração da lista ordenada não precisa estar correta — `1.`, `1.`, `1.` vira `1.`, `2.`, `3.` no output. O markdown cuida da numeração; você foca no conteúdo.
+
+### Links e imagens
+
+``` markdown
+[Texto do link](https://exemplo.com)
+![Texto alternativo](caminho/para/imagem.png)
+```
+
+A diferença entre os dois é o `!` no início. Imagens usam a mesma sintaxe de link com prefixo de exclamação porque, conceitualmente, são "links que se renderizam embutidos em vez de virarem texto clicável".
+
+### Blocos de código
+
+Para código inline (dentro do parágrafo), use crases simples:
+
+``` markdown
+Use o comando `ls -la` para listar arquivos.
+```
+
+Para blocos, três crases delimitando, com a linguagem opcional para *syntax highlighting*:
+
+````markdown
+```python
+import pandas as pd
+df = pd.read_csv("dados.csv")
+```
+````
+
+### Citação em bloco
+
+``` markdown
+> "O senhor… mire, veja: o mais importante e bonito, do mundo, é
+> isto: que as pessoas não estão sempre iguais, ainda não foram
+> terminadas — mas que elas vão sempre mudando."
+> — Guimarães Rosa, *Grande Sertão: Veredas*
+```
+
+Cada linha começa com `> ` (sinal de maior + espaço).
+
+### Tabelas
+
+``` markdown
+| Variável | Tipo | Descrição |
+|----------|------|-----------|
+| idade    | int  | Anos completos |
+| sexo     | str  | M / F |
+| pas      | num  | Pressão arterial sistólica (mmHg) |
+```
+
+A linha do meio (`|---|---|---|`) define que aquilo é tabela. O alinhamento opcional vem da posição dos `:`: `:---` à esquerda, `---:` à direita, `:---:` centralizado.
+
+### Linha horizontal
+
+``` markdown
+---
+```
+
+Três traços (ou asteriscos, ou underscores) sozinhos numa linha. **Atenção:** três traços também delimitam o cabeçalho YAML no início de `.qmd` — em texto corrido, fora do começo do arquivo, vira linha horizontal.
+
+::: {.callout-tip}
+## Pulando linhas e parágrafos
+Em Markdown, **uma linha em branco separa parágrafos**. Linhas adjacentes (sem espaço entre) viram o mesmo parágrafo, mesmo que você tenha apertado *Enter*. Para forçar quebra de linha sem novo parágrafo, termine a linha com **dois espaços** (uma técnica frágil, fácil de perder em copy-paste) ou com `\` no fim.
+:::
+
+## Os "flavors": CommonMark, GFM e Pandoc
+
+Aqui aparece a primeira surpresa para quem escreve Markdown em mais de um lugar. **Não existe um Markdown.** Existem **vários dialetos** que estendem ou interpretam a especificação original de formas ligeiramente diferentes.
+
+| Variante | Quem mantém | Onde aparece |
+|---|---|---|
+| **Markdown original (Gruber, 2004)** | John Gruber | Especificação ambígua, muitas implementações divergiam |
+| **CommonMark (2014)** | Comitê liderado por John MacFarlane (criador do Pandoc) | Reddit, Discord, Stack Overflow, GitLab — tentativa de padronizar a sintaxe que Gruber deixou ambígua |
+| **GitHub Flavored Markdown (GFM)** | GitHub | Issues, PRs, comentários, READMEs no GitHub — adiciona tabelas, tachado, *task lists*, *autolinks* |
+| **Pandoc Markdown** | John MacFarlane | Pandoc [@macfarlane2023pandoc] e tudo que se constrói em cima dele (Quarto, R Markdown, Bookdown) — superset com citações, notas de rodapé, divs, atributos |
+
+Para o curso, o que importa é **Pandoc Markdown**: é o sabor que o Quarto entende. Tudo que o CommonMark e o GFM aceitam, o Pandoc aceita. Em cima disso, o Pandoc adiciona recursos que vão aparecer no próximo capítulo: citações com `[@chave]`, divs nomeados (`::: {.callout-note}`), atributos em headings (`{.unnumbered}`), referências cruzadas, equações em LaTeX, e mais.
+
+::: {.callout-note}
+## Onde isso afeta sua vida
+Se você escreve um `README.md` no GitHub e copia para um `.qmd`, **a maioria das coisas funciona**. O que pode quebrar: tabelas com sintaxe não-padrão, *checkboxes* em listas (`- [ ] tarefa`), e *autolinks* (URL solta vira link automático). Em caso de dúvida, sempre prefira a sintaxe explícita do Pandoc.
+:::
+
+## Onde Markdown aparece (provavelmente já no seu dia)
+
+Mesmo quem nunca escreveu `.md` deliberadamente já encontrou Markdown em vários lugares:
+
+- **README de qualquer repositório no GitHub, GitLab ou Bitbucket** é Markdown.
+- **Issues, pull requests, discussões e comentários** nas mesmas plataformas — Markdown.
+- **Stack Overflow, Server Fault, Math Overflow, Cross Validated** e o resto da rede Stack Exchange — Markdown.
+- **Reddit, Discord** — Markdown (variante simplificada).
+- **Notion** — variante interna baseada em Markdown.
+- **Obsidian, Logseq, Bear, iA Writer, Typora** — editores de notas que salvam em `.md` puro.
+- **Slack** — usa marcações inspiradas em Markdown (`*negrito*`, `_itálico_`, `~tachado~`) embora não seja Markdown estrito.
+- **Jupyter Notebooks** — células de texto são Markdown.
+- **Quarto, R Markdown, Bookdown, Hugo, Jekyll, Eleventy** — toda a geração moderna de geradores de site estático e ambientes de publicação científica é construída sobre Markdown.
+
+A consequência prática: aprender Markdown não é investir em uma habilidade de nicho. É aprender a língua franca da escrita técnica do início do século XXI.
+
+## Conexão com IA
+
+Markdown e modelos de linguagem têm uma relação simbiótica que vale entender porque afeta como você prompta:
+
+**Os modelos foram treinados em Markdown.** Bilhões de tokens de GitHub, Stack Overflow, blogs técnicos, fóruns de programação — todos em Markdown. Os modelos aprenderam a estrutura como se fosse parte da gramática do inglês escrito tecnicamente. Por isso, quando você pede "me dá uma tabela comparativa", eles entregam uma tabela em Markdown sem você ter pedido a sintaxe.
+
+**Você pode aproveitar essa fluência:**
+
+- *"Reformata isto em Markdown com seções, tabela onde fizer sentido, listas onde houver enumeração."* — funciona quase sempre.
+- *"Escreva o esqueleto em Markdown de um capítulo sobre [tema], com cabeçalhos `##` em cada seção."* — produz outline imediatamente útil.
+- *"Esta é a transcrição da reunião. Estrutura como ata em Markdown: participantes, decisões, *follow-ups*."* — ótimo uso para reuniões clínicas.
+
+**Cuidados:** os modelos às vezes inventam variantes de sintaxe (Markdown próprio, com extensões que não existem). Quando algo "não renderiza", a primeira hipótese é que o modelo gerou algo fora do Pandoc Markdown. Pedir explicitamente "Pandoc Markdown" no prompt diminui essa chance.
+
+## O que vem a seguir
+
+Markdown sozinho dá conta de blog post, README, documentação, anotações. Para análise científica reproduzível, falta o ingrediente que transforma o texto em **documento executável**: a capacidade de inserir blocos de código que rodam de verdade, geram tabelas e gráficos, e injetam os resultados no documento renderizado. Esse ingrediente é o **Quarto**, próximo capítulo.
+
+→ [02 · Quarto](02-quarto.qmd)

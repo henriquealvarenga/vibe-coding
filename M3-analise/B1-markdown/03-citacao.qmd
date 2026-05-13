@@ -1,0 +1,187 @@
+---
+title: "Citação: BibTeX e CSL"
+---
+
+Imagine que você terminou de escrever um artigo sobre uso de inteligência artificial em diagnóstico de imagem. Quarenta páginas, sessenta e duas referências, todas formatadas no estilo Vancouver porque você ia submeter para o *NEJM*. Na última hora, decide submeter primeiro para o *Lancet Digital Health*. Lê as instruções para autores. *Lancet* exige um formato ligeiramente diferente — vírgulas em vez de pontos, abreviações de revista sem ponto final, *et al.* em itálico depois de seis autores em vez de três. Mudar manualmente cada referência levaria horas. Em Quarto, leva trinta segundos: você troca uma linha no `_quarto.yml`, renderiza, e as sessenta e duas referências aparecem reformatadas.
+
+Esse capítulo explica como isso funciona — quem são os atores que fazem essa troca acontecer e por que vale entendê-los antes de instalar qualquer ferramenta.
+
+## A engrenagem em três peças
+
+Quando você cita algo em Quarto, três peças trabalham juntas:
+
+| Peça | O que é | Onde fica |
+|---|---|---|
+| **Citation key** | Identificador curto que você escreve no texto, como `@silva2024` | Dentro do `.qmd`, no corpo do texto |
+| **Arquivo `.bib`** | Base de dados das referências em formato **BibTeX** | Pasta `references/`, lido pelo Quarto |
+| **Arquivo `.csl`** | Definição do estilo de formatação (Vancouver, ABNT, JAMA, etc.) | Pasta `references/csl_styles/`, lido pelo Quarto |
+
+O fluxo conceitual é simples: você escreve `@silva2024` no texto. O Quarto pega essa chave, procura no `.bib` a entrada correspondente (autor, título, ano, revista, etc.), aplica as regras do `.csl` (como formatar autor, onde pôr o ano, como tratar páginas) e injeta a citação formatada no documento renderizado — junto com a entrada na lista final de referências.
+
+A virtude desse desenho é a **separação de preocupações**. A base de referências (o `.bib`) é independente do estilo (`.csl`). Você pode trocar o estilo sem mexer na base, ou trocar a base sem mexer no estilo. É exatamente o que torna possível submeter o mesmo manuscrito para o *NEJM* e para o *Lancet* sem reescrever nenhuma referência.
+
+## BibTeX: a base de referências
+
+**BibTeX** é o formato em que você guarda os metadados de cada referência (autor, título, ano, revista, páginas, DOI, etc.). O nome vem do casamento entre **Bib**liography e Te**X**, e o formato existe desde 1985, criado por Oren Patashnik para o ecossistema LaTeX. Hoje é lido por praticamente toda ferramenta acadêmica — Pandoc [@macfarlane2023pandoc], Quarto [@quarto2024guide], LaTeX, Overleaf, R Markdown, e gerenciadores como Zotero, Mendeley e EndNote conseguem exportar para `.bib`.
+
+Um arquivo `.bib` é texto puro. Cada referência é uma **entry** com tipo, citation key e campos:
+
+``` bibtex
+@article{singhal2023large,
+  author  = {Singhal, Karan and Azizi, Shekoofeh and Tu, Tao and others},
+  title   = {Large language models encode clinical knowledge},
+  journal = {Nature},
+  year    = {2023},
+  volume  = {620},
+  pages   = {172--180},
+  doi     = {10.1038/s41586-023-06291-2}
+}
+```
+
+A primeira linha tem três partes:
+
+- **`@article`** é o **tipo da entry** — diz ao BibTeX que regras de formatação aplicar. Os tipos mais usados em pesquisa médica:
+
+| Tipo | Para que tipo de obra |
+|---|---|
+| `@article` | Artigo de revista científica peer-reviewed |
+| `@book` | Livro |
+| `@incollection` | Capítulo de livro com editores diferentes do livro |
+| `@inproceedings` | Trabalho publicado em anais de congresso |
+| `@manual` | Manual técnico, documentação de software |
+| `@misc` | Genérico — para o que não cabe em outro lugar (preprints, posts, datasets) |
+| `@online` | Recurso online (alguns parsers usam `@misc` no lugar) |
+| `@phdthesis` | Tese de doutorado |
+| `@mastersthesis` | Dissertação de mestrado |
+
+- **`singhal2023large`** é a **citation key** — o identificador que você vai usar no texto para referenciar essa entry.
+
+- O bloco entre chaves é a lista de campos. Quais são obrigatórios depende do tipo (um `@article` precisa de `journal`; um `@book` precisa de `publisher`).
+
+::: {.callout-tip}
+## Citation keys legíveis valem o esforço
+Você pode chamar uma referência de `xtr3839` (chave aleatória) ou de `singhal2023large` (autor + ano + primeira palavra do título). As duas funcionam tecnicamente. Mas a segunda permite que você leia `[@singhal2023large; @topol2019deep]` no fonte e já saiba do que está falando, sem precisar abrir o `.bib` para descobrir. Quando o número de referências cresce, isso vira diferença prática.
+
+A convenção `AuthorYearWord` (Singhal 2023 "Large") é o padrão do **Better BibTeX** — extensão do Zotero que veremos no capítulo de instalação. A configuração padrão dele já gera essas chaves automaticamente.
+:::
+
+No texto do `.qmd`, você cita a entry assim:
+
+``` markdown
+Modelos de linguagem clínicos atingiram desempenho próximo
+ao de especialistas em algumas tarefas [@singhal2023large].
+```
+
+Renderizado, isso vira (no estilo Vancouver, por exemplo): "...próximo ao de especialistas em algumas tarefas [1]." E "[1]" aparece na lista final de referências formatado conforme o estilo escolhido.
+
+Variações úteis da sintaxe de citação no Quarto:
+
+| Sintaxe | Resultado |
+|---|---|
+| `[@singhal2023large]` | (Singhal et al., 2023) — citação em parênteses |
+| `@singhal2023large` | Singhal et al. (2023) — citação narrativa, sem parênteses |
+| `[@singhal2023large; @topol2019deep]` | (Singhal et al., 2023; Topol, 2019) — múltiplas |
+| `[@singhal2023large, p. 175]` | (Singhal et al., 2023, p. 175) — com página |
+| `[-@singhal2023large]` | (2023) — só o ano, autor já mencionado no texto |
+
+A sintaxe exata de saída depende do CSL escolhido — em Vancouver vira `[1]` em vez de `(Singhal et al., 2023)`.
+
+## CSL: o estilo da formatação
+
+**CSL** é a sigla para **Citation Style Language**. É um formato XML padronizado que descreve, regra por regra, como uma citação e uma referência devem ser formatadas: como ordenar autores, onde pôr o ano, se nome de revista vai em itálico ou caixa-alta, qual o separador entre volume e número, quando usar *et al.* e a partir de quantos autores.
+
+O projeto CSL é mantido coletivamente desde 2009 (originalmente concebido por Bruce D'Arcus e Simon Kornblith) e a especificação atual é a CSL 1.0.2, disponível em [citationstyles.org](https://citationstyles.org). Ela é usada por Pandoc, Quarto, LaTeX (via `pandoc-citeproc`), Zotero, Mendeley, Word com plug-ins do Mendeley/Zotero, e dezenas de outras ferramentas.
+
+Um arquivo `.csl` típico tem mil ou duas mil linhas de XML denso. Você quase nunca precisa abrir um — a esmagadora maioria dos estilos que você vai usar já existe pronta no **Zotero Style Repository**.
+
+### Onde achar estilos prontos
+
+O **Zotero Style Repository** ([zotero.org/styles](https://www.zotero.org/styles)) é o repositório canônico — mantém mais de **dez mil estilos** validados, busca por nome de revista ou de norma, e disponibiliza cada um como `.csl` para download direto.
+
+Para pesquisa médica, os estilos mais comuns:
+
+| Estilo | Quem usa | Característica |
+|---|---|---|
+| **Vancouver** | Padrão internacional para biomedicina | Citações numéricas `[1]`, lista ordenada por ordem de aparição |
+| **AMA** (American Medical Association) | *JAMA* e maioria das revistas AMA | Numéricas, formato compacto, *et al.* depois de 6 autores |
+| **NEJM** | *New England Journal of Medicine* | Variante do Vancouver com pequenas diferenças |
+| **BMJ** | *British Medical Journal* | Vancouver com adaptações britânicas |
+| **The Lancet** | *Lancet* e revistas do grupo | Numéricas com formatação própria |
+| **APA 7** | Psicologia, ciências comportamentais, algumas multidisciplinares | Autor-ano, lista alfabética |
+| **ABNT** (NBR 6023) | Dissertações e teses brasileiras | Nome do autor em CAIXA-ALTA, ano no fim |
+
+Se a sua revista não está na lista, é raro. Procure por nome (a busca cobre títulos, ISSN, abreviações) ou pelo nome da editora. Se mesmo assim não achar, há quem mantenha forks no GitHub para revistas menos comuns — mas, em medicina, o repositório oficial cobre praticamente todo o universo das revistas indexadas.
+
+::: {.callout-warning}
+## Não tente editar `.csl` na unha
+Os arquivos CSL são XML válido mas nada divertido — esquemas profundos, referências cruzadas internas, regras condicionais aninhadas. Editar à mão uma vez é educativo; fazer disso rotina é tempo desperdiçado. Se um estilo do repositório não cobre exatamente o que você precisa, as opções saudáveis são (1) usar o estilo mais próximo e ajustar formatação manual no PDF final, (2) usar o **CSL Editor visual** ([editor.citationstyles.org](https://editor.citationstyles.org)) que evita XML cru, ou (3) abrir uma issue no repositório do estilo. Editar XML cru, deixe para casos de força maior.
+:::
+
+## Configurando no Quarto
+
+A configuração é só duas linhas no `_quarto.yml` na raiz do projeto:
+
+``` yaml
+bibliography: references/references.bib
+csl: references/csl_styles/Vancouver.csl
+```
+
+A primeira linha aponta para o arquivo `.bib` que tem todas as referências do projeto. A segunda aponta para o `.csl` que descreve o estilo. Não há limite estrito para quantas referências o `.bib` pode conter — bibliotecas com milhares de entradas funcionam sem problema.
+
+Depois disso, qualquer `.qmd` do projeto pode citar com `@chave` e o Quarto se encarrega do resto. As referências citadas aparecem automaticamente em uma seção `# References` no fim do documento (ou no lugar onde você colocar `::: {#refs}` explícito, caso queira controle).
+
+::: {.callout-note}
+## Configuração local por capítulo
+Se um capítulo específico precisa de bibliografia ou estilo diferente do projeto, você pode sobrescrever no YAML do próprio `.qmd`:
+
+``` yaml
+---
+title: "Capítulo especial"
+bibliography: outras-refs.bib
+csl: ../estilos/APA.csl
+---
+```
+
+Isso é útil quando, por exemplo, você está escrevendo uma dissertação em ABNT mas tem um capítulo isolado que vai ser submetido a uma revista que exige outro estilo.
+:::
+
+## O fluxo de submissão: trocar de estilo em trinta segundos
+
+Volta à cena do início. Você decidiu submeter para o *Lancet Digital Health* em vez do *NEJM*. O fluxo prático:
+
+1. Vai em [zotero.org/styles](https://www.zotero.org/styles) e busca por "*Lancet*".
+2. Baixa o `.csl` correspondente (clica no nome do estilo, salva como `Lancet.csl`).
+3. Move o arquivo para `references/csl_styles/Lancet.csl`.
+4. Edita o `_quarto.yml` trocando uma linha:
+
+``` diff
+- csl: references/csl_styles/Vancouver.csl
++ csl: references/csl_styles/Lancet.csl
+```
+
+5. Renderiza o documento. As sessenta e duas referências aparecem reformatadas no estilo *Lancet*.
+
+A base de referências (`.bib`) não foi tocada. As citation keys no texto não mudaram. Só o estilo. Isso é a separação de preocupações em ação.
+
+## Conexão com IA
+
+Três usos onde agentes de IA economizam tempo real nesse domínio:
+
+**1. Identificar o estilo a partir das instruções para autores.** Quando uma revista descreve seu estilo de citação em parágrafo solto ("references should be numbered in order of appearance, journal names abbreviated according to *Index Medicus*, *et al.* after six authors"), você cola esse parágrafo e o agente identifica que se trata de uma variante do Vancouver — ou propõe um estilo equivalente disponível no Zotero Style Repository. Útil quando a revista não está no repositório com esse nome exato.
+
+**2. Gerar entry `.bib` a partir de DOI ou URL.** Em vez de copiar metadados manualmente, você pede: *"gera a entry BibTeX para o DOI 10.1038/s41586-023-06291-2"*. O agente consulta a fonte (CrossRef, PubMed) e devolve uma entry pronta. Útil para entradas avulsas — para volume, o Zotero faz melhor (próximo capítulo).
+
+**3. Diagnosticar problemas no `.bib` ou no `.csl`.** Quando uma referência não aparece formatada como esperado, você cola a entry e o trecho problemático do output. O agente identifica campo faltando, encoding errado em caracteres acentuados, ou regra do CSL que está sendo aplicada de forma diferente do esperado. Particularmente útil para autores brasileiros que penam com nomes compostos e acentuação em estilos internacionais.
+
+::: {.callout-warning}
+## Verifique sempre as entries que o agente gera
+Modelos de linguagem **inventam referências com naturalidade preocupante** — autores que não existem, DOIs malformados, números de página inventados. Antes de aceitar uma entry `.bib` gerada por IA, abra o DOI no navegador e confirme que o artigo existe e que os metadados batem. Para um projeto acadêmico, citação fabricada é um problema real — não uma curiosidade técnica.
+:::
+
+## O que vem a seguir
+
+Você agora entende **o que** o Zotero faz: alimenta um arquivo `.bib` que o Quarto consome, junto com um `.csl` que dita o estilo. O próximo capítulo deste Bloco é sobre **LaTeX** — outro alvo de renderização do Quarto, relevante para teses, artigos com fórmulas pesadas, e revistas que exigem `.tex` na submissão. Lá você vai ver como o mesmo mecanismo de citação opera quando o destino final é PDF via LaTeX em vez de HTML ou Word.
+
+Para a parte operacional — instalar o Zotero, capturar referências do navegador com um clique, configurar Better BibTeX para que o `.bib` se atualize automaticamente — o capítulo é [Instalando o Zotero](../../M0-setup/B1-instalacoes/04-zotero.qmd), no Módulo 0.
+
+→ [04 · LaTeX](04-latex.qmd)

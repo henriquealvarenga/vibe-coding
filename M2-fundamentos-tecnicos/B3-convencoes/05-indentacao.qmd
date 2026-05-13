@@ -1,0 +1,159 @@
+---
+title: "Indentação: o \"símbolo invisível\""
+---
+
+**Indentação** é o espaço em branco no começo de uma linha — os espaços ou tabulações que empurram texto para a direita. Parece decoração; em algumas linguagens é decoração mesmo; em outras, é **sintaxe obrigatória** que decide se o programa roda ou não.
+
+A traição é que o caractere é invisível. Você olha para a tela e vê "alinhamento bonito"; o interpretador olha o mesmo arquivo e vê "estrutura hierárquica". Quando os dois discordam, vem o erro mais frustrante para iniciante: *"mas tá tudo igual, não muda nada!"* — só que muda.
+
+## Em qual linguagem a indentação importa
+
+| Linguagem | Status | O que acontece se você errar |
+|---|---|---|
+| **Python** | **Obrigatória** — define blocos | `IndentationError`; pode também executar a coisa errada silenciosamente |
+| **YAML** | **Obrigatória** — define hierarquia | Parser falha ou interpreta hierarquia errada |
+| **Markdown** | **Obrigatória** para listas aninhadas | Lista vira parágrafo, sub-itens viram itens de mesmo nível |
+| **R** | Cosmética | Código roda igual; estilo destoante prejudica leitura |
+| **LaTeX** | Cosmética | Documento renderiza igual |
+| **C, C++, Java, JavaScript** | Cosmética (delimitam blocos com `{ }`) | Código compila igual; estilo destoante prejudica leitura |
+| **Shell (bash/zsh)** | Cosmética em comandos comuns; algumas estruturas ficam mais legíveis indentadas | Geralmente roda igual |
+
+A primeira coluna é a parte importante. Se a linguagem está marcada como **obrigatória**, indentação é parte da gramática — errar quebra. Se é cosmética, errar deixa o código feio mas funcional.
+
+## Python: indentação **é** o bloco
+
+Em quase toda linguagem, blocos de código são marcados por chaves `{ }` ou palavras-chave (`begin/end`). Em Python, são marcados pela **própria indentação**:
+
+``` python
+if idade >= 18:
+    grupo = "adulto"        # dentro do bloco "if" (4 espaços)
+    print("ok")             # dentro do bloco "if" (4 espaços)
+print("fim")                # FORA do bloco "if" (sem indentação)
+```
+
+Tirar os 4 espaços da segunda linha muda o significado:
+
+``` python
+if idade >= 18:
+grupo = "adulto"            # IndentationError: expected an indented block
+```
+
+Muito pior: se você indenta com **número errado** de espaços (digamos, 5 em vez de 4), Python pode até rodar mas produzir um erro lógico onde a próxima linha "vaza" para outro bloco.
+
+PEP 8, o guia de estilo oficial do Python, recomenda **4 espaços por nível de indentação** [@vanrossum2001pep8].
+
+::: {.callout-warning}
+## Tab × espaço em Python: o terror silencioso
+Tab e espaço **parecem iguais na tela**, mas para Python são caracteres diferentes. Um arquivo onde uma linha usa tab e a vizinha usa 8 espaços (que visualmente alinham igual) **dá erro `TabError: inconsistent use of tabs and spaces in indentation`** em Python 3.
+
+A regra prática é: **só espaços, nunca tabs**. Configure o seu IDE para que a tecla TAB **insira espaços** automaticamente:
+
+- **Positron / VS Code:** abra a paleta de comandos (`Cmd/Ctrl + Shift + P`), procure *"Indent Using Spaces"*, marque. Depois *"Convert Indentation to Spaces"* converte arquivos existentes.
+- **RStudio:** *Tools → Global Options → Code → Editing → Insert spaces for tab*.
+:::
+
+## YAML: indentação define hierarquia
+
+YAML usa indentação para indicar o que está "dentro" de quê:
+
+``` yaml
+website:
+  title: "Vibe Coding"
+  navbar:
+    background: dark
+    left:
+      - text: "Prefácio"
+      - text: "Módulos"
+```
+
+Aqui, `title` e `navbar` estão dentro de `website` (2 espaços de indentação). `background` e `left` estão dentro de `navbar` (4 espaços). Os itens com `-` estão dentro de `left` (6 espaços).
+
+Se você bagunçar a indentação:
+
+``` yaml
+website:
+  title: "Vibe Coding"
+ navbar:                    # ERRO: 1 espaço em vez de 2
+    background: dark
+```
+
+O parser ou para com erro, ou (pior) interpreta `navbar` como propriedade de algum outro nível, e o site renderiza "errado mas sem erro".
+
+A especificação YAML 1.2.2 [@benkiki2021yaml] é taxativa: **só espaços, nunca tabs**. Tab caractere (`#x9`) não é indentação válida em YAML — ponto final.
+
+## R: cosmética, mas ainda assim importa
+
+Em R, indentação **não tem peso sintático**. Este código roda:
+
+``` r
+imc <- function(peso, altura) {
+peso / altura ^ 2
+}
+```
+
+E este, equivalente em comportamento, também:
+
+``` r
+imc <- function(peso, altura) {
+  peso / altura ^ 2
+}
+```
+
+A diferença é só legibilidade humana. O tidyverse style guide [@wickham2024tidystyle] recomenda **2 espaços por nível de indentação em R** — e o auto-formatador do Positron/RStudio aplica essa regra com `Cmd/Ctrl + I` (reformat selection).
+
+## Markdown: o ponto onde indentação decide se vira lista ou parágrafo
+
+Markdown geralmente ignora espaço no começo da linha — mas para **listas aninhadas**, indentação define quem é filho de quem:
+
+``` markdown
+- Frutas
+  - Maçã
+  - Banana
+- Vegetais
+  - Cenoura
+```
+
+Renderiza como lista hierárquica. Se você tirar a indentação dos sub-itens:
+
+``` markdown
+- Frutas
+- Maçã
+- Banana
+- Vegetais
+- Cenoura
+```
+
+Vira lista plana — todos os itens no mesmo nível. Quarto e Pandoc são tolerantes a 2, 3 ou 4 espaços, mas inconsistência dentro do mesmo arquivo confunde o parser.
+
+## A regra prática universal
+
+Para o fluxo deste curso (R, Python, YAML, Markdown, Quarto):
+
+- **Sempre espaços, nunca tabs.** Resolve problema antes de ele aparecer.
+- **2 espaços** por nível em R, YAML, Markdown.
+- **4 espaços** por nível em Python.
+- **Não misture.** Um arquivo com indentação inconsistente é convite para bug.
+- **Configure o IDE para fazer isso por você.** Pressionar TAB insere espaços; auto-formatador (`Cmd/Ctrl + I` no Positron) corrige tudo de uma vez.
+
+## Tornar o invisível visível
+
+Quando o código não funciona "sem motivo", às vezes a causa é um tab disfarçado de espaço, ou um espaço sobrando no fim da linha. A solução é **mostrar caracteres invisíveis** no editor:
+
+- **Positron / VS Code:** menu *View → Appearance → Render Whitespace*. Espaços viram pontinhos `·`, tabs viram setas `→`. Você passa a enxergar a estrutura literal do arquivo.
+- **RStudio:** *Tools → Global Options → Code → Display → Show whitespace characters*.
+
+Vale ligar uma vez e deixar ligado. Custa quase nada visualmente e revela bugs que doutra forma você caçaria por horas.
+
+## Conexão com IA
+
+Agentes de IA acertam indentação com mais consistência que humanos — eles produzem 4 espaços em Python, 2 em R/YAML, sem hesitar. Os problemas aparecem nas bordas:
+
+- **Copiar e colar de chat para arquivo.** Algumas interfaces de chat trocam tabs por espaços (ou vice-versa) silenciosamente. Sempre rode o linter (`black` em Python, `styler` em R) ou o auto-formatador do IDE depois de colar trecho longo gerado pelo agente.
+- **Indentação misturada por edição parcial.** Se você pede ao agente para "ajustar essa função" e ele edita parcialmente, pode introduzir indentação inconsistente entre o trecho original (4 espaços) e o trecho novo (tab). Sempre revise o diff.
+- **Quando dá erro de indentação que você não vê,** copie o erro e o trecho exato (preservando os espaços e tabs originais — use crase tripla no chat) e peça "encontre a inconsistência de indentação aqui". O agente vê o que seu olho não vê.
+
+## O que vem a seguir
+
+Indentação é um caractere que existe mas não aparece. O próximo capítulo é sobre **arquivos inteiros** que existem mas não aparecem — como `.gitignore`, `.Rprofile`, `.env` — e por que precisam estar visíveis para você trabalhar com confiança.
+
+→ [06 · Arquivos invisíveis e como vê-los](06-arquivos-invisiveis.qmd)

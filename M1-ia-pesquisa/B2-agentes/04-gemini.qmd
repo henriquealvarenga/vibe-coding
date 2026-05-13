@@ -1,0 +1,110 @@
+---
+title: "Gemini"
+---
+
+Para fechar o panorama dos agentes que apresentamos no Módulo 0, vamos olhar para o **Gemini**, do Google. Como nos capítulos anteriores sobre Claude e Codex, o foco aqui é conceitual: quem é a empresa, como o produto se organiza, em que difere dos outros dois e quando faz sentido escolher.
+
+Adianto um ponto importante: **o Gemini não tem o paralelo limpo do Claude (Desktop unificado com 3 modos) nem do Codex (várias superfícies do mesmo agente)**. A Google distribuiu o Gemini em produtos separados, com filosofias diferentes — e isso muda como o pesquisador encontra a ferramenta certa para cada tarefa. Vamos por partes.
+
+## Google em poucas palavras
+
+A **Google** tem peso óbvio na história de IA — boa parte dos avanços teóricos que tornaram a IA generativa viável (a arquitetura *Transformer* de 2017, mencionada em M1-B1-01) saiu de pesquisadores do Google. O produto de IA generativa entrou no mercado com o **Bard** em março de 2023, em resposta ao ChatGPT. No início de 2024 a Google **renomeou tudo para Gemini**, alinhando o nome do produto ao da família de modelos. Hoje a Google é a terceira grande do espaço de modelos de fronteira, ao lado da OpenAI e da Anthropic.
+
+A integração com o **Google Workspace** (Gmail, Drive, Docs, Sheets, Calendar) é o diferencial estrutural mais óbvio em relação aos concorrentes — para quem vive nessas ferramentas, o Gemini está literalmente "do lado".
+
+## A família Gemini
+
+| Modelo | Foco | Quando usar |
+|---|---|---|
+| **Gemini 2.5 Pro** | Modelo principal — raciocínio amplo, janela de **1M tokens** | Tarefas longas, leitura de livros ou bases de PDF inteiras |
+| **Gemini 2.5 Flash** | Versão rápida e barata | Uso diário, respostas mais ágeis |
+| **Gemini 2.5 Flash-Lite** | Versão ainda menor | Tarefas leves, classificação |
+| **Gemini 3.x** (Pro / Flash) | Geração mais nova, lançada em novembro de 2025 | Por enquanto, foco principal no IDE Antigravity (ver seção dedicada abaixo) |
+
+Em uso típico, a aplicação escolhe o modelo conforme a tarefa. Vale lembrar a distinção *modelo × aplicação × versão* discutida em M1-B1-01: o que muda entre os pontos de acesso a seguir é a **interface**; o **modelo** por trás pode ser o mesmo.
+
+## Os pontos de acesso do Gemini
+
+Aqui está a parte que difere mais do que vimos nos outros agentes. Em vez de um único "Gemini Desktop" que cobre tudo (como o Claude Desktop), a Google oferece **dois grupos de produtos** com objetivos diferentes:
+
+### Grupo 1 — Conversação e análise de contexto
+
+- **Gemini Desktop (macOS)** — lançado em **abril de 2026**. Requer **macOS 15 (Sequoia)+** e **Apple Silicon**. Vai além de chat: lê arquivos locais (PDFs, imagens, documentos), compartilha sua tela com a IA via atalho `Option + Espaço`, gera imagens (Nano Banana) e vídeos (Veo). Para download: [gemini.google/mac](https://gemini.google/mac).
+- **Web** ([gemini.google.com](https://gemini.google.com)) — versão padrão no navegador. Funciona em qualquer sistema.
+- **Apps mobile** — Android e iOS, na Google Play e App Store.
+- **Integração Workspace** — Gemini embutido em Gmail, Docs, Sheets, Drive (recurso de planos pagos do Workspace).
+
+### Grupo 2 — Trabalho com código
+
+- **Gemini CLI** — agente em terminal, **open source** no GitHub. Equivalente direto do Claude Code e do Codex CLI. Instalação coberta em M0-B1-05.
+- **Gemini Code Assist** — extensão para **VS Code, JetBrains** e outras IDEs. Oferece sugestões inline de código (estilo Copilot), chat integrado e um "modo agente" baseado no Gemini CLI.
+
+::: {.callout-warning}
+## A diferença organizacional importa
+O Gemini Desktop é potente, mas **não opera no seu sistema como agente** no mesmo sentido do Claude Cowork ou do Codex Desktop. Ele lê arquivos locais e compartilha tela, mas não cria/edita arquivos do seu projeto, não roda comandos no terminal, não faz commits no Git. Para esse tipo de trabalho com Gemini, você precisa do **Gemini CLI** (terminal) ou do **Gemini Code Assist** (dentro de uma IDE). O "balcão único" que o Claude Desktop oferece **não existe** no ecossistema Gemini hoje.
+:::
+
+## Gemini × Claude × Codex: diferenças que importam
+
+| Aspecto | Gemini (Google) | Claude (Anthropic) | Codex (OpenAI) |
+|---|---|---|---|
+| Modelo padrão | Gemini 2.5 Pro / Flash | Claude Opus / Sonnet | GPT-5 |
+| Acesso | Conta Google (Free / Workspace / AI Pro) ou API | Conta Anthropic (Free / Pro / Max) ou API | Conta ChatGPT (Plus / Pro / Business / Enterprise / Edu) ou API |
+| Pontos de acesso | Desktop (só macOS), web, mobile, Workspace, CLI, Code Assist | Claude Desktop unificado (Chat + Cowork + Code), CLI standalone | App Desktop, web, extensão de IDE, CLI |
+| Modo agêntico para trabalho **não-coding** | Não há equivalente direto ao Cowork | Modo dedicado **Cowork** dentro do Desktop | Embutido no app Desktop |
+| CLI open source? | **Sim** (único entre os três) | Não | Não |
+| Cota gratuita | **Generosa** com conta Google pessoal — 60 req/min, 1000 req/dia (Flash, desde março/2026) | Limitada no plano Free | Compartilhada com cota do ChatGPT |
+| Janela de contexto | **1M tokens** (2.5 Pro), 2M (Gemini 3 no Antigravity) | 1M tokens (Opus 4.7) | Variável por modelo |
+| Integração natural | Google Workspace (Gmail, Docs, Sheets, Drive) | Quarto, ferramentas Posit, MCP | GitHub (Copilot, Actions), VS Code |
+
+## Quando vale a pena instalar o Gemini
+
+Quatro cenários onde o Gemini faz sentido **mesmo seguindo o curso com Claude como padrão**:
+
+1. **Você (ou sua instituição) usa Google Workspace.** A integração nativa com Gmail, Drive, Docs e Sheets é o diferencial mais forte do Gemini para uso diário. Universidades brasileiras com conta Workspace educacional muitas vezes têm Gemini incluído.
+2. **Você precisa de janela de contexto muito grande.** Para enviar livros inteiros, séries de PDFs longos ou bases de protocolos clínicos completas, o 1M (Gemini 2.5 Pro) ou 2M tokens (Gemini 3) são vantagem real.
+3. **Você quer ferramenta open source.** O Gemini CLI é o único dos três agentes com código totalmente aberto no GitHub — relevante para quem valoriza transparência ou quer auditar/contribuir.
+4. **Você quer cota gratuita generosa.** Mesmo após a mudança de março/2026 (Pro virou pago no free tier), os modelos Flash continuam dando 60 req/min e 1000 req/dia — mais do que a maior parte das pessoas usa em um dia de trabalho.
+
+## Limites específicos do Gemini
+
+Quatro pontos honestos:
+
+- **Mudança recente na cota gratuita do CLI (25/03/2026).** O free tier do Gemini CLI passou a oferecer apenas modelos **Flash**; o Gemini 2.5 **Pro** virou exclusivo de planos pagos. Quem dependia do Pro com a janela de 1M tokens via free tier precisa migrar para um plano pago ou adaptar o uso.
+- **Desktop só para macOS Apple Silicon.** Não há app oficial para **Windows** nem para **Linux**. Nesses sistemas, use a versão web em [gemini.google.com](https://gemini.google.com), o **CLI** ou o **Code Assist**.
+- **Falta de balcão único.** Como discutido acima, não existe o equivalente ao Claude Desktop (que reúne Chat + Cowork + Code). O usuário precisa pular entre Gemini Desktop, CLI e Code Assist conforme a tarefa.
+- **Identidade do modelo nem sempre clara.** Como há duas gerações simultâneas no mercado (2.5 e 3.x), e a Google muda muito a oferta entre planos, é comum não ter certeza de qual modelo está rodando. Ler o canto inferior das interfaces ajuda.
+
+## Antigravity: o IDE agêntico da Google
+
+Em **18 de novembro de 2025**, junto com o lançamento do **Gemini 3**, a Google publicou o **Antigravity** — um IDE "agent-first" que merece menção própria.
+
+### O que é
+
+- **Fork modificado do VS Code**, na mesma linhagem do Positron e do Cursor.
+- **Arquitetura dual-view:**
+  - *Editor view* — interface familiar de IDE, com agente em sidebar (estilo Cursor).
+  - *Manager view* — "centro de controle" para orquestrar **múltiplos agentes em paralelo**, com **Artifacts** (task lists, planos de implementação, capturas de tela, gravações de browser) como entregáveis verificáveis.
+- **Modelos padrão:** Gemini 3.1 Pro e Gemini 3 Flash. Suporta também Claude Sonnet 4.6, Claude Opus 4.6 e GPT-OSS-120B.
+- **Janela de contexto:** 2M tokens.
+- **Gratuito durante o public preview**, com cotas generosas no Gemini 3 Pro.
+- **Integração nativa com Google Cloud** para fluxos de deploy.
+
+Site oficial: [antigravity.google](https://antigravity.google).
+
+### E para Quarto, funciona?
+
+Sim — testado neste curso. Como o Antigravity é fork do VS Code, **a extensão oficial do Quarto funciona normalmente**. Depois de instalar a extensão e ter o Quarto CLI no sistema (M0-B1-03), é possível abrir um `.qmd`, ter *preview* lado a lado, e renderizar para HTML, PDF, Word — exatamente como em Positron, RStudio ou VS Code com a mesma extensão.
+
+::: {.callout-tip}
+## Para o público deste curso, Positron continua sendo o padrão
+O Antigravity é uma ferramenta poderosa, mas é desenhada para **dev profissional** — a *Manager view* com agentes paralelos, a integração com Google Cloud e a complexidade de "Artifacts" são úteis em projetos grandes de software, mas adicionam complexidade que não casa com o escopo deste curso.
+
+Para análise de dados em pesquisa médica, **a recomendação continua sendo Positron + Gemini CLI ou Gemini Code Assist** se você quiser usar Gemini. Quem já tem familiaridade com VS Code e quer experimentar um IDE agêntico mais ambicioso pode instalar o Antigravity em paralelo — não há conflito.
+:::
+
+## O que vem a seguir
+
+Falta uma peça para fechar o Bloco de Agentes: como **dizer ao agente, de uma vez por todas, as regras do seu projeto** — sem repetir em cada *prompt*. Esse é o papel do `AGENTS.md`, padrão aberto que os três agentes (Claude, Codex e Gemini) leem automaticamente.
+
+- **05 · O arquivo `AGENTS.md`** — o que é, por que padronizou em torno desse nome (Agentic AI Foundation, dezembro de 2025), e o `AGENTS.md` deste próprio curso disponível para você copiar e adaptar ao seu projeto.

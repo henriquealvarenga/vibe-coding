@@ -1,0 +1,181 @@
+---
+title: "Documentação reprodutível: Quarto + R/Python"
+---
+
+Você tem ambiente R isolado com `renv` (cap. 04), ambiente Python isolado com `uv` (cap. 04), e quer escrever um relatório que combine análise estatística clássica em R (uma regressão de Cox de sobrevida) com inferência por modelo de linguagem em Python (extração estruturada de comorbidades a partir de prontuários em texto livre). **No mesmo documento**. **Mesmas conclusões geradas a cada renderização**.
+
+Esse é o caso de uso onde Quarto brilha — e este capítulo explica como ele faz isso. Especificamente: como o Quarto escolhe entre dois "motores" diferentes de execução (knitr para R, Jupyter para Python), quando você usa cada um, e o que muda quando você mistura as duas linguagens num mesmo `.qmd`.
+
+## Os dois engines do Quarto
+
+Por baixo, Quarto não executa código diretamente. Ele delega execução para um de dois motores:
+
+- **knitr** — para código R. Ele roda os blocos R, pega a saída (texto, tabelas, gráficos), e devolve para o Quarto inserir no documento renderizado.
+- **Jupyter** — para código Python. Mesma ideia: executa os blocos Python via Jupyter kernel, captura saída, devolve para o Quarto.
+
+Por padrão, Quarto **detecta automaticamente** qual engine usar olhando os blocos de código no documento. Se há blocos R, usa knitr; se só há blocos Python, usa Jupyter. Você pode também declarar explicitamente no YAML do `.qmd`:
+
+``` yaml
+---
+title: "Análise"
+engine: knitr   # ou: jupyter
+---
+```
+
+A diferença entre os dois engines tem origem histórica e tecnológica que vale conhecer.
+
+## A linhagem knitr (R, 2002–presente)
+
+O conceito de "documento reprodutível com código embutido" é antigo e tem trajetória longa em R:
+
+**Sweave (Friedrich Leisch, 2002).** Primeira ferramenta amplamente adotada para misturar texto e código R num mesmo documento. Inspirada no **literate programming** de Donald Knuth (anos 1980 — programação narrativa, código junto de explicação). Sweave usava sintaxe LaTeX-like, gerava PDF via LaTeX. Era poderoso mas pesado, e a sintaxe alienava quem não vinha de TeX.
+
+**knitr (Yihui Xie, 2012).** Yihui Xie, então estudante de doutorado em estatística na Iowa State University, criou knitr como reescrita moderna do Sweave. Diferenças centrais: sintaxe limpa (chunks delimitados por ` ```{r} `), mais formatos de saída (HTML, Markdown, LaTeX, Word), opções de chunk poderosas. Em poucos anos, knitr substituiu Sweave como padrão em R.
+
+**R Markdown (RStudio, 2014).** A RStudio Inc. (depois Posit) adotou knitr como motor de execução e adicionou Markdown como formato de texto (em vez de LaTeX). O resultado, **R Markdown** (extensão `.Rmd`), virou padrão para documentos reprodutíveis em R por quase uma década.
+
+**Quarto (Posit, 2022).** A próxima geração. Quarto generalizou o R Markdown — passou a suportar Python (via Jupyter), Julia, Observable JavaScript — e renomeou os arquivos para `.qmd`. Mas **mantém knitr como engine para código R**. O capítulo M3-B1-02 cobre o Quarto em detalhe; aqui o foco é a parte R.
+
+Quando você roda `quarto render arquivo.qmd` num documento com blocos R, esse fluxo acontece:
+
+```
+quarto render arquivo.qmd
+       │
+       ▼
+[Quarto detecta blocos {r}]
+       │
+       ▼
+[Invoca knitr]
+       │
+       ▼
+[knitr roda cada bloco R, captura output]
+       │
+       ▼
+[Quarto pega texto + outputs, gera HTML/PDF/DOCX/etc.]
+```
+
+## A linhagem Jupyter (Python, 2001–presente)
+
+A trajetória paralela em Python é igualmente rica:
+
+**IPython (Fernando Pérez, 2001).** Pérez, então estudante de física na University of Colorado, criou o IPython como shell interativo melhorado para Python — com autocompletar, histórico, formatação rica de saída. Inspiração óbvia: oferecer aos físicos a "conversa com os dados" que estatísticos já tinham em R [@perez2007ipython].
+
+**IPython Notebook (2011).** Em 2011, o IPython ganhou interface web. Era possível escrever código Python em "células" no navegador, ver gráficos inline, narrar análises. Foi adotado em massa em ensino e em ciência exploratória.
+
+**Jupyter (2014).** O projeto se desmembrou. O kernel de Python continuou como IPython; a interface de notebook virou **Jupyter**, suportando múltiplas linguagens — o nome combina **Ju**lia, **Pyt**hon e **R** (as três linguagens originalmente suportadas). Hoje, Jupyter aceita kernels para dezenas de linguagens, mas o uso predominante é Python.
+
+**Quarto adota Jupyter (2022).** Quando Quarto foi criado em 2022, em vez de inventar um novo motor para Python, a Posit adotou o **Jupyter** como engine. Isso significa que executar código Python num `.qmd` Quarto é, por baixo, exatamente o mesmo que executar num Jupyter Notebook — mesmas bibliotecas, mesmos kernels, mesmo comportamento. A vantagem: aproveita todo o ecossistema maduro de Jupyter (kernels para conda, ambientes virtuais, GPUs, etc.).
+
+O fluxo, paralelo ao knitr:
+
+```
+quarto render arquivo.qmd
+       │
+       ▼
+[Quarto detecta blocos {python}]
+       │
+       ▼
+[Invoca Jupyter]
+       │
+       ▼
+[Jupyter roda cada bloco Python, captura output]
+       │
+       ▼
+[Quarto pega texto + outputs, gera HTML/PDF/DOCX/etc.]
+```
+
+A simetria é deliberada. Para o usuário de Quarto, R e Python são igualmente cidadãos de primeira classe — a única diferença é o engine subjacente.
+
+## Misturando R e Python no mesmo documento
+
+Aqui vem um caso útil de fluxo bilíngue. Suponha que você queira fazer análise de sobrevida em R (porque `survival` e `survminer` em R são imbatíveis) E classificação automática de comorbidades de prontuário em Python (porque o modelo de linguagem que extrai informação está disponível só em Python). Tradicionalmente, isso exigiria dois ambientes separados, dois scripts, e copiar resultados manualmente entre os dois.
+
+Quarto permite os dois no mesmo `.qmd` via uma ferramenta chamada **`reticulate`** (R) — pacote que cria ponte bidirecional entre R e Python na mesma sessão. O fluxo:
+
+````markdown
+---
+title: "Análise integrada"
+engine: knitr
+---
+
+## Extração de comorbidades em Python
+
+```{{python}}
+from transformers import pipeline
+classifier = pipeline("text-classification", model="...")
+prontuarios = ["Paciente com HAS, DM2 e DPOC.", ...]
+comorbidades = [classifier(p) for p in prontuarios]
+```
+
+## Análise de sobrevida em R
+
+```{{r}}
+library(survival)
+library(reticulate)
+
+# Acessa objetos Python a partir de R
+comorbidades_r <- py$comorbidades
+
+# Análise estatística em R
+modelo <- coxph(Surv(tempo, evento) ~ comorbidades_r, data = dados)
+summary(modelo)
+```
+````
+
+Note os dois pontos importantes:
+
+- **`engine: knitr`** no YAML diz ao Quarto para usar o engine R. O `reticulate` cuida da execução de Python a partir de dentro do R.
+- **`py$comorbidades`** acessa o objeto Python `comorbidades` a partir do R. O `reticulate` faz a tradução entre tipos (lista Python vira lista R, DataFrame pandas vira `data.frame` R).
+
+A alternativa simétrica: usar engine Jupyter e `rpy2` para chamar R a partir de Python. Funciona também, mas é menos comum em pesquisa de saúde (onde o ponto de partida tipicamente é R).
+
+::: {.callout-note}
+## Quando misturar e quando não
+Misturar R e Python no mesmo documento é poderoso mas custa **complexidade de manutenção**: dois ambientes para manter (R + renv, Python + uv), dois conjuntos de bibliotecas, debugging mais difícil. Use isso quando há **vantagem clara** — uma tarefa que cada linguagem faz dramaticamente melhor que a outra. Para análises rotineiras, escolha uma só.
+
+Em pesquisa médica, os casos típicos onde a mistura vale a pena: análise estatística clássica em R + processamento de imagem médica em Python; análise de coorte em R + extração de NLP de prontuários em Python; modelo Bayesiano em Stan via R + visualização interativa via Python/Plotly.
+:::
+
+## A integração com ambientes isolados
+
+O capítulo anterior (`04-instalacao-ambientes`) tratou de ambientes isolados — `renv` para R, `uv` para Python. Aqui é onde tudo se conecta:
+
+- Quando você renderiza `.qmd` num projeto com `renv` ativo, o knitr automaticamente usa os pacotes do ambiente do projeto (não os globais).
+- Quando você renderiza com Jupyter, o engine usa o kernel Python apontado pelo ambiente ativo (`.venv` criado pelo `uv`, ou conda env).
+- Tudo isso é **transparente** se você abre o projeto no Positron ou RStudio — a IDE detecta os ambientes e ativa antes de chamar Quarto.
+
+A consequência: um `.qmd` num projeto bem configurado **roda igual em qualquer máquina**. Clona do GitHub, restaura ambientes (`renv::restore()`, `uv sync`), `quarto render` — mesmas bibliotecas, mesmos resultados.
+
+## Cuidados práticos
+
+Algumas coisas que pegam iniciante:
+
+**1. Cache de execução.** Por padrão, knitr e Jupyter **re-executam todos os blocos** a cada render. Em análises pesadas (modelos que demoram minutos a horas para rodar), isso é caro. Quarto oferece sistema de **freeze** (congela execução, só re-executa quando o código muda) e **cache** (cacheia output de blocos individualmente). Configurações no YAML:
+
+``` yaml
+execute:
+  freeze: auto    # Re-executa só se o .qmd mudar
+  cache: true     # Cacheia outputs por bloco
+```
+
+**2. Reprodutibilidade vs velocidade.** Cache e freeze ajudam velocidade mas exigem cuidado: se você atualiza dados de entrada sem mexer no `.qmd`, o cache não vai detectar e vai mostrar resultado antigo. Em fase de desenvolvimento, vale `freeze: false` para garantir frescor; perto de submissão, `freeze: auto` para evitar re-rodar análises pesadas a cada pequena mudança de texto.
+
+**3. Plots não-determinísticos.** Códigos com aleatoriedade (simulações, modelos com seed implícito) podem produzir gráficos ligeiramente diferentes a cada execução. Use `set.seed()` em R e `np.random.seed()` em Python sempre que houver aleatoriedade.
+
+**4. Encoding de output.** Especialmente no Windows, caracteres acentuados em texto de output podem aparecer como mojibake. Configurar `encoding: UTF-8` no YAML resolve a maioria dos casos.
+
+## Conexão com IA
+
+Agentes ajudam em três pontos específicos com Quarto + engines:
+
+**1. Configurar projeto inicial.** *"Estou começando projeto Quarto que combina análise R e processamento de texto em Python. Como configuro o `_quarto.yml`, o `renv`, o `uv`, e o `.qmd` inicial?"* — agente entrega esqueleto completo.
+
+**2. Diagnosticar erro de engine.** Quando o render falha, mensagens podem ser obscuras ("knitr error" não diz nada). Cole o stack trace e o agente identifica se é problema de pacote faltando, sintaxe de chunk, configuração de YAML, ou ambiente.
+
+**3. Otimizar tempo de render.** *"Meu `.qmd` demora 12 minutos para renderizar. O que posso configurar para acelerar sem perder reprodutibilidade?"* — agente sugere `freeze`, `cache`, particionamento de chunks pesados em arquivos separados.
+
+## O que vem a seguir
+
+Você sabe configurar ambientes (cap. 04) e integrar R + Python em documentos Quarto (este capítulo). Falta o capítulo final do Bloco — o que reúne toda a filosofia do curso e operacionaliza a tese central: **como você de fato pede análise para um agente de IA, e como conduz o trabalho de pesquisa em fluxo "vibe coding"**. Esse é o conteúdo que substitui os 8 capítulos antigos sobre sintaxe e bibliotecas que foram deletados.
+
+→ [14 · Padrões de prompt para gerar código de análise](14-prompts-analise.qmd)

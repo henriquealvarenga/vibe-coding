@@ -1,0 +1,172 @@
+---
+title: "Comentários"
+---
+
+Um **comentário** é um trecho de texto que o interpretador (R, Python) ou o renderizador (Quarto, LaTeX) **ignora**. Ele existe exclusivamente para o leitor humano — e, agora, para o agente de IA que vai ler o seu projeto antes de mexer nele.
+
+Parece tópico óbvio demais para um capítulo. Justamente por ser óbvio, é o lugar onde quase todo iniciante (e muito agente) escorrega: comenta de menos, comenta de mais, ou comenta a coisa errada.
+
+## Cada linguagem usa um símbolo diferente
+
+| Símbolo | Linguagens | Exemplo |
+|---|---|---|
+| `#` | R, Python, YAML, shell (bash/zsh), Ruby, TOML | `# critério de inclusão: idade ≥ 18` |
+| `//` | C, C++, Java, JavaScript, TypeScript, Go, Rust | `// inicializa contador` |
+| `/* */` | C, C++, Java, JavaScript, CSS (comentário em bloco) | `/* trecho legado, ver issue #142 */` |
+| `<!-- -->` | HTML, Markdown, XML, Quarto (fora de chunk) | `<!-- TODO: revisar tabela -->` |
+| `%` | LaTeX, BibTeX, MATLAB, Erlang | `% ajuste de margens para impressão` |
+| `--` | SQL, Haskell, Lua, Ada | `-- filtra apenas pacientes ativos` |
+| `;` | Lisp, Clojure, assembly | `; saída para o registrador A` |
+
+No fluxo do curso, os três que mais aparecem são `#` (R, Python, YAML, terminal), `<!-- -->` (Markdown e Quarto fora de blocos de código) e `%` (BibTeX, LaTeX para fórmulas).
+
+::: {.callout-note}
+## Comentários em Quarto: depende de onde
+Dentro de um arquivo `.qmd`, o símbolo de comentário muda conforme o lugar:
+
+- **No corpo Markdown**, use `<!-- comentário -->`. Não aparece no HTML/PDF final.
+- **No cabeçalho YAML** (entre as linhas `---`), use `#`.
+- **Dentro de chunks de código** (` ```{r} ` ou ` ```{python} `), use o símbolo da linguagem do chunk: `#` para R e Python.
+- **Para esconder um chunk inteiro do output** (mas ainda executar), use a opção `#| echo: false` no topo do chunk — isso não é comentário, é diretiva Quarto, mas é confundida com comentário com frequência.
+:::
+
+## A regra: explique o **porquê**, não o **o quê**
+
+A versão ruim:
+
+``` r
+# soma a com b
+total <- a + b
+```
+
+O comentário não acrescenta nada — o código já diz o que faz. Ocupa espaço, polui leitura, envelhece (se mudar a operação, alguém vai esquecer de atualizar o comentário, e ele passa a mentir).
+
+A versão útil:
+
+``` r
+# excluímos pacientes com peso < 30 kg porque o protocolo do estudo
+# considera essa faixa indicativa de dado errôneo de prontuário
+dados <- dados[dados$peso >= 30, ]
+```
+
+Aqui o comentário responde a uma pergunta que o código sozinho não responde: *por que esse limiar, e não outro*. É decisão metodológica, não de programação — exatamente o tipo de informação que se perde se não for registrada perto do código.
+
+@ousterhout2018philosophy formaliza essa intuição como princípio: comentários devem descrever coisas que **não estão óbvias no código** — escolhas de design, restrições, dependências, motivações. Comentar o que já está visível é redundância; comentar o que está ausente do código é o ponto inteiro.
+
+## Comentários como documentação leve
+
+Há três usos defensáveis de comentário que vão além do "porquê de uma linha específica":
+
+**Cabeçalho de script.** Em arquivos `.R` ou `.py` longos, um cabeçalho curto orienta quem abre pela primeira vez:
+
+``` r
+# ============================================================
+# analise_sobrevida.R
+# Curva de Kaplan-Meier por grupo de tratamento.
+# Input:  data/processed/coorte_2025.parquet
+# Output: output/figures/sobrevida.pdf
+# ============================================================
+```
+
+Não inclua autor nem data — Git resolve isso melhor (`git log` e `git blame` mostram quem fez o quê, quando). Cabeçalho serve para *propósito* e *fluxo de dados*, não para metadados administrativos.
+
+**Divisores de seção.** Em R, terminar um comentário com quatro hífens (`----`), iguais (`====`) ou cerquilhas (`####`) faz com que RStudio e Positron tratem aquela linha como **seção dobrável** no painel de outline:
+
+``` r
+# Importação ----
+
+dados <- read.csv("data/raw/coorte.csv")
+
+# Limpeza ----
+
+dados_limpos <- dados |>
+  filter(!is.na(idade))
+
+# Análise ----
+
+modelo <- lm(desfecho ~ idade + sexo, data = dados_limpos)
+```
+
+O atalho `Ctrl + Shift + R` (Windows/Linux) ou `Cmd + Shift + R` (Mac) insere uma seção dessas direto no cursor. Para arquivos R com mais de cem linhas, esse hábito sozinho transforma a navegação.
+
+**TODO, FIXME, HACK.** Convenção universal para marcar pendências:
+
+``` python
+# TODO: substituir hardcoded path por variável de ambiente
+# FIXME: este loop O(n²) gargala em datasets > 10⁵ linhas
+# HACK: workaround para bug do pacote X versão 1.4.2
+```
+
+A convenção é antiga e bem-sustentada — IDEs como Positron e VS Code reconhecem essas tags e listam todas as pendências do projeto numa aba dedicada. Útil para não esquecer pendências em projeto longo.
+
+## Antipadrões a evitar
+
+**1. Comentar o óbvio.**
+
+``` python
+i = i + 1  # incrementa i em 1
+```
+
+Apaga.
+
+**2. Manter código morto comentado "caso precise depois".**
+
+``` r
+# modelo_antigo <- lm(y ~ x1 + x2, data = df)
+# resumo_antigo <- summary(modelo_antigo)
+modelo <- lm(y ~ x1 + x2 + x3, data = df)
+```
+
+A função do Git é exatamente essa: guardar versões anteriores sem precisar deixá-las pisando no script. Código comentado *suja* leitura, atrapalha busca textual, e cria a falsa impressão de que aquele caminho ainda é considerado. Apaga, comita, segue.
+
+**3. Comentário desatualizado (pior que comentário ausente).**
+
+``` r
+# converte para meses (× 12)
+idade_decadas <- idade_anos / 10
+```
+
+O comentário mente — a operação não é multiplicar por 12 nem converter para meses. Comentário desatualizado é mais perigoso que ausência de comentário, porque o leitor confia nele e perde tempo procurando bug onde não há.
+
+**4. Comentar para "compensar" código ruim.**
+
+``` python
+# esta função recebe um dicionário onde a chave é o ID do paciente,
+# o valor é uma lista cuja primeira posição é a idade, a segunda é o
+# diagnóstico, a terceira é o array de exames, em formato...
+def proc(d):
+    ...
+```
+
+@ousterhout2018philosophy chama isso de *comments compensating for bad code*: se você precisa de cinco linhas de comentário para explicar o argumento de uma função, o sinal não é "preciso comentar mais" — é "preciso refatorar". Renomeie a função, troque o dicionário por uma classe com campos nomeados, ou divida em funções menores.
+
+@wilson2017good, em *Good Enough Practices in Scientific Computing*, sintetiza: o melhor comentário é o que se torna desnecessário porque o código foi escrito de forma que o explica.
+
+## Convenções específicas das linguagens do curso
+
+**Python (PEP 8).** Recomenda comentários em frases completas, primeira letra maiúscula, e — para comentários inline (na mesma linha do código) — pelo menos dois espaços antes do `#`, e um espaço após [@vanrossum2001pep8].
+
+``` python
+x = x + 1                 # Compensa o índice começando em zero
+```
+
+**R (tidyverse style guide).** Recomenda um espaço após o `#`, comentários em frase, e usa o truque dos `----` no fim do comentário para criar seções dobráveis [@wickham2024tidystyle].
+
+``` r
+# Ajusta o valor para a escala 0-100
+escore <- (bruto - min_bruto) / (max_bruto - min_bruto) * 100
+```
+
+## Conexão com IA
+
+Agentes de IA têm tendência conhecida a **comentar demais** — geram um comentário antes de quase toda linha, geralmente explicando o óbvio. Acontece porque o modelo é treinado para "ser útil" e interpreta isso como "explicar tudo".
+
+O `AGENTS.md` deste projeto (M1-B2-05) tem regra explícita sobre isso: *"Comentários explicam o por quê de uma decisão, não o que o código faz. Não comente o óbvio."* É a regra que mais reduz poluição visual quando você usa Claude, Codex ou Gemini para gerar código.
+
+Teste prático para validar um comentário antes de aceitar a sugestão do agente: **se removê-lo não faz perder informação, apague**.
+
+## O que vem a seguir
+
+Comentários cuidam do que o código não consegue dizer. O próximo capítulo cuida do oposto: **os símbolos e operadores que o código diz** — `<-`, `|>`, `%>%`, `**`, `==` e companhia. Quem nunca viu, lê código como hieróglifo.
+
+→ [04 · Símbolos e operadores](04-simbolos-operadores.qmd)

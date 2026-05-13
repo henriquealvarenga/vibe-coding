@@ -1,0 +1,336 @@
+---
+title: "Conceitos de Git"
+---
+
+# Conceitos do Git
+
+No capítulo anterior, você conheceu a história do Git e do GitHub, entendeu o que é controle de versão e por que essas ferramentas se tornaram essenciais. Antes de colocar a mão na massa, porém, precisamos construir um vocabulário comum.
+
+O Git possui uma série de conceitos e termos específicos que podem parecer confusos à primeira vista: repositório, commit, staging, branch, merge, push, pull, clone, fork... São palavras que você encontrará em toda documentação, tutorial e mensagem de erro. Entendê-las bem agora vai facilitar muito o seu aprendizado — e evitar frustrações mais tarde.
+
+Este capítulo é um glossário expandido. Não vamos executar comandos ainda; vamos entender **o que cada conceito significa** e **por que ele existe**. Pense nisso como aprender as regras do jogo antes de começar a jogar.
+
+## Repositório (repository)
+
+Um **repositório** — frequentemente abreviado como **repo** — é uma pasta que está sendo monitorada pelo Git. Ela contém todos os seus arquivos de trabalho e, além disso, uma pasta oculta chamada `.git` onde o Git armazena todo o histórico de alterações, configurações e metadados.
+
+Existem dois tipos de repositório:
+
+**Repositório local**
+: Fica no seu computador. É onde você trabalha, edita arquivos e faz commits. Só você tem acesso a ele (a menos que compartilhe a pasta de outra forma).
+
+**Repositório remoto**
+: Fica em um servidor na internet, como o GitHub, GitLab ou Bitbucket. Serve como ponto de sincronização entre diferentes pessoas (ou entre seus próprios computadores). Quando você "sobe" seu código para o GitHub, está enviando para um repositório remoto.
+
+A grande sacada do Git é que o repositório local é completo e autônomo. Você pode fazer commits, criar branches, ver o histórico inteiro — tudo sem conexão com a internet. O repositório remoto é apenas uma cópia sincronizada que facilita colaboração e backup.
+
+## Commit
+
+Um **commit** é um "instantâneo" (snapshot) do estado dos seus arquivos em um determinado momento. É a unidade básica do histórico no Git.
+
+Pense em um commit como tirar uma foto do seu projeto. Cada foto registra exatamente como todos os arquivos estavam naquele instante. Se você quiser voltar a uma versão anterior, basta "olhar" para uma foto mais antiga.
+
+Cada commit contém:
+
+- **As alterações feitas** desde o commit anterior
+- **Uma mensagem** explicando o que foi alterado e por quê
+- **O autor** (nome e e-mail de quem fez o commit)
+- **A data e hora** em que foi feito
+- **Um identificador único** (um código hexadecimal chamado hash, como `a1b2c3d4...`)
+
+Fazer commits frequentes é uma boa prática. Commits pequenos e bem descritos facilitam entender o histórico e, se algo der errado, permitem voltar a um ponto específico sem perder muito trabalho.
+
+::: {.callout-tip}
+## Boas mensagens de commit
+
+Uma mensagem de commit deve ser clara e descritiva. Compare:
+
+- ❌ "Alterações"
+- ❌ "Ajustes"
+- ❌ "WIP" (work in progress)
+- ✅ "Corrige cálculo de média ponderada"
+- ✅ "Adiciona gráfico de dispersão ao relatório"
+- ✅ "Remove função duplicada no módulo de análise"
+
+A mensagem deve responder: "Se eu aplicar este commit, o que acontece com o projeto?"
+:::
+
+## Área de preparação (staging area)
+
+A **área de preparação** — também chamada de **staging area** ou **index** — é um conceito que confunde muitos iniciantes, mas é fundamental para entender o Git.
+
+Quando você modifica arquivos no seu projeto, essas alterações não vão automaticamente para o próximo commit. Primeiro, você precisa explicitamente dizer ao Git quais alterações quer incluir. Esse processo de selecionar alterações é chamado de **staging** (preparar).
+
+Por que isso existe? Porque às vezes você modifica vários arquivos, mas quer fazer commits separados para cada tipo de alteração. Por exemplo:
+
+- Você corrigiu um bug no arquivo `analise.R`
+- Você também adicionou um novo gráfico no arquivo `visualizacao.R`
+- E aproveitou para corrigir uns erros de digitação no `README.md`
+
+Em vez de fazer um único commit gigante com tudo misturado, você pode:
+
+1. Adicionar `analise.R` à área de preparação → commit "Corrige bug no cálculo"
+2. Adicionar `visualizacao.R` à área de preparação → commit "Adiciona gráfico de dispersão"
+3. Adicionar `README.md` à área de preparação → commit "Corrige typos no README"
+
+Resultado: três commits limpos e organizados, cada um com um propósito claro.
+
+### Os três estados de um arquivo
+
+No Git, um arquivo pode estar em três estados:
+
+```{mermaid}
+flowchart LR
+    A[Modified<br>Modificado] -->|git add| B[Staged<br>Preparado]
+    B -->|git commit| C[Committed<br>Confirmado]
+    C -->|editar arquivo| A
+```
+
+1. **Modified (modificado)**: você alterou o arquivo, mas ainda não o adicionou à área de preparação
+2. **Staged (preparado)**: você marcou o arquivo para entrar no próximo commit
+3. **Committed (confirmado)**: as alterações foram salvas no histórico do repositório
+
+## Diretório de trabalho (working directory)
+
+O **diretório de trabalho** é simplesmente a pasta no seu computador onde estão os arquivos do projeto — a pasta que você vê no Finder, no Explorador de Arquivos ou no seu editor de código.
+
+Quando você edita um arquivo, está modificando o diretório de trabalho. Essas modificações ainda não fazem parte do histórico do Git; são apenas alterações locais que você pode escolher salvar (fazer commit) ou descartar.
+
+### Resumo visual: os três "lugares" do Git
+
+```{mermaid}
+flowchart LR
+    subgraph "Seu Computador"
+        A[Diretório de Trabalho<br>Working Directory] -->|git add| B[Área de Preparação<br>Staging Area]
+        B -->|git commit| C[Repositório Local<br>Local Repository]
+    end
+    subgraph "Internet"
+        D[Repositório Remoto<br>GitHub]
+    end
+    C -->|git push| D
+    D -->|git pull| C
+```
+
+## Branch (ramificação)
+
+Uma **branch** é uma linha independente de desenvolvimento. É como uma versão paralela do seu projeto onde você pode fazer alterações sem afetar a versão principal.
+
+Imagine que você está escrevendo um livro. A versão oficial está pronta e publicada (branch `main`). Agora você quer experimentar reescrever o capítulo 3, mas não quer arriscar estragar o livro que já funciona. Você cria uma cópia paralela (branch `reescrever-cap3`), faz suas experiências lá, e só quando estiver satisfeito, incorpora as mudanças de volta ao livro oficial.
+
+### Por que usar branches?
+
+- **Experimentação segura**: teste ideias sem risco de quebrar o que funciona
+- **Trabalho paralelo**: várias pessoas podem trabalhar em funcionalidades diferentes ao mesmo tempo
+- **Organização**: mantenha o trabalho em progresso separado do código estável
+- **Revisão**: permita que outros revisem suas alterações antes de incorporá-las
+
+### A branch principal: main (ou master)
+
+Todo repositório Git tem uma branch principal, que geralmente se chama **main** (em repositórios mais antigos, pode se chamar **master**). Essa é a linha de desenvolvimento "oficial" do projeto.
+
+Quando você cria branches adicionais, elas partem de algum ponto da branch principal (ou de outra branch). Depois, quando o trabalho estiver pronto, você faz um **merge** (fusão) para incorporar as alterações de volta.
+
+### Visualizando branches
+
+Branches são frequentemente representadas como linhas em um gráfico:
+
+```{mermaid}
+gitGraph
+    commit id: "A"
+    commit id: "B"
+    branch feature
+    commit id: "C"
+    commit id: "D"
+    checkout main
+    commit id: "E"
+    merge feature id: "F"
+    commit id: "G"
+```
+
+Neste exemplo:
+
+- A linha principal (main) tem os commits A, B, E, F e G
+- Uma branch chamada "feature" foi criada a partir de B
+- A branch feature teve seus próprios commits (C e D)
+- No commit F, a branch feature foi incorporada de volta (merge)
+- O desenvolvimento continua na main com o commit G
+
+## Merge (fusão)
+
+**Merge** é o processo de combinar as alterações de uma branch em outra. É como pegar o trabalho que você fez em uma cópia paralela e incorporá-lo à versão principal.
+
+Na maioria dos casos, o Git consegue fazer merge automaticamente. Ele analisa as alterações de cada branch e combina tudo de forma inteligente.
+
+### Conflitos de merge
+
+Às vezes, porém, o Git encontra um **conflito**: duas branches modificaram a mesma parte do mesmo arquivo de formas incompatíveis. Nesses casos, o Git não consegue decidir sozinho qual versão manter e pede sua ajuda.
+
+Um conflito aparece no arquivo mais ou menos assim:
+
+```
+<<<<<<< HEAD
+Esta é a versão da branch atual
+=======
+Esta é a versão da outra branch
+>>>>>>> outra-branch
+```
+
+Você precisa editar o arquivo manualmente, escolhendo qual versão manter (ou combinando as duas), e depois remover os marcadores `<<<<<<<`, `=======` e `>>>>>>>`.
+
+Conflitos parecem assustadores no início, mas são uma parte normal do trabalho colaborativo. As ferramentas visuais (GitHub Desktop, Positron) tornam a resolução muito mais fácil, mostrando as diferenças lado a lado.
+
+## Clone
+
+**Clone** é a ação de copiar um repositório remoto para o seu computador. Quando você clona um repositório do GitHub, está baixando todos os arquivos e todo o histórico de commits.
+
+O resultado é um repositório local completo, conectado ao repositório remoto de origem. A partir daí, você pode fazer commits localmente e depois sincronizar com o remoto.
+
+Clone é diferente de simplesmente baixar os arquivos. Um download comum (como um ZIP) traz apenas os arquivos na versão atual, sem histórico e sem conexão com o repositório original. O clone traz tudo e mantém a conexão.
+
+## Fork
+
+**Fork** é um conceito específico do GitHub (e plataformas similares), não do Git em si.
+
+Um fork é uma cópia de um repositório para a sua própria conta no GitHub. É diferente de clone porque:
+
+- **Clone**: copia do GitHub para seu computador (repositório remoto → local)
+- **Fork**: copia de uma conta do GitHub para outra conta do GitHub (repositório remoto → outro repositório remoto)
+
+Por que fazer fork? Quando você quer contribuir para um projeto de outra pessoa, mas não tem permissão de escrita no repositório original. Você faz fork para sua conta, faz as alterações no seu fork, e depois abre um **pull request** pedindo que o dono do projeto original incorpore suas alterações.
+
+## Push
+
+**Push** é a ação de enviar seus commits locais para o repositório remoto. Você trabalha no seu computador, faz vários commits, e quando está pronto para compartilhar (ou fazer backup), faz push.
+
+```{mermaid}
+flowchart LR
+    A[Repositório Local] -->|git push| B[Repositório Remoto<br>GitHub]
+```
+
+Após o push, outras pessoas podem ver suas alterações no GitHub, e você pode acessá-las de outros computadores.
+
+## Pull
+
+**Pull** é o oposto do push: você baixa as alterações do repositório remoto para o seu computador. Se outra pessoa fez commits e enviou para o GitHub, você usa pull para trazer essas alterações para o seu repositório local.
+
+```{mermaid}
+flowchart LR
+    A[Repositório Remoto<br>GitHub] -->|git pull| B[Repositório Local]
+```
+
+Na prática, é uma boa ideia fazer pull regularmente, especialmente antes de começar a trabalhar, para garantir que você tem a versão mais recente.
+
+### Pull vs Fetch
+
+Você pode encontrar também o termo **fetch**. A diferença:
+
+- **Fetch**: baixa as alterações do remoto, mas não aplica automaticamente no seu diretório de trabalho. Você pode revisar antes de decidir incorporar.
+- **Pull**: faz fetch e já aplica as alterações automaticamente (é um atalho para fetch + merge).
+
+Para a maioria dos casos de uso, pull é o que você quer.
+
+## Origin
+
+**Origin** é o nome padrão que o Git dá ao repositório remoto principal. Quando você clona um repositório do GitHub, o Git automaticamente cria uma referência chamada "origin" apontando para aquele repositório.
+
+Então, quando você vê comandos como `git push origin main`, está dizendo: "envie a branch main para o repositório remoto chamado origin (que é o GitHub)".
+
+Você pode ter múltiplos remotos com nomes diferentes (útil em fluxos de trabalho avançados), mas para a maioria dos projetos, origin é o único que você vai usar.
+
+## HEAD
+
+**HEAD** é uma referência especial que aponta para o commit atual — ou seja, onde você está agora no histórico do repositório.
+
+Normalmente, HEAD aponta para uma branch (ex: main), que por sua vez aponta para o commit mais recente dessa branch. Quando você faz um novo commit, HEAD se move automaticamente para apontar para ele.
+
+Você pode ver HEAD sendo mencionado em mensagens do Git ou em comandos avançados. Por enquanto, basta saber que HEAD = "onde você está agora".
+
+## Diff
+
+**Diff** (de "diferença") é a comparação entre duas versões de um arquivo ou entre dois commits. O diff mostra exatamente quais linhas foram adicionadas, removidas ou modificadas.
+
+Na visualização de diff:
+
+- Linhas **vermelhas** (com sinal de menos) foram **removidas**
+- Linhas **verdes** (com sinal de mais) foram **adicionadas**
+- Linhas sem marcação não foram alteradas
+
+Diffs são essenciais para entender o que mudou. Antes de fazer commit, é sempre bom revisar o diff para ter certeza de que você está incluindo apenas o que pretende.
+
+## Pull Request (PR)
+
+**Pull Request** — às vezes abreviado como **PR** — é uma funcionalidade do GitHub (não do Git em si) que permite propor alterações para um repositório.
+
+O fluxo típico é:
+
+1. Você cria uma branch com suas alterações
+2. Você faz push dessa branch para o GitHub
+3. Você abre um Pull Request, que é uma solicitação para que suas alterações sejam incorporadas à branch principal
+4. Outras pessoas revisam suas alterações, fazem comentários, sugerem ajustes
+5. Quando aprovado, o Pull Request é "mergeado" (as alterações são incorporadas)
+
+Pull Requests são fundamentais para colaboração em projetos open source e em equipes profissionais. Eles criam um registro formal das alterações propostas e permitem discussão antes da incorporação.
+
+## Issue
+
+**Issue** é outra funcionalidade do GitHub. É basicamente um "chamado" ou "ticket" para reportar bugs, solicitar funcionalidades, fazer perguntas ou discutir ideias.
+
+Issues podem ser:
+
+- Marcadas com labels (etiquetas) como "bug", "enhancement", "question"
+- Atribuídas a pessoas responsáveis
+- Vinculadas a Pull Requests que as resolvem
+- Comentadas e discutidas pela comunidade
+
+Em projetos maiores, issues são a forma principal de organizar o trabalho e acompanhar o que precisa ser feito.
+
+## Resumo visual: o fluxo completo
+
+```{mermaid}
+flowchart TB
+    subgraph "Seu Computador"
+        WD[Diretório de Trabalho<br>Working Directory]
+        SA[Área de Preparação<br>Staging Area]
+        LR[Repositório Local<br>Local Repository]
+    end
+    
+    subgraph "GitHub"
+        RR[Repositório Remoto<br>Remote Repository]
+    end
+    
+    WD -->|"git add"| SA
+    SA -->|"git commit"| LR
+    LR -->|"git push"| RR
+    RR -->|"git pull"| LR
+    RR -->|"git clone"| LR
+    LR -->|checkout| WD
+```
+
+## Glossário rápido
+
+| Termo | Significado |
+|-------|-------------|
+| **Repository (repo)** | Pasta monitorada pelo Git, contendo arquivos e histórico |
+| **Commit** | Instantâneo do projeto em um momento específico |
+| **Staging area** | Área intermediária onde você prepara alterações para o commit |
+| **Branch** | Linha paralela de desenvolvimento |
+| **Main/Master** | Branch principal do projeto |
+| **Merge** | Combinar alterações de uma branch em outra |
+| **Conflict** | Situação onde o Git não consegue fazer merge automaticamente |
+| **Clone** | Copiar um repositório remoto para o computador |
+| **Fork** | Copiar um repositório para sua conta no GitHub |
+| **Push** | Enviar commits locais para o repositório remoto |
+| **Pull** | Baixar alterações do repositório remoto |
+| **Fetch** | Baixar alterações sem aplicar automaticamente |
+| **Origin** | Nome padrão do repositório remoto principal |
+| **HEAD** | Referência ao commit/branch atual |
+| **Diff** | Comparação mostrando diferenças entre versões |
+| **Pull Request (PR)** | Solicitação para incorporar alterações (GitHub) |
+| **Issue** | Chamado para reportar bugs ou solicitar funcionalidades (GitHub) |
+
+---
+
+
+## Uma prévia: por que o Positron facilita tudo isso?
+
+Todos esses conceitos — staging, commit, push, pull, branches — podem parecer abstratos agora. Mas quando você usar uma ferramenta como o **Positron**, tudo se torna visual e concreto. O Positron integra o terminal, o editor de código e o controle de versão em uma única janela. Quando você abre uma pasta no Positron, o terminal já abre diretamente nesse diretório — sem precisar navegar com `cd`. A aba **Source Control** mostra o estado dos seus arquivos em tempo real, e os botões de push e pull estão a um clique. No próximo capítulo vamos aprender a inicializar o git no terminal, mas nos capítulos seguintes vamos ver como podemos fazer tudo mais facilmente usando o GitHub Desktop ou o Positron.

@@ -1,0 +1,138 @@
+---
+title: "Manipulação de arquivos e pastas"
+---
+
+Você acabou de receber os dados de uma coorte: um arquivo `extracao_2026.csv` que veio por e-mail. Quer organizar num projeto novo: criar a estrutura `projeto-coorte/` com subpastas `dados/`, `scripts/`, `output/`, mover o CSV pra `dados/`, renomear pra `coorte.csv` (sem o sufixo da extração), e criar um `README.md` vazio para documentar tudo depois. Tudo isso em segundos pelo terminal — e cada operação é um único comando.
+
+Os comandos abaixo seguem a estrutura `comando [opções] [argumentos]` que vimos no capítulo 04. Apresento as versões para Mac/Linux e — quando diferentes — também para Windows.
+
+## Criar pasta — `mkdir`
+
+```bash
+mkdir nova-pasta                 # cria uma pasta no diretório atual
+mkdir -p pasta/subpasta          # Mac/Linux: cria pasta E subpastas (mesmo se a pasta-mãe não existir)
+mkdir pasta\subpasta             # Windows: cria estrutura de pastas
+```
+
+A opção `-p` ("parents") é especialmente útil — ela cria a hierarquia inteira de uma vez. Sem ela, `mkdir dados/raw/2026` falha se `dados/raw/` ainda não existir.
+
+## Criar arquivo vazio — `touch`
+
+```bash
+touch arquivo.txt                # Mac/Linux
+type nul > arquivo.txt           # Windows cmd
+New-Item arquivo.txt             # Windows PowerShell
+```
+
+`touch` é especialmente útil para criar placeholders — `README.md`, `.gitkeep`, `.gitignore` — que serão preenchidos depois.
+
+## Copiar — `cp`
+
+```bash
+cp arquivo.txt copia.txt              # Mac/Linux: copia mantendo o original
+copy arquivo.txt copia.txt            # Windows
+```
+
+Para copiar uma pasta inteira, é necessário o flag `-r` (recursivo, ou seja, copia o conteúdo todo):
+
+```bash
+cp -r pasta-original pasta-copia      # Mac/Linux
+xcopy pasta-original pasta-copia /E   # Windows
+```
+
+Sem o `-r`, `cp` reclama que pastas só podem ser copiadas em modo recursivo. É uma checagem proposital — copiar pasta acidentalmente costuma ser erro.
+
+## Mover ou renomear — `mv`
+
+```bash
+mv arquivo.txt novo-nome.txt          # renomeia
+mv arquivo.txt pasta-destino/         # move (mantendo o nome)
+mv arquivo.txt pasta-destino/novo.txt # move e renomeia ao mesmo tempo
+
+move arquivo.txt novo-nome.txt        # Windows: equivalente
+```
+
+Em Unix, **mover e renomear são a mesma operação** — você está só mudando "o caminho até o arquivo". Renomear é mover dentro da mesma pasta. Mover é mover para outra. O comando é o mesmo.
+
+## Remover arquivo — `rm`
+
+```bash
+rm arquivo.txt                        # Mac/Linux
+del arquivo.txt                       # Windows
+```
+
+Para remover pasta:
+
+```bash
+rm -r pasta                           # Mac/Linux: remove pasta e tudo dentro
+rmdir /S pasta                        # Windows: remove pasta e conteúdo
+```
+
+::: {.callout-warning}
+## `rm` é definitivo
+Diferente de mover para a Lixeira (que faz `Cmd + Delete` no Finder), o `rm` **deleta direto**, sem passar por lugar nenhum. Não há "recuperar do Lixo". Se você apagou por engano, o arquivo só volta se houver backup.
+
+Dois hábitos que evitam acidente:
+
+1. **Use `rm -i`** quando estiver em dúvida. O `-i` (interactive) pede confirmação para cada arquivo.
+2. **Olhe o `ls` antes do `rm`.** Especialmente com wildcards: rode `ls *.tmp` primeiro para ver o que vai ser apagado, e depois `rm *.tmp` se a lista estiver correta.
+
+Comandos que parecem inofensivos podem ser catastróficos. `rm -rf /` (com permissões de administrador) apaga o sistema operacional inteiro. Não é piada — é um clássico de tragédia em fóruns de Linux. **Cheque sempre o caminho antes de executar `rm` com `-r`.**
+:::
+
+## Wildcards (curinga)
+
+Wildcards são caracteres especiais que substituem padrões de nomes. Os dois mais usados:
+
+| Wildcard | Significa |
+|---|---|
+| `*` | Qualquer sequência de caracteres |
+| `?` | Exatamente um caractere qualquer |
+
+Exemplos:
+
+```bash
+ls *.csv                  # lista todos os arquivos .csv
+rm *.tmp                  # remove todos os .tmp
+cp dados/*.csv backup/    # copia todos os .csv da pasta dados/ para backup/
+mv arquivo?.txt pasta/    # move arquivo1.txt, arquivo2.txt, arquivoA.txt
+```
+
+Wildcards são uma das ferramentas mais poderosas do terminal. Operações que no Finder exigiriam selecionar manualmente arquivo por arquivo — copiar todos os CSVs de uma pasta, deletar todos os arquivos temporários, renomear em lote — viram comando de uma linha.
+
+## Exemplo completo: organizando um projeto novo
+
+Voltando ao cenário do início — receber `extracao_2026.csv` e montar a estrutura:
+
+```bash
+# Estamos em ~/Documents
+mkdir projeto-coorte
+cd projeto-coorte
+mkdir -p dados scripts output
+mv ~/Downloads/extracao_2026.csv dados/coorte.csv
+touch README.md
+touch scripts/analise.R
+ls -la
+```
+
+Resultado:
+
+```
+projeto-coorte/
+├── README.md
+├── dados/
+│   └── coorte.csv
+├── output/
+└── scripts/
+    └── analise.R
+```
+
+Em sete comandos a estrutura está pronta. A mesma operação manualmente (criar pasta, criar subpasta, abrir Downloads, mover, renomear, criar arquivo, repetir) tomaria três minutos. No terminal, são vinte segundos — e o resultado é exatamente o mesmo, sem inconsistência humana.
+
+A estrutura `dados / scripts / output` (com README) é uma convenção comum para projetos de pesquisa. O capítulo M2-B3-09 (Estrutura clássica de projeto) detalha as razões e variações — mas o esqueleto acima já dá conta da maioria dos projetos.
+
+## O que vem a seguir
+
+Você sabe criar, mover, copiar e remover. O próximo capítulo é sobre **olhar para dentro** dos arquivos: ler conteúdo, espiar primeiras linhas de um CSV gigante, encontrar arquivos pelo nome, buscar texto dentro deles. Operações que substituem clicar-e-abrir no Finder com algo mais rápido e mais preciso.
+
+→ [08 · Visualização e busca](08-visualizacao-busca.qmd)

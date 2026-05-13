@@ -1,0 +1,106 @@
+---
+title: "Anatomia de um comando"
+---
+
+Olhando para alguém digitando no terminal, você vê algo como `ls -la Documents`, `git commit -m "primeira versão"`, `pip install pandas --upgrade`. Cada um desses comandos parece diferente, mas todos seguem a mesma estrutura gramatical. Entender essa gramática é o pulo do gato: depois que você reconhece o padrão, comandos novos viram variações, não enigmas.
+
+## A estrutura genérica
+
+Um comando de terminal segue, quase sem exceção, esta forma:
+
+```
+comando [opções] [argumentos]
+```
+
+**Comando** é o programa que você quer executar. **Opções** modificam o comportamento dele (geralmente prefixadas por `-` ou `--`). **Argumentos** são os dados sobre os quais o comando vai operar — tipicamente nomes de arquivos ou caminhos.
+
+Os colchetes `[]` na sintaxe acima indicam que opções e argumentos são **opcionais**, dependendo do comando. Alguns comandos rodam sozinhos (`pwd`, `clear`); outros exigem argumentos (`cd Documents` precisa do destino); outros aceitam variações arbitrárias (`ls` lista o diretório atual, `ls -la` lista tudo com detalhes, `ls -la Documents` faz o mesmo numa pasta específica).
+
+## Exemplo dissecado
+
+Tomando `ls -la Documents` como caso:
+
+```bash
+ls -la Documents
+```
+
+| Pedaço | Categoria | O que faz |
+|---|---|---|
+| `ls` | comando | "**l**i**s**t" — listar arquivos |
+| `-la` | opções combinadas | `-l` (formato longo, com permissões e tamanho) + `-a` (incluir arquivos ocultos) |
+| `Documents` | argumento | a pasta a ser listada (caminho relativo a partir do diretório atual) |
+
+A combinação produz: lista de tudo dentro de `Documents`, com detalhes, incluindo arquivos invisíveis (que começam com ponto, como `.DS_Store` ou `.gitignore`).
+
+## Opções curtas e longas
+
+A maioria das opções tem duas versões: uma **curta** (uma letra após `-`) e uma **longa** (palavra após `--`). As duas são equivalentes, e a escolha é estilística:
+
+```bash
+ls -a              # opção curta
+ls --all           # opção longa (equivalente)
+
+ls -la             # opções curtas combinadas
+ls -l --all        # mesma coisa, formas misturadas
+
+git commit -m "msg"        # opção curta com argumento
+git commit --message "msg" # equivalente longo
+```
+
+Forma curta é melhor para uso interativo (você digita menos). Forma longa é melhor para scripts (fica auto-explicativa quando alguém — incluindo você daqui a seis meses — for ler).
+
+## Opções combinadas
+
+Em comandos no estilo Unix (Mac/Linux), opções curtas de uma única letra podem ser **agrupadas** sob um único hífen:
+
+```bash
+ls -l -a -h        # três opções separadas
+ls -lah            # mesma coisa, agrupadas
+```
+
+A agrupada é o que você vê em quase todo tutorial. Na hora de escrever script ou comando para outra pessoa ler, vale a versão expandida.
+
+## Argumentos
+
+Argumentos são os "alvos" do comando — o que ele vai operar:
+
+```bash
+cp arquivo.txt copia.txt        # dois argumentos: origem e destino
+mv pasta-antiga pasta-nova      # idem
+rm arquivo.txt                  # um argumento
+mkdir nova-pasta                # um argumento
+cd                              # nenhum argumento (vai para a home)
+```
+
+Comandos podem aceitar **vários argumentos**:
+
+```bash
+rm arq1.txt arq2.txt arq3.txt   # remove três arquivos
+cp *.csv pasta-de-backup/       # copia todos os .csv para a pasta de backup
+```
+
+O `*` no segundo exemplo é um **wildcard** — vamos voltar nele mais à frente.
+
+## Ajuda integrada
+
+Todo comando útil tem documentação integrada, acessível pelo próprio terminal. Três formas comuns:
+
+```bash
+ls --help          # ajuda resumida (Mac/Linux)
+man ls             # manual completo (Mac/Linux), saia com 'q'
+help dir           # ajuda do comando (Windows cmd)
+Get-Help dir       # ajuda detalhada (Windows PowerShell)
+```
+
+O `man` (de **man**ual) abre páginas extensas com todas as opções, exemplos e referências. É o lugar canônico para descobrir o que um comando faz, sem depender de Google. Se você esquecer uma opção do `find`, do `grep` ou do `tar`, `man find` é mais rápido (e mais confiável) que pesquisar online.
+
+::: {.callout-tip}
+## Quando o agente de IA é mais rápido que o `man`
+Páginas de manual são completas mas, para iniciantes, podem ser densas. Em vez de decifrar um `man rsync` de mil linhas, perguntar a um agente *"como copio só os `.csv` modificados nos últimos 7 dias usando rsync?"* costuma ser mais rápido. O agente lê o `man` por você e devolve o exemplo concreto. Para aprofundar depois, o `man` continua sendo a referência canônica.
+:::
+
+## O que vem a seguir
+
+Com a gramática `comando [opções] [argumentos]` na cabeça, qualquer comando novo passa a ser legível. O próximo capítulo aplica essa gramática nos primeiros comandos de fato — os de **navegação** entre pastas: descobrir onde você está, ver o que tem ao redor, se mover entre diretórios.
+
+→ [05 · Navegação no sistema de arquivos](05-navegacao.qmd)

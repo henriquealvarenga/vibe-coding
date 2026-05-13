@@ -1,0 +1,95 @@
+---
+title: "R Language"
+---
+
+## R: uma linguagem para análise estatística e gráficos
+
+R é um sistema para computação estatística e produção de gráficos. Consiste em uma linguagem de programação somada a um ambiente de execução com gráficos, depurador, acesso a funções do sistema e capacidade de executar scripts armazenados em arquivos [@hornik2017].
+
+Aprender uma linguagem computacional pode parecer assustador para profissionais e estudantes da área da saúde sem trajetória em programação, mas vale lembrar que a medicina é, ela mesma, um vocabulário rigoroso e cheio de termos técnicos. Linguagens computacionais funcionam de forma análoga: são vocabulários — convenções precisas para que o computador faça exatamente o que se pretende. A boa notícia é que as linguagens recentes, e o R em particular, foram desenhadas para reduzir essa barreira: a maioria das tarefas estatísticas pode ser expressa em poucas linhas legíveis. R foi criado justamente para essa finalidade — fazer estatística e gerar gráficos de qualidade com comandos simples [@ihaka1996].
+
+## R para análise exploratória de dados
+
+A Análise Exploratória de Dados (EDA — *Exploratory Data Analysis*) é uma etapa inicial crítica do trabalho com dados: serve para descobrir padrões, tendências e anomalias antes de qualquer modelagem formal, por meio de visualizações e estatísticas descritivas. John W. Tukey, pioneiro do conceito, defendia uma exploração intuitiva e flexível dos dados em vez da aplicação cega de modelos pré-estabelecidos. Em *Exploratory Data Analysis*, enfatizou a importância de "aprender com os dados" e considerar múltiplos ângulos para formar um entendimento abrangente [@tukey1977].
+
+Tukey também destacou o papel de visualizações e técnicas gráficas em EDA, mostrando como representações visuais revelam relações que escapam a métodos puramente numéricos. Essa exploração mais aberta favorece descobertas inesperadas e a formulação de novas hipóteses.
+
+R emergiu como escolha frequente para EDA pela versatilidade da linguagem, pelo conjunto amplo de pacotes e pela comunidade ativa. Combinando recursos de base e pacotes do `tidyverse`, é possível conduzir EDA eficaz e estabelecer alicerce sólido para análises posteriores. Como resume Hadley Wickham:
+
+> Não há regra sobre quais perguntas você deve fazer para orientar sua pesquisa. No entanto, dois tipos de perguntas sempre serão úteis para fazer descobertas em seus dados: que tipo de variação ocorre dentro de minhas variáveis? Que tipo de covariação ocorre entre minhas variáveis?
+>
+> — Hadley Wickham, *R for Data Science*
+
+## Breve história do R
+
+A origem do R remonta à linguagem **S**, desenvolvida por John Chambers em 1976 nos Bell Labs (AT&T). No início dos anos 1990, S foi aprimorada com notação para modelos estatísticos e, no final da década, transformada numa linguagem orientada a objetos. Essa versão revisada de S foi o ponto de partida para o R.
+
+O R foi criado em 1993 por Robert Gentleman e Ross Ihaka, na Universidade de Auckland, Nova Zelândia, inicialmente como ferramenta para o ensino em cursos introdutórios de estatística [@ihaka1998]. É software livre, distribuído sob a licença pública GNU e mantido pela R Foundation, com versões para macOS, Windows e Linux. Sua estrutura aberta atraiu uma comunidade ampla de desenvolvedores ao longo das décadas seguintes, e hoje o R figura entre as principais ferramentas para análise estatística e ciência de dados.
+
+## CRAN — Comprehensive R Archive Network
+
+O **CRAN** é o repositório oficial onde qualquer pessoa pode contribuir com extensões para R, conhecidas como *pacotes* (*packages*), desde que sigam os requisitos de qualidade e licenciamento dos mantenedores [@hornikcran]. O número de pacotes ultrapassou 10.000 em 2017 [@smith2008] e 20.000 em 2024 — refletindo o ritmo de uma comunidade ativa de desenvolvedores.
+
+Entre os milhares de pacotes, destacam-se os desenvolvidos por Hadley Wickham, reunidos no `tidyverse` (referência ao termo "universo", sugerindo um conjunto coeso de ferramentas para análise de dados). O `tidyverse` inclui `ggplot2` (visualização), `dplyr` (manipulação), `tidyr` (organização), entre outros — todos desenhados sob uma filosofia comum que torna a programação em R mais simples e consistente. Este curso se apoia frequentemente nesses pacotes.
+
+## Bioconductor
+
+Além do CRAN, o projeto **Bioconductor** mantém e distribui pacotes R voltados a análise genômica e biologia molecular [@tippmann2015]. É um projeto de software de código aberto desenvolvido por uma comunidade ampla de cientistas [@huber2015]. Em 2024, contava com cerca de 2.300 pacotes especializados.
+
+## Popularidade e adoção do R
+
+R tem ganhado espaço crescente na pesquisa científica. Em 2009, o *New York Times* publicou matéria destacando sua adoção entre cientistas, com a frase muitas vezes citada de que "R has really become the second language for people coming out of grad school" [@vance2009]. Em pesquisa da Rexer Analytics em 2015, R foi a ferramenta mais utilizada entre 1.220 cientistas avaliados [@rexer2015]. Em 2017, análise do Stack Overflow indicou crescimento sustentado do uso de R entre seus usuários [@robinson2017]. No Canadá, cerca de metade das universidades tinha pelo menos um curso usando R [@canadianr]. R também é reconhecido como repositório central de funções estatísticas validadas [@smith2008].
+
+Nos últimos anos, o uso de R em aulas de estatística cresceu substancialmente. Pacotes específicos para uso educacional foram desenvolvidos (`mosaic`, `TeachingDemos`, `simpleR`, entre outros) e dezenas de livros didáticos baseados em R foram publicados [@piboonrungroj2012].
+
+## RStudio e Posit
+
+Para escrever código R com produtividade, o ambiente mais usado é o **RStudio** — uma IDE específica para R (e que também suporta Python). RStudio fornece editor de código, console interativo, painéis para gráficos e ajuda, e integração com Git. Mais recentemente, a Posit (empresa que mantém o RStudio) lançou o **Positron**, IDE de próxima geração que cobre R e Python no mesmo ambiente. Esses ambientes são apresentados em detalhe no Bloco *Ambientes de trabalho* (Módulo 1).
+
+
+## Para aprofundar: o livro do autor
+
+Este capítulo introduziu R no escopo do que o curso *Vibe Coding na Pesquisa Científica* precisa — origem, ecossistema, lugar nas ferramentas atuais. Para tratamento aprofundado da linguagem em si — sintaxe detalhada, estruturas de dados, manipulação com `dplyr`/`tidyverse`, visualização com `ggplot2`, estatística descritiva e inferencial, modelagem — o material de referência usado neste curso é o **Manual Básico da Linguagem R** do autor [@alvarenga2024manualr]:
+
+> [henriquealvarenga.com/manual_r](https://henriquealvarenga.com/manual_r/)
+
+O livro está disponível online de forma gratuita e cobre o conteúdo que normalmente apareceria em capítulos próprios deste Bloco. A decisão de não duplicar esse material é coerente com a tese do curso: você usa R via vibe coding (descrevendo em PT-BR para um agente de IA), e quando quiser entender o que está acontecendo por baixo, vai ao livro.
+
+## Leituras complementares sobre R
+
+Para quem quer comparar abordagens ou explorar áreas específicas, segue uma seleção de livros, sites e cursos.
+
+### Livros sobre programação em R
+
+- *R for Data Science* (2ª ed.), Hadley Wickham, Mine Çetinkaya-Rundel e Garrett Grolemund. O'Reilly (2023). Disponível online em <https://r4ds.hadley.nz>.
+- *Advanced R* (2ª ed.), Hadley Wickham. Chapman & Hall/CRC (2019). Online em <https://adv-r.hadley.nz>.
+- *Hands-On Programming with R*, Garrett Grolemund. O'Reilly (2014).
+- *The R Book* (2ª ed.), Michael J. Crawley. Wiley (2013).
+- *R for Everyone: Advanced Analytics and Graphics*, Jared P. Lander. Pearson (2014).
+- *Biostatistics with R: An Introduction to Statistics Through Biological Data*, Babak Shahbaba. Springer (2012).
+- *Introductory Statistics with R* (2ª ed.), Peter Dalgaard. Springer (2008).
+- *A Beginner's Guide to R*, Alain F. Zuur, Elena N. Ieno e Erik H. W. G. Meesters. Springer (2009).
+- *The Art of R Programming: A Tour of Statistical Software Design*, Norman Matloff. No Starch Press (2011).
+- *Efficient R Programming*, Colin Gillespie e Robin Lovelace. O'Reilly (2016). Online em <https://csgillespie.github.io/efficientR/>.
+- *Introduction to Probability and Statistics Using R*, G. Jay Kerns. Disponível em <https://cran.r-project.org/web/packages/IPSUR/vignettes/IPSUR.pdf>.
+- *Data Analysis for the Life Sciences with R*, Rafael A. Irizarry e Michael I. Love. Online em <https://leanpub.com/dataanalysisforthelifesciences>.
+
+### Livros sobre gráficos em R
+
+- *ggplot2: Elegant Graphics for Data Analysis* (3ª ed.), Hadley Wickham, Danielle Navarro e Thomas Lin Pedersen. Online em <https://ggplot2-book.org>.
+- *R Graphics Cookbook* (2ª ed.), Winston Chang. Online em <https://r-graphics.org>.
+- *Fundamentals of Data Visualization*, Claus O. Wilke. O'Reilly (2019). Online em <https://clauswilke.com/dataviz>.
+
+### Sites
+- CRAN: The Comprehensive R Archive Network -  <https://cran.r-project.org> 
+- The R Project for Statistical Computing — <https://www.r-project.org>
+- Posit (RStudio) — <https://posit.co>
+- R-bloggers — <https://www.r-bloggers.com>
+- Stack Overflow (tag R) — <https://stackoverflow.com/questions/tagged/r>
+- Big Book of R — catálogo com mais de 300 livros sobre R em diversas áreas. <https://www.bigbookofr.com>
+
+### Cursos
+
+- Coursera — <https://www.coursera.org>
+- edX — <https://www.edx.org>
+- DataCamp — <https://www.datacamp.com>

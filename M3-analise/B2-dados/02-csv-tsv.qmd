@@ -1,0 +1,131 @@
+---
+title: "CSV e TSV"
+---
+
+Você termina de extrair o banco de uma coorte de quinhentos pacientes. O sistema oferece "exportar". Você clica. Aparece uma caixa: *"Formato de exportação: CSV"*. Aceita, salva. O arquivo `coorte_2026.csv` chega na sua pasta de downloads, peso 380 KB. Abre num editor de texto e vê texto puro:
+
+```
+id,sexo,idade,pas_sistolica,pas_diastolica,grupo
+1,F,42,138,82,intervencao
+2,M,67,156,94,controle
+3,F,55,142,88,intervencao
+```
+
+Tabela inteira. Sem dependência de Excel, sem versão proprietária, sem instalador. Você pode abrir esse arquivo em qualquer máquina, em qualquer linguagem, em qualquer ano. É a forma mais antiga, mais simples, e provavelmente mais utilizada de mover dados tabulares de um sistema para outro. Este capítulo é sobre **por que** essa simplicidade venceu, **como** ela é tecnicamente especificada, e onde ela ainda traz dor de cabeça apesar (ou por causa) dessa simplicidade.
+
+## A engrenagem mínima
+
+CSV é a sigla para **Comma-Separated Values** — *valores separados por vírgula*. A engrenagem essencial é tão pequena que cabe em três regras:
+
+1. **Cada linha do arquivo é um registro** (uma observação, um paciente, uma transação).
+2. **Cada campo dentro do registro é separado por vírgula** (ou outro delimitador, conforme veremos).
+3. **A primeira linha geralmente contém os nomes das colunas** (o cabeçalho).
+
+Quando um campo contém uma vírgula no próprio valor (por exemplo, um endereço como `"Av. Paulista, 1000"`), ele aparece **entre aspas duplas**. Aspas duplas dentro de campos são escapadas duplicando-as: `"Ela disse ""sim"" e foi embora"`.
+
+É só isso. Toda a especificação cabe num parágrafo. E essa minimalidade é, simultaneamente, o motivo de CSV ter dominado a troca de dados tabulares por décadas e o motivo de ter custos práticos sérios — a próxima seção é sobre o equilíbrio entre essas duas coisas.
+
+## A prática que veio antes da especificação
+
+Uma armadilha comum em retrospectivas técnicas é confundir a data de uma especificação com a origem do objeto especificado. No caso de CSV, esse erro é especialmente enganoso. A **RFC 4180**, publicada em outubro de 2005, é o documento que formalizou o CSV [@shafranovich2005csv]. Mas o próprio documento abre dizendo que "o formato de valores separados por vírgula (CSV) tem sido usado para troca e conversão de dados entre programas de planilha há um tempo considerável" e que, apesar do uso comum, "nunca havia sido formalmente documentado".
+
+Essa observação é historicamente importante. Significa que **CSV entrou na documentação formal apenas depois de ter se tornado uma convenção prática estabelecida**. Em algum momento dos anos 1970, à medida que mainframes começavam a trocar dados com aplicações de planilha emergentes, programadores chegaram independentemente à mesma solução: separar campos por vírgula, registros por quebras de linha, cobrir o caso patológico (vírgulas dentro de campos) com aspas. Não havia comitê. Não havia consórcio. A convenção emergiu porque resolvia um problema recorrente — como mover linhas e colunas entre programas heterogêneos sem exigir um ambiente proprietário compartilhado.
+
+Esse tipo de emergência é historicamente significativo. Coloca CSV na categoria de padrões que surgem do **uso repetido**, não do design centralizado. A consequência: a autoridade inicial do CSV foi **operacional**, não normativa. O formato pegou porque era útil em vários contextos, não porque uma instituição autoritativa o definiu de antemão. Isso também ajuda a explicar por que a identidade do CSV permanece um pouco instável — adoção generalizada veio primeiro, padronização veio depois, e o resultado foi um formato moldado por práticas heterogêneas em vez de uma única filosofia de design.
+
+## RFC 4180: estabilização tardia, não invenção
+
+A RFC 4180 é o documento central em qualquer relato sério da história do CSV. Sua importância está em duas conquistas relacionadas: documentar uma especificação compartilhável do formato e **registrar formalmente o tipo MIME `text/csv`** [@shafranovich2005csv; @iana2005csv]. Esse registro deu ao CSV um lugar institucional mais estável dentro do ecossistema de tipos de mídia da internet.
+
+Mas o significado da RFC 4180 não deve ser exagerado. O documento é explicitamente **informacional**, não normativo estrito, e seu tom é tanto descritivo quanto prescritivo. Não reivindica ter inventado CSV. Tenta identificar "o formato que parece ser seguido pela maioria das implementações". As convenções que se tornaram canônicas — um registro por linha, campos separados por vírgula, cabeçalho opcional, aspas duplas para campos contendo vírgulas ou quebras de linha, aspas duplicadas como escape — foram **codificadas**, não criadas, pela RFC.
+
+O documento também preserva evidência da incompletude do formato. Em suas considerações de interoperabilidade, declara explicitamente que, devido à ausência de uma única especificação, há "diferenças consideráveis entre as implementações" [@shafranovich2005csv]. Historicamente, então, a RFC 4180 deve ser lida como um **momento de estabilização tardia**, não como ponto de origem.
+
+::: {.callout-note}
+## Por que isso importa para você
+Quando você abre um CSV gerado por outro sistema e ele "não funciona como esperado", a causa frequentemente não é defeito do seu programa nem do gerador — é que CSV nunca foi um padrão único. Ele é uma família de práticas relacionadas. Saber disso muda a pergunta: deixa de ser "qual está errado?" e passa a ser "qual variante este arquivo usa?". A próxima seção lista as variantes mais comuns.
+:::
+
+## Por que CSV persiste
+
+Se CSV é formalmente limitado e praticamente ambíguo, por que persistiu com tanto sucesso? A resposta está em sua **economia técnica e institucional**. CSV impõe muito pouco. É texto puro. Pode ser gerado por praticamente qualquer ferramenta com esforço mínimo. Pode ser aberto por humanos num editor de texto. Pode ser importado por planilhas, lido por scripts, exportado de bancos de dados, e arquivado com pouca dependência de software proprietário.
+
+A Library of Congress caracteriza CSV como "um formato simples para representar uma matriz retangular de valores numéricos e textuais" e — em sua descrição de formato de 2024 — reportou manter mais de **840 mil arquivos CSV** em sua coleção, listando CSV como **formato preferido** para datasets em seu *Recommended Formats Statement* [@loc2024csv]. Esse endosso institucional importa: mostra que a persistência do CSV não é mero acidente nem inércia legada — é ativamente sustentada como formato de baixa fricção para datasets.
+
+Essa persistência reflete um padrão histórico mais amplo. **Formatos duráveis nem sempre são os mais expressivos ou teoricamente elegantes**. Frequentemente, são os que minimizam custos de coordenação entre ferramentas e organizações. CSV se tornou, na prática, um **formato de fronteira**: um meio neutro através do qual sistemas com estruturas internas diferentes podem se comunicar.
+
+## O custo da simplicidade
+
+A simplicidade do CSV é também a fonte de sua principal fraqueza. O formato parece direto, mas a realidade do CSV "no mundo" é muito mais heterogênea do que a descrição canônica sugere. Arquivos rotulados como "CSV" podem variar em delimitadores, convenções de aspas, terminadores de linha, estrutura de cabeçalho, e até no número e localização de tabelas que contêm.
+
+Estudos empíricos tornam essa heterogeneidade visível. Mitlöhner e colegas analisaram mais de **200 mil arquivos CSV** de 232 portais de dados abertos e encontraram variação substancial em dialetos e estruturas de tabela [@mitlohner2016opendata]. Van den Burg, Nazábal e Sutton afirmam de forma ainda mais explícita: padrões de formatação para CSV "não são seguidos consistentemente", e arquivos frequentemente exigem inspeção manual e conserto antes de poderem ser carregados de forma confiável [@vandenburg2019wrangling]. Christodoulakis, Munson e Gabel descrevem CSV como um "formato folgadamente definido" com metadados embutidos limitados, o que torna a descoberta automática de tabelas um problema técnico não trivial [@christodoulakis2020pytheas].
+
+Em ambiente brasileiro, três armadilhas práticas dominam o cotidiano:
+
+| Armadilha | Causa | Sintoma |
+|---|---|---|
+| **Vírgula vs ponto-e-vírgula** | Locale `pt-BR` usa vírgula como separador decimal (`3,14`). Excel em PT-BR exporta CSV com **`;`** como separador de campo para evitar conflito | Arquivo "CSV" salva com `;` e seu R/Python espera `,` — leitura quebra |
+| **Encoding UTF-8 vs Windows-1252** | Excel antigo no Windows salva em CP1252 (Windows-1252); ferramentas modernas esperam UTF-8 | Acentos viram `Ã§Ã£o` ou `Ã©` em vez de `ção` ou `é` |
+| **BOM** (*Byte Order Mark*) | Excel adiciona 3 bytes invisíveis no início (`EF BB BF`) marcando UTF-8 | Primeira coluna chega com nome `﻿id` em vez de `id`, quebrando seleção de variáveis |
+
+Essas três armadilhas são tão comuns que existem funções específicas para lidar com elas em quase toda biblioteca de leitura de CSV. Em R, `read_csv2()` do `readr` assume `;` e vírgula como decimal — versão "brasileira". Em Python, `pandas.read_csv(..., sep=";", encoding="latin-1")` resolve a maioria dos casos legados.
+
+A lição histórica geral: CSV reduziu fricção no ponto de geração e troca, mas **deslocou complexidade para downstream**. O fardo não desapareceu — moveu para parsers, heurísticas, bibliotecas de software e julgamento do usuário. CSV é, nesse sentido, um formato cuja simplicidade depende de **trabalho oculto**: o trabalho de interpretação, normalização e conserto.
+
+::: {.callout-warning}
+## Verificação obrigatória ao importar CSV
+Antes de confiar em qualquer carga de CSV, três checagens rápidas no terminal evitam horas de debug depois (revisitando o que vimos no Bloco *Terminal*):
+
+1. `head -n 3 arquivo.csv` — espia as três primeiras linhas. Confere o separador (`,` ou `;`?), o cabeçalho, e se há aspas onde esperaria.
+2. `wc -l arquivo.csv` — conta linhas. O número bate com o que você esperava da extração?
+3. `file arquivo.csv` — mostra o encoding detectado (`UTF-8`, `ISO-8859-1`, `UTF-8 with BOM`, etc.).
+
+Esse trio dispara em três segundos e elimina classe inteira de problemas que normalmente apareceriam só na hora da análise.
+:::
+
+## CSV ampliado: extensões em vez de substituições
+
+Uma característica reveladora da história do CSV é que suas limitações **não levaram a substituição direta**. Em vez disso, esforços posteriores buscaram **suplementar** o CSV preservando seu caráter leve.
+
+A **RFC 7111**, publicada em 2014, atualizou o tipo de mídia `text/csv` definindo identificadores de fragmento URI para entidades CSV [@hausenblas2014uri]. Significativo porque tratou CSV não meramente como arquivo a ser movido, mas como um **objeto estruturado** cujas linhas, colunas e células podem precisar ser endereçadas individualmente na web — extensão coerente com a infraestrutura web crescente da década.
+
+Desenvolvimento ainda mais consequente veio com o trabalho **CSV on the Web** do W3C. O documento *Model for Tabular Data and Metadata on the Web* parte da observação de que dados tabulares são rotineiramente transferidos na web em vários formatos, incluindo variantes CSV, e propõe um modelo que pode suportar validação, exibição e conversão [@tennison2015model]. A recomendação companheira, *Metadata Vocabulary for Tabular Data*, afirma que validação, conversão, exibição e busca exigem metadados adicionais descrevendo como dados tabulares devem ser interpretados [@pollock2015metadata].
+
+Esses documentos são historicamente importantes porque **não descartam CSV**. Aceitam sua persistência e constroem camadas interpretativas em volta. CSV continua sendo o portador leve de valores tabulares; metadados e modelos associados fornecem a semântica, a tipagem e a descrição estrutural ausentes. Esse padrão é característico de **infraestruturas duráveis**: em vez de desaparecerem quando seus limites se tornam aparentes, são frequentemente cercadas por mecanismos auxiliares que estendem sua utilidade.
+
+## TSV: o irmão menos famoso
+
+CSV tem um primo próximo, frequentemente esquecido: o **TSV** — *Tab-Separated Values*. A diferença é cosmética: TSV usa **caractere de tabulação** (`\t`) como separador em vez de vírgula. A consequência prática é importante: como dados textuais raramente contêm tabs, TSV **dispensa quase totalmente a necessidade de aspas e escape**. É um formato CSV-like mais limpo.
+
+A origem do TSV é mais antiga que o nome formal. Vem da tradição Unix dos anos 1970, onde arquivos de tabela eram tipicamente delimitados por tab para facilitar processamento por ferramentas como `awk` e `cut`. O IANA registra `text/tab-separated-values` como tipo MIME oficial, com especificação curta da IANA datada de 1993 (anterior à RFC 4180 do CSV).
+
+Quando preferir TSV em vez de CSV:
+
+- **Dados que contêm muitas vírgulas** (endereços, descrições com pontuação, texto livre). TSV elimina a necessidade de escape em quase todos os casos.
+- **Locale brasileiro com decimal vírgula** (`3,14`). TSV evita completamente a confusão entre separador de campo e separador decimal.
+- **Pipelines Unix/Linux clássicos**. Comandos como `cut -f 2,3 dados.tsv` funcionam diretamente, enquanto `cut -d',' -f 2,3 dados.csv` falha em arquivos com vírgulas dentro de aspas.
+
+Em pesquisa médica, TSV aparece com frequência em **bioinformática** (formatos como `.tsv`, `.bed`, `.gtf` são variantes tab-delimitadas), e cada vez mais em **datasets compartilhados em repositórios** que querem evitar a guerra do separador entre Excel europeu e americano. Em R, `read_tsv()` do `readr`. Em Python, `pandas.read_csv("arquivo.tsv", sep="\t")`.
+
+## Conexão com IA
+
+Três usos de agentes que economizam tempo real nesse domínio:
+
+**1. Detecção de dialeto.** *"Cole as primeiras 5 linhas deste CSV — qual é o separador, encoding e quoting?"* O agente identifica padrão em segundos. Útil quando você recebe arquivo de fonte desconhecida.
+
+**2. Conserto de CSV malformado.** Arquivos com colunas faltando em algumas linhas, aspas desbalanceadas, encoding misturado — o agente sugere transformação antes de você abrir no R/Python.
+
+**3. Geração de código de leitura calibrado.** *"Escreva o `read_csv()` ou `read_csv2()` mais apropriado para um arquivo brasileiro com decimal vírgula, encoding latin-1, e cabeçalho na linha 3."* O agente devolve a chamada exata, com argumentos certos.
+
+::: {.callout-warning}
+## Dois cuidados que valem reforçar
+**Não cole dados sensíveis no agente** sem anonimizar — nomes de pacientes, identificadores únicos, dados clínicos vinculáveis. Para detecção de dialeto basta colar **as primeiras 5 linhas com identificadores fakes** ou só os cabeçalhos. Ver capítulo M1-B1-06 sobre LGPD e dados sensíveis em prompts.
+
+**Verifique sempre o que o agente fez.** Se ele "consertou" o CSV, abra o resultado no `head` antes de carregar — agentes às vezes silenciosamente descartam linhas problemáticas em vez de avisar.
+:::
+
+## O que vem a seguir
+
+CSV é o caso paradigmático do "formato de fronteira" — simples no centro, mas com complexidade que vaza para as bordas. O próximo capítulo trata do antagonista óbvio: o **Excel** (`.xlsx`), formato que escolheu o caminho oposto — riqueza estrutural, tipagem embutida, fórmulas, formatação, metadados — ao custo de portabilidade e legibilidade. Quando vale Excel? Quando vale CSV? E como conviver com ambos no fluxo de pesquisa?
+
+→ [03 · Excel (XLSX/XLS)](03-excel.qmd)

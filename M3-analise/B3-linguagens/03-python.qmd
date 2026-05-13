@@ -1,0 +1,102 @@
+---
+title: "Python"
+---
+
+Python é, hoje, a linguagem de programação mais usada do mundo segundo praticamente todos os índices que medem isso (TIOBE, Stack Overflow Survey, GitHub State of the Octoverse). Em ciência de dados, machine learning, processamento de linguagem natural, deep learning aplicado a imagem médica — Python é o ambiente padrão. Este capítulo apresenta a linguagem em seus termos próprios: de onde veio, como chegou ao lugar de destaque que ocupa hoje, e onde encontrar bons recursos para aprofundar.
+
+## Python: linguagem de propósito geral aplicada a dados
+
+Diferente de R — que foi desenhado especificamente para estatística — Python é uma **linguagem de propósito geral**. Foi pensado para servir como ferramenta versátil: scripts de sistema, automação, aplicações web, jogos, robótica, ciência de dados, qualquer coisa. Essa generalidade trazia, durante anos, uma desvantagem em pesquisa científica: falta de bibliotecas especializadas. Estatístico que abrisse Python em 2005 não tinha equivalente ao `dplyr`, ao `ggplot2`, aos modelos do R. Tinha que escrever ferramentas básicas a partir do zero.
+
+Essa situação começou a mudar a partir de meados dos anos 2000 com a chegada de **NumPy** e de uma família de bibliotecas científicas construídas sobre ele. Hoje, Python é tão capaz de análise de dados quanto R — e em alguns terrenos (machine learning, deep learning) é decisivamente melhor.
+
+## Breve história do Python
+
+A origem do Python é específica e algo cômica. **Guido van Rossum** — programador holandês então no **CWI** (*Centrum Wiskunde & Informatica*, instituto holandês de matemática e ciência da computação) — começou a trabalhar na linguagem em **dezembro de 1989**, durante uma semana de Natal em que o instituto estava fechado. Era projeto de hobby para preencher tempo livre.
+
+O nome **não é uma referência à cobra píton**, como muita gente assume. Vem do grupo de comédia britânico **Monty Python**, do qual van Rossum era fã. Quando precisou escolher um nome curto, único e levemente misterioso para a linguagem nova, "Python" pareceu adequado. A documentação oficial em vários momentos faz referências ao grupo (até hoje exemplos de código usam nomes como `spam`, `eggs`, `parrot`, etc.).
+
+Versão **1.0 saiu em 1994**. Python era, na época, uma linguagem entre muitas outras competindo por atenção (Tcl, Perl, Ruby foram contemporâneos). A escolha de design que diferenciou Python foi a **legibilidade**: indentação significativa em vez de chaves, sintaxe verbal em vez de simbólica, "explicit is better than implicit" como princípio. O resultado é código que parece mais com pseudocódigo legível do que com código tradicional.
+
+Van Rossum permaneceu como **"BDFL"** (*Benevolent Dictator For Life* — Ditador Benevolente Vitalício, expressão jocosa) da linguagem por décadas, tomando decisões de design pessoalmente até **renunciar ao papel em 2018**, transferindo a governança para um conselho diretivo eleito pela comunidade. Python segue sob administração da **Python Software Foundation**, organização sem fins lucrativos baseada nos EUA.
+
+## A virada para ciência de dados
+
+Por mais de uma década, Python e ciência de dados não eram associados. Isso mudou em três marcos:
+
+**NumPy (2006).** Travis Oliphant unificou duas bibliotecas anteriores (Numeric de 1995 e Numarray de 2001) num único pacote para computação numérica eficiente — **arrays multidimensionais**, operações vetorizadas, álgebra linear. Resolveu o problema fundamental de Python "ser lento": com NumPy, operações pesadas rodam em código C/Fortran compilado por baixo, e Python só serve de cola. Resultado: performance comparável a R/MATLAB para a maioria dos cálculos numéricos. Em 2020, NumPy ganhou paper canônico publicado na **Nature** [@harris2020numpy] — raro reconhecimento para uma biblioteca de software.
+
+**pandas (2008).** Wes McKinney, então analista quantitativo no fundo de hedge AQR Capital Management, precisava de estruturas de dados rotuladas para análise de dados financeiros. R tinha `data.frame`; Python não tinha equivalente. Ele construiu **pandas** — nome que combina "panel data" (termo de econometria) com "Python data analysis". O **DataFrame** do pandas foi inspirado diretamente no `data.frame` do R, e em poucos anos virou a estrutura central de análise de dados em Python [@mckinney2010pandas]. Em 2026, pandas é a biblioteca Python mais baixada do PyPI por mês.
+
+**scikit-learn (2007–2010).** O projeto começou como **Google Summer of Code** em 2007, conduzido por **David Cournapeau**, depois adotado pelo **INRIA** (instituto francês de pesquisa em ciência da computação) com Fabian Pedregosa coordenando. Versão 1.0 saiu em 2010, paper canônico em 2011 [@pedregosa2011scikitlearn]. Scikit-learn padronizou interfaces para machine learning em Python — todo modelo tem `fit()`, `predict()`, `score()` — e essa consistência facilitou enormemente o ensino e a adoção. Quando deep learning explodiu nos anos 2010, Python já era a plataforma natural por causa de scikit-learn.
+
+A partir desses três pilares, o ecossistema cresceu rapidamente: **matplotlib** (visualização, baseada em MATLAB), **seaborn** (visualização estatística, sobre matplotlib), **statsmodels** (modelos estatísticos clássicos), **TensorFlow** (Google, 2015) e **PyTorch** (Meta, 2016) para deep learning, **scipy** (algoritmos científicos), **plotly** (visualização interativa). Em 2026, o ecossistema Python para ciência de dados é maduro e completo.
+
+## Jupyter: o ambiente interativo
+
+Em paralelo à evolução das bibliotecas, **Fernando Pérez** — então estudante de doutorado em física na University of Colorado, Boulder — criou em 2001 o **IPython** [@perez2007ipython]. O IPython era um shell interativo melhorado para Python, com autocompletar inteligente, histórico de comandos, formatação rica de saída — pensado para o tipo de "conversa com os dados" que estatísticos faziam em R.
+
+Em **2011**, o IPython ganhou interface web — o **IPython Notebook** —, permitindo escrever código, ver resultados e narrar análises numa única página de navegador. Em **2014**, o projeto se desmembrou e renomeou: o IPython continuou como kernel de Python; a parte de notebook virou **Jupyter** (nome combinando **Ju**lia, **Pyt**hon, **R** — as três linguagens originalmente suportadas). Jupyter foi adotado em massa para ensino, exploração de dados, e ciência reproduzível. Hoje (2026) é o ambiente mais usado no mundo para ciência de dados em Python, com integração em todas as principais plataformas (AWS SageMaker, Google Colab, Databricks).
+
+## PyPI e o ecossistema de pacotes
+
+O **PyPI** (*Python Package Index*, lê-se "pai-pi-ai") é o repositório oficial de pacotes Python. Em 2026, hospeda **mais de 500.000 pacotes** — número uma ordem de magnitude maior que o CRAN do R. A diferença reflete a posição de Python como linguagem geral: há pacotes para qualquer coisa imaginável.
+
+A contrapartida é que o controle de qualidade é menor. CRAN tem revisão de mantenedores antes de aceitar pacotes; PyPI aceita praticamente qualquer pacote sem revisão prévia, e a qualidade fica a cargo da reputação individual e do uso comunitário. Isso significa que **escolher bibliotecas em Python exige mais discernimento** — verificar manutenção ativa, número de usuários, qualidade da documentação. Em geral, as principais bibliotecas científicas (NumPy, pandas, scikit-learn, matplotlib) têm padrões de qualidade muito altos; o cuidado vale para pacotes mais nichados.
+
+Para instalar pacotes, três ferramentas convivem hoje. **`pip`** é a oficial e mais antiga (presente desde 2008). **`conda`** é alternativa popular em ciência de dados, distribuída pela Anaconda Inc. (criada em 2012), com vantagem de gerenciar também dependências não-Python. **`uv`** é a mais nova (Astral, 2024), escrita em Rust, dezenas de vezes mais rápida que pip — virando padrão emergente em 2025-2026. O capítulo seguinte (`04-instalacao-ambientes`) trata da instalação e isolamento dessas ferramentas em detalhe.
+
+## Adoção em pesquisa médica
+
+Python ainda não dominou completamente a pesquisa médica clássica — em estatística aplicada à epidemiologia, R continua com vantagem cultural e técnica. Mas em três áreas adjacentes, Python é hoje absolutamente dominante:
+
+- **Bioinformática moderna.** Pipelines de sequenciamento (Snakemake, Nextflow), análise de single-cell RNA-seq (Scanpy), variant calling, integração com genomic browsers — todos em Python.
+- **Imagem médica.** Análise de DICOM, segmentação automatizada, deep learning para radiologia, patologia digital — ecossistema Python é maduro (MONAI, SimpleITK, pydicom) e o R quase ausente.
+- **Processamento de prontuário eletrônico.** Mineração de texto clínico, extração de informações de notas médicas, fenotipagem automática — Python via spaCy, transformers (HuggingFace), e modelos clínicos especializados (BioBERT, ClinicalBERT).
+
+A regra prática: **se a pesquisa envolve modelagem estatística clássica, séries temporais, regressão multinível, análises causais — R é frequentemente melhor escolha**. Se envolve machine learning, deep learning, processamento de texto/imagem em escala, ou integração com sistemas — Python é a escolha natural. Para análise tabular padrão, **as duas funcionam igualmente bem**.
+
+## Para aprofundar: recursos curados
+
+Diferente do R, este curso não tem livro próprio do autor sobre Python. A recomendação é uma seleção curada de recursos gratuitos e de alta qualidade que cobrem o terreno que normalmente apareceria nos capítulos deletados (sintaxe, estruturas de dados, importação, limpeza, visualização, modelagem):
+
+**Livros online gratuitos (em inglês):**
+
+- **Python for Data Analysis** (3ª ed.), Wes McKinney (2022) — escrito pelo criador do pandas; o livro de referência canônico para análise tabular em Python. Versão online gratuita: <https://wesmckinney.com/book/>
+- **A Whirlwind Tour of Python**, Jake VanderPlas (2016) — tour rápido pela linguagem em si, ideal para quem já programa em outra linguagem. Online: <https://jakevdp.github.io/WhirlwindTourOfPython/>
+- **Python Data Science Handbook**, Jake VanderPlas (2ª ed., 2023) — cobre NumPy, pandas, matplotlib, scikit-learn em profundidade. Online: <https://jakevdp.github.io/PythonDataScienceHandbook/>
+- **Think Python** (3ª ed.), Allen B. Downey — introdução à programação em Python para iniciantes absolutos. Online: <https://allendowney.github.io/ThinkPython/>
+
+**Recursos em português:**
+
+- **Curso de Python da Alura** — cursos pagos mas de qualidade.
+- **Pense em Python** (tradução do *Think Python*), Allen B. Downey — disponível online em PT-BR.
+- **Tutoriais da Real Python** (em inglês mas com qualidade alta) — <https://realpython.com>
+
+**Documentação oficial:**
+
+- **Python.org** (linguagem em si): <https://docs.python.org/pt-br/3/> (também em PT-BR)
+- **NumPy**: <https://numpy.org/doc/>
+- **pandas**: <https://pandas.pydata.org/docs/>
+- **matplotlib**: <https://matplotlib.org/stable/>
+- **scikit-learn**: <https://scikit-learn.org/stable/>
+
+A documentação oficial é geralmente excelente em Python. Para quase qualquer função, o site oficial tem referência completa, exemplos, e tutoriais. Vale como primeira fonte antes de fóruns ou Stack Overflow.
+
+## IDEs e ambientes para Python
+
+Para escrever código Python, várias opções convivem (todas cobertas no Bloco *Ambientes de trabalho* do Módulo 1):
+
+- **Positron** (recomendada do curso) — IDE polyglot da Posit, suporta R e Python lado a lado.
+- **VS Code** — IDE mais usada do mundo para Python, com ecossistema enorme de extensões.
+- **PyCharm** (JetBrains) — IDE específica para Python, paga (com versão Community gratuita).
+- **Jupyter Notebook / JupyterLab** — interface de notebook baseada em navegador, padrão para análise exploratória.
+- **Google Colab** — Jupyter gratuito hospedado pelo Google, sem instalação local; popular em ensino e em projetos com GPU.
+
+Para o curso, **Positron com kernel Python** é a recomendação. Para projetos específicos com necessidade de GPU ou de compartilhamento via web, **Colab** é caminho prático complementar.
+
+## O que vem a seguir
+
+Você conhece R (cap. 02) e Python (este capítulo) em seus termos próprios. Antes de começar a usar qualquer das duas em fluxo de pesquisa real, falta um passo crítico: **instalar e isolar ambientes**. Por que isso importa, como evolui historicamente (de instalações globais caóticas a ambientes virtuais reproduzíveis), e quais ferramentas usar — `renv` para R, `uv` ou `conda` para Python — é o tema do próximo capítulo.
+
+→ [04 · Instalação de ambientes](04-instalacao-ambientes.qmd)

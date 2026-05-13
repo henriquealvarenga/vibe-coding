@@ -1,0 +1,73 @@
+---
+title: "Por que Python *e* R, não Python *ou* R"
+sidebar: bloco-linguagens
+---
+
+Numa conferência de pesquisa em saúde, à mesa do café, dois grupos formados quase espontaneamente. De um lado, gente discutindo `dplyr`, `ggplot2`, `lme4`. Do outro, gente discutindo `pandas`, `matplotlib`, `scikit-learn`. As duas mesas estão fazendo essencialmente a mesma coisa — análise de dados de pesquisa — em duas linguagens diferentes. Ao longo da conferência, raramente uma pessoa de uma mesa visita a outra. As tribos coexistem, geralmente sem guerra, mas com pouca conversa.
+
+A pergunta que aparece naturalmente para quem está chegando: **"qual eu deveria aprender?"**. A resposta deste curso, e a justificativa para este Bloco se chamar *Python **e** R*, é: **as duas**. Não por militância, e não por completude — por economia. Cada uma tem terreno onde é decisivamente melhor, e a era da IA torna trivial alternar entre as duas. Este capítulo abre o Bloco contando como chegamos aqui, por que a divisão existe, e por que ela é menos relevante do que parece.
+
+## Duas linhagens, uma direção
+
+R e Python nasceram quase no mesmo momento, com propósitos opostos.
+
+**R (1993, Auckland, Nova Zelândia).** Robert Gentleman e Ross Ihaka, professores de estatística da Universidade de Auckland, queriam uma linguagem para **ensinar estatística** aos alunos de graduação. Não havia opção que combinasse simplicidade pedagógica com potência analítica — o que existia era ou caro e fechado (SAS, SPSS), ou aberto mas pesado (S, da Bell Labs). Eles construíram uma versão livre, inspirada no S de John Chambers (Bell Labs, 1976), e chamaram de R — pela inicial dos seus dois primeiros nomes (**R**oss e **R**obert) e como referência irônica ao próprio S. Versão 1.0 saiu em 2000, sob licença GPL [@ihaka1996].
+
+R foi desenhado, do dia zero, para uma audiência específica: **estatísticos**. As decisões de design refletem isso — vetores como tipo primário, fórmulas como notação nativa para modelos (`y ~ x1 + x2`), `data.frame` como estrutura central, plots como objetos de primeira classe. Coisas que seriam estranhas em uma linguagem de propósito geral são naturais em R porque a comunidade-alvo era análise estatística.
+
+**Python (1991, Amsterdam, Holanda).** Guido van Rossum, então no CWI (Centrum Wiskunde & Informatica, instituto holandês de matemática e ciência da computação), começou Python como **projeto de hobby de fim-de-semana** durante um Natal de 1989. O nome vem do grupo de comédia britânico **Monty Python**, do qual van Rossum era fã. Ele queria uma linguagem que fosse **fácil de ler**, com sintaxe mais limpa que C e mais simples que Perl, mas que servisse pra "qualquer coisa".
+
+Python era, e continuou sendo por muito tempo, uma **linguagem de propósito geral**. Servia pra construir scripts de sistema, aplicações web, automação, jogos. Estatística e ciência de dados eram aplicações entre dezenas de outras — e por anos, R era melhor naquele nicho.
+
+A mudança veio gradualmente, a partir de meados dos anos 2000:
+
+- **NumPy (2006).** Travis Oliphant unificou bibliotecas matemáticas anteriores num único pacote para arrays numéricos eficientes. Resolveu o problema de Python ser lento para cálculos pesados.
+- **matplotlib (2003).** John Hunter criou uma biblioteca de gráficos inspirada no MATLAB. Deu a Python visualização decente.
+- **pandas (2008).** Wes McKinney, então analista quantitativo, criou o **DataFrame** em Python — estrutura de dados claramente inspirada no `data.frame` do R. Foi o ponto de virada: Python passou a ter tabelas decentes.
+- **scikit-learn (2007–2010).** David Cournapeau e o INRIA criaram a biblioteca canônica de machine learning em Python. Quando aprendizado de máquina virou central nos anos 2010, Python tinha posição privilegiada.
+- **Jupyter (2014).** Fernando Pérez evoluiu o IPython (que ele criou em 2001) para um ambiente de notebook baseado em navegador. Virou padrão de fato para análise exploratória e ensino, especialmente em Python.
+
+A partir de 2015, ciência de dados em Python deixou de ser segunda escolha — virou competidor pleno. Hoje (2026), as duas linguagens convivem em pé de igualdade no espaço de pesquisa.
+
+## A divisão cultural que ainda persiste
+
+Mesmo com convergência técnica, ainda há **separação cultural** real entre as duas comunidades — porque cada uma chegou ao mesmo lugar por caminhos diferentes:
+
+| Aspecto | R | Python |
+|---|---|---|
+| **Origem** | Acadêmica (estatística) | Indústria/sistemas |
+| **Comunidade dominante** | Bioestatística, epidemiologia, ciências sociais quantitativas, biologia | Engenharia de software, machine learning, ciência da computação |
+| **Onde brilha** | Modelagem estatística clássica, gráficos publicáveis, séries temporais, análises causais | Machine learning, deep learning, processamento de texto/imagem em escala, integração com sistemas |
+| **Cultura de pacotes** | CRAN com >20 mil pacotes, validação rigorosa | PyPI com ~500 mil pacotes, qualidade variável |
+| **Notação** | Funcional, pipe (`\|>` ou `%>%`), fórmulas (`y ~ x`) | Orientada a objetos, métodos encadeados (`.method()`) |
+| **Documentação** | Padronizada, integrada (man pages para cada função) | Variável, geralmente em sites separados |
+
+Em medicina, especialmente em **bioestatística e epidemiologia clássica**, R historicamente domina. Em **bioinformática moderna, deep learning aplicado a imagem médica, e processamento de prontuários eletrônicos**, Python tem vantagem. **Mas a fronteira é porosa** — `pandas` resolve análise tabular bem, e R com `keras`/`torch` faz deep learning. Em 2026, a escolha é mais cultural-institucional do que técnica-obrigatória.
+
+::: {.callout-note}
+## Os exemplos do curso usam R
+A escolha de R para os exemplos do curso é prática, não dogmática. Três razões: o autor tem material aprofundado de R disponível em [henriquealvarenga.com/manual_r](https://henriquealvarenga.com/manual_r/); em medicina/biostatística, R ainda é o ambiente padrão; e o ecossistema Posit (Quarto, RStudio, Positron) que organiza o curso é R-first. Mas tudo que aparece em R tem equivalente direto em Python — em quase todos os exemplos, é uma tradução de uma linha.
+:::
+
+## A grande virada: vibe coding muda a equação
+
+A pergunta "qual aprender?" só fazia sentido quando aprender uma linguagem era investimento de tempo grande. Saber R bem custa meses; saber R *e* Python bem custa um ano. A maioria dos pesquisadores escolhia uma e parava ali.
+
+A IA generativa muda isso. **Agentes de IA traduzem entre R e Python com fluência**. Você descreve em PT-BR o que quer; o agente entrega em qualquer das duas, ou em ambas. Você pode ter um projeto majoritariamente em R com três scripts em Python (porque uma biblioteca específica só existe em Python), e isso virou trivial em vez de exótico.
+
+A consequência prática: a pergunta deixou de ser "qual aprender" e passou a ser **"qual descrever bem"**. Isto é, qual o vocabulário que você usa quando descreve análise — pacotes, funções, sintaxe — para o agente entender. Para um pesquisador que tem alguma exposição a R, descrever em "termos de R" funciona bem; o agente traduz para Python sob demanda. Para quem vem de Python, o inverso. **Nas duas direções, o agente cobre o gap**.
+
+Esse é o argumento que justifica este Bloco ter capítulos separados para R (cap. 02) e Python (cap. 03), mas não capítulos separados para "estatística descritiva em R", "estatística descritiva em Python", e assim por diante. Para o aluno do curso, importa entender:
+
+1. **O que cada linguagem é** (cap. 02 R, cap. 03 Python — onde estão as referências para aprofundar).
+2. **Como instalar e isolar ambientes** das duas (cap. 04).
+3. **Como o Quarto integra ambas** num mesmo documento (cap. 13).
+4. **Como pedir análise em PT-BR para o agente, em qualquer das duas linguagens** (cap. 14).
+
+Os capítulos antigos do Bloco que ensinavam "sintaxe mínima", "estruturas de dados", "importação", "limpeza", etc. foram **deletados**. A razão é a tese central do curso: você descreve, a IA escreve. Ensinar essas operações em capítulos próprios contraria o argumento. O cap. 14 substitui essa cobertura.
+
+## O que vem a seguir
+
+Os dois próximos capítulos apresentam cada linguagem em seus termos próprios — origem, comunidade, ecossistema, lugar atual. Comece pelo capítulo da linguagem que você já tem alguma familiaridade (provavelmente R, se você é pesquisador de saúde formado nos últimos 15 anos); leia o outro depois para contraste.
+
+→ [02 · R](02-r.qmd) · [03 · Python](03-python.qmd)

@@ -1,0 +1,66 @@
+---
+title: "Introdução ao Bloco"
+sidebar: bloco-convencoes
+---
+
+Este bloco é diferente dos outros do Módulo 1. Em vez de uma trilha linear que prepara você para o próximo passo, ele é uma **camada de detalhes técnicos** — pequenas convenções, símbolos e armadilhas que você vai *encontrar* ao longo do Módulo 2 e dali pra frente, e que não cabem confortavelmente em nenhum bloco temático.
+
+Pense neste bloco como um **glossário expandido** do curso: você não precisa lê-lo agora. Ele está aqui para você voltar **quando precisar**.
+
+## Quando voltar
+
+Algumas situações típicas em que um capítulo deste bloco resolve a sua dúvida:
+
+- Você abriu um `.csv` e os acentos viraram `Ã§Ã£` → cap. **10 (Encoding)**.
+- O Python recusou seu código com `IndentationError` → cap. **05 (Indentação)**.
+- Apareceu um `Error: object 'x' not found` no console e você não sabe o que olhar → cap. **11 (Mensagens de erro)**.
+- Não consegue ver o `.gitignore` no Finder → cap. **06 (Arquivos invisíveis)**.
+- Vai criar um arquivo novo e tem dúvida sobre nome (kebab? snake? maiúscula?) → cap. **02 (Nomeação)**.
+- Tropeçou num `<-`, `|>` ou `%>%` em código alheio → cap. **04 (Símbolos e operadores)**.
+- O cabeçalho do `.qmd` deu erro estranho → cap. **07 (YAML)**.
+
+A busca do site (lupa no canto superior direito) ajuda a chegar direto no capítulo certo.
+
+## Modos de uso
+
+Este bloco admite duas formas de uso, das quais a primeira é o **default**:
+
+1. **Por demanda**, durante o resto do curso — você trabalha no Módulo 2, 3 ou 4; quando tropeçar num símbolo, encoding errado ou erro críptico, abre o capítulo correspondente, lê em poucos minutos, segue.
+2. **Em ordem**, agora — se você está com tempo e curiosidade, é leitura curta (capítulos pequenos), e ter as convenções "no fundo da cabeça" antes de programar facilita.
+
+::: {.callout-tip}
+## Pode pular adiante
+Se você está com pressa de chegar ao Módulo 2 (Markdown, Quarto, R, Python), **pode**. Volte aqui só quando aparecer um problema. Os capítulos foram desenhados para serem auto-suficientes — você não precisa ler 06 para entender 10, nem 02 para entender 05.
+:::
+
+## Mapa dos capítulos
+
+Cada linha responde a uma pergunta concreta. Quando a pergunta aparecer no seu trabalho, vem direto para o capítulo.
+
+| # | Capítulo | O que resolve |
+|---|---|---|
+| 02 | [Convenções de nomeação e extensões de arquivo](02-nomeacao-extensoes.qmd) | Por que `idade_anos.R` e não `Idade Anos (final v2).R` |
+| 03 | [Comentários](03-comentarios.qmd) | Como `#`, `//`, `<!-- -->` e `%` ignoram texto em cada linguagem |
+| 04 | [Símbolos e operadores](04-simbolos-operadores.qmd) | O que `<-`, `\|>`, `%>%`, `**`, `==` significam |
+| 05 | [Indentação](05-indentacao.qmd) | Por que o "espaço invisível" quebra Python e YAML |
+| 06 | [Arquivos invisíveis](06-arquivos-invisiveis.qmd) | Como ver `.gitignore`, `.Rprofile`, `.env` no Finder/Explorer |
+| 07 | [YAML em todo lugar](07-yaml.qmd) | A linguagem de configuração que aparece no `_quarto.yml`, no cabeçalho dos `.qmd` e no GitHub Actions |
+| 08 | [Versão semântica e lockfiles](08-versao-semantica.qmd) | O que `1.2.3` significa e por que `renv.lock`/`uv.lock` importam |
+| 09 | [Estrutura clássica de projeto](09-estrutura-projeto.qmd) | Onde fica o `data/`, o `R/`, o `output/` e por quê |
+| 10 | [Encoding e UTF-8](10-encoding.qmd) | Por que "informação" às vezes vira "informaÃ§Ã£o" |
+| 11 | [Lendo mensagens de erro](11-mensagens-erro.qmd) | Como decifrar um *stack trace* em vez de entrar em pânico |
+| 12 | [Interfaces: CLI, GUI, TUI](12-interfaces-cli-gui-tui.qmd) | Por que Claude Code "parece um terminal" mas tem menus |
+
+## Onde isso conecta com a IA
+
+Agentes de IA são especialmente sensíveis a convenções. Dois efeitos práticos:
+
+- **Agentes alucinam menos quando o projeto segue padrão.** Inconsistência de nomes, encoding quebrado e estrutura confusa fazem o agente perder tempo inferindo intenção e às vezes inventar caminhos que não existem.
+- **As regras deste bloco viram contrato com o agente via `AGENTS.md`.** No capítulo [O arquivo `AGENTS.md`](../../M1-ia-pesquisa/B2-agentes/05-arquivo-agents.qmd) (M1-B2-05), o `AGENTS.md` da raiz deste próprio curso já fixa várias das convenções que aparecem aqui. Cada capítulo deste bloco aprofunda e justifica uma dessas regras.
+
+## O que vem a seguir
+
+Se quiser ler em ordem, comece pelo capítulo de nomeação — é o que economiza mais tempo a longo prazo. Se preferir ir direto produzir, **pule para o Módulo 2** e volte aqui por demanda.
+
+- Em ordem → [02 · Convenções de nomeação e extensões de arquivo](02-nomeacao-extensoes.qmd)
+- Pular para o próximo módulo → [Markdown, Quarto e Escrita Técnica](/M3-analise/B1-markdown/01-markdown.qmd)

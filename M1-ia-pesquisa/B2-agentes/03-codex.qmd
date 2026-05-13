@@ -1,0 +1,112 @@
+---
+title: "Codex"
+---
+
+No capítulo anterior você viu o **Claude** — o agente recomendado por este curso. Agora vamos olhar para a alternativa principal: o **Codex**, da OpenAI. Não é o caminho que o curso vai seguir como padrão, mas vale entender o que existe ao lado — especialmente se você já assina ChatGPT (Plus, Pro ou Team), prefere o estilo da OpenAI, ou quer comparar agentes lado a lado na mesma tarefa.
+
+## OpenAI em poucas palavras
+
+A **OpenAI** é a empresa que lançou o ChatGPT em novembro de 2022 — o produto que tirou IA generativa do laboratório e a colocou no vocabulário do dia a dia. Fundada em 2015 como organização de pesquisa, hoje é a principal concorrente da Anthropic no espaço de modelos de fronteira. A linha de produtos é ampla: o **ChatGPT** (chat), os modelos da série **GPT** (com `o-series` para tarefas de raciocínio), **DALL·E** (imagens), **Whisper** (áudio), e — o que nos interessa aqui — o **Codex**, o agente de programação que, hoje, está disponível como aplicativo desktop, na web, como extensão de IDE e como linha de comando.
+
+## Dois Codex: o de 2021 e o de hoje
+
+A primeira coisa a saber é que **"Codex" é um nome reaproveitado**, e isso causa confusão na hora de procurar documentação.
+
+- **Codex original (2021–2023).** Modelo de completar código, baseado em GPT-3 e treinado em código aberto do GitHub. Foi o motor inicial do **GitHub Copilot**. Foi descontinuado em março de 2023.
+- **Codex atual (2025 em diante).** Produto **completamente diferente** — um agente baseado nos modelos GPT mais recentes, no espírito do Claude. Começou como ferramenta de linha de comando; ao longo de 2025 e início de 2026, ganhou também versão **web**, **extensão para IDEs** (como VS Code) e **aplicativo desktop** (lançado para macOS Apple Silicon em 2025 e disponibilizado para Windows em março de 2026). Reaproveita o nome e o foco em código, mas a arquitetura é nova.
+
+::: {.callout-warning}
+## Cuidado com documentação antiga
+Pesquisar "Codex documentation" no Google ainda traz resultados sobre o modelo descontinuado. Para o Codex atual, prefira a [documentação oficial](https://github.com/openai/codex) e o site da OpenAI. Se a página fala em "Codex API endpoint" ou compara com GPT-3, está falando do produto antigo.
+:::
+
+## A família GPT
+
+Como vimos em **M1-B1-01** e na seção sobre o Claude (M1-B2-02), modelo, aplicação e versão são coisas distintas. O Codex CLI usa os modelos da família **GPT** por baixo dos panos — a aplicação é o terminal; o modelo é o que faz o raciocínio.
+
+A família GPT tem variantes para perfis diferentes de tarefa:
+
+| Modelo | Foco |
+|---|---|
+| **GPT-5** | Modelo principal — raciocínio amplo, tarefas variadas |
+| **GPT-5 mini** | Versão menor e mais barata, para tarefas rotineiras |
+| **`o-series`** | Modelos de raciocínio explícito, para tarefas que exigem cadeia de pensamento longa |
+
+Em uso típico, o Codex escolhe automaticamente o modelo mais adequado à tarefa. É possível forçar um modelo específico via configuração, mas raramente é necessário no começo.
+
+## As várias formas de usar o Codex
+
+Diferente do Claude — que concentra Chat, Cowork e Claude Code em um único **Claude Desktop** — a OpenAI distribuiu o Codex em **vários pontos de acesso**, todos cobertos pela mesma assinatura ChatGPT (Plus, Pro, Business, Enterprise ou Edu) e com o mesmo histórico/preferências sincronizados:
+
+| Ponto de acesso | Para quê serve |
+|---|---|
+| **App Desktop** (macOS Apple Silicon, Windows) | A forma mais **amigável** para a maior parte dos usuários — janela própria, integração com o sistema, opera arquivos e aplicativos do computador. **Caminho recomendado** para quem segue este curso. |
+| **Web** ([chatgpt.com/codex](https://chatgpt.com/codex)) | Mesmo agente, no navegador. Útil em máquinas onde você não pode instalar o app (laboratórios compartilhados, computadores institucionais). |
+| **Extensão de IDE** (VS Code) | Para quem já vive dentro do VS Code, integra o agente diretamente no editor. |
+| **CLI** (`codex` no terminal) | Versão original, ainda atual e oficialmente suportada. Caminho preferido por quem trabalha primariamente em projetos de código com Git. |
+
+::: {.callout-tip}
+## Para o público deste curso: comece pelo Desktop
+Se você está chegando ao Codex pela primeira vez e segue este curso, **comece pelo aplicativo desktop**. A interface gráfica é mais convidativa que o terminal e cobre a maior parte dos casos de uso em pesquisa. CLI e extensão de IDE ficam como caminhos avançados, para quando você sentir necessidade.
+:::
+
+A ergonomia do **app Desktop** lembra a do Claude Desktop: você abre uma janela, conversa em linguagem natural, dá permissão para o agente operar arquivos e aplicativos, e aprova ações sensíveis quando ele pede. Tudo o que vimos no capítulo *De chatbot a agente* (M1-B2-01) — *loop* `pensar → agir → observar`, portões de aprovação, humano no controle — vale igual aqui, em qualquer ponto de acesso.
+
+A instalação do Codex Desktop (macOS e Windows) e da CLI está documentada no capítulo *Instalando Claude, Codex e Gemini CLI* (M0-B1-05).
+
+## Codex × Claude: diferenças que importam
+
+As duas plataformas competem pelo mesmo espaço (agente para trabalho intelectual e código). As diferenças não são tanto de capacidade quanto de **organização, estilo, ecossistema e custo**:
+
+| Aspecto | Codex (OpenAI) | Claude (Anthropic) |
+|---|---|---|
+| Empresa | OpenAI | Anthropic |
+| Modelo padrão | GPT-5 | Claude Opus / Sonnet |
+| Acesso | Conta ChatGPT (Plus / Pro / Business / Enterprise / Edu) ou API | Conta Anthropic (Free / Pro / Max) ou API |
+| Pontos de acesso | App Desktop (macOS, Windows), web, extensão de IDE, CLI | Claude Desktop (Chat + Cowork + Claude Code), CLI standalone |
+| Modo agêntico para trabalho **não-coding** | Inclui no app Desktop (operar arquivos, planilhas, web) | Modo dedicado **Cowork** dentro do Desktop |
+| Estilo de resposta | Direto, conciso | Verboso, com mais explicação |
+| Plan-first nativo | Precisa ser pedido explicitamente | Tende a oferecer planejamento por iniciativa |
+| Ecossistema natural | GitHub (Copilot, Actions), VS Code | Quarto, ferramentas Posit, MCP |
+
+Nenhum dos dois é "melhor" universalmente. Para tarefas curtas e diretas (refatorar uma função, gerar um pequeno *script*), Codex frequentemente é mais rápido em chegar ao resultado. Para tarefas longas que envolvem ler vários arquivos, manter consistência entre eles e raciocinar passo a passo (refatorar um projeto inteiro, escrever capítulos coerentes de um livro), Claude costuma ser mais confortável.
+
+## Quando vale a pena instalar o Codex
+
+Três cenários onde o Codex faz sentido **mesmo seguindo o curso com Claude como padrão**:
+
+1. **Você já paga ChatGPT.** Se você já assina Plus, Pro ou Team, o Codex usa essa cota — sem custo adicional. Vale instalar.
+2. **Você prefere o estilo da OpenAI.** Algumas pessoas se sentem mais produtivas com a "voz" dos modelos GPT do que com a do Claude. É uma preferência válida.
+3. **Você quer comparar agentes na mesma tarefa.** Rodar o mesmo *prompt* nos dois agentes e comparar é uma das formas mais rápidas de aprender as diferenças e desenvolver critério próprio sobre quando usar cada um. Para um pesquisador, é exercício saudável.
+
+::: {.callout-tip}
+## Comparar agentes é parte da metodologia
+Em uso de IA para pesquisa, **um único agente é uma única perspectiva**. Rodar a mesma análise ou o mesmo *prompt* em dois agentes diferentes e comparar os outputs é uma forma legítima de mitigar viés e detectar erros — tem o mesmo espírito de pedir uma segunda opinião a um colega. Não substitui sua revisão crítica, mas amplia o ponto de vista.
+:::
+
+## Limites específicos do Codex
+
+Para fechar com honestidade, quatro pontos a manter em mente:
+
+- **Cota atrelada ao plano ChatGPT.** Mesmo no Plus, há limite de mensagens por janela de tempo. Em sessões longas é comum precisar pausar. Quem usa intensivamente costuma migrar para Pro ou planos institucionais.
+- **App Desktop não tem versão Linux nativa.** Para Linux, as opções oficiais são a versão **web** (em [chatgpt.com/codex](https://chatgpt.com/codex)) ou a **CLI** — ambas funcionam normalmente. É a mesma situação do Claude Desktop.
+- **Menos integração nativa com Quarto e Posit.** O Claude Code, por afinidade de ecossistema, lida com Quarto de forma mais fluida. O Codex funciona, mas pode precisar de instruções mais explícitas no *prompt*.
+- **Plan-first não é o padrão.** O Codex costuma "ir fazendo" sem apresentar um plano prévio, a menos que você peça. Em tarefas grandes ou destrutivas, vale **sempre** começar o *prompt* com algo como *"Antes de tocar em qualquer arquivo, apresente o plano completo e aguarde minha aprovação"* — a técnica que vimos no capítulo de *Prompts* (M1-B1-04).
+
+## Gemini CLI: a outra alternativa
+
+Para completar o cenário, vale lembrar que **existe uma terceira opção**: o **Gemini CLI**, do Google. Tem ergonomia parecida com Codex e Claude Code (CLI no terminal, login com conta Google), e é especialmente atraente por dois motivos: é **código aberto**, e a **quota gratuita é generosa** — algumas centenas a mais de mil requisições por dia para usuários autenticados, no momento da escrita deste curso. Quem trabalha bastante com Google Workspace (Drive, Docs, Sheets) também tende a preferi-lo pela integração natural.
+
+A instalação do Gemini CLI está documentada no capítulo *Instalando Claude, Codex e Gemini CLI* (M0-B1-05). Como acontece com o Codex, tudo o que vimos sobre agentes no capítulo *De chatbot a agente* (M1-B2-01) se aplica igual.
+
+## Por que o curso adota o Claude como padrão
+
+Para evitar dúvida: a escolha do Claude como padrão deste curso não significa que Codex ou Gemini CLI sejam inferiores. Significa que **um curso precisa fazer uma escolha** para que os exemplos, as capturas de tela e as instruções sejam consistentes. Os critérios da escolha foram (1) qualidade percebida em escrita longa e raciocínio passo a passo — perfis típicos de pesquisa; (2) integração madura com Quarto, R e Python via Claude Code; (3) a existência do **Cowork** como modo agêntico para o trabalho de pesquisa que **não** envolve código (revisão bibliográfica, organização de Zotero, escrita de manuscrito).
+
+Tudo o que será ensinado nos próximos módulos vale para os três agentes — apenas a sintaxe específica de comandos e o nome dos arquivos de configuração mudam.
+
+## O que vem a seguir
+
+Para fechar o panorama dos agentes, falta o terceiro grande do mercado: o **Gemini**, do Google.
+
+- **04 · Gemini** — terceiro agente, com particularidades importantes: o único dos três com **CLI open source**, integração nativa com **Google Workspace**, e janela de contexto muito grande. O capítulo também apresenta o **Antigravity**, IDE agêntica da Google lançada com o Gemini 3.

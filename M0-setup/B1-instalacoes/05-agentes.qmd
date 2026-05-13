@@ -1,0 +1,309 @@
+---
+title: "Instalando Claude, Codex e Gemini CLI"
+---
+
+Este é o capítulo onde instalamos os **agentes de IA** que serão seus parceiros de trabalho ao longo do curso. São os mesmos agentes que ajudaram a construir o site que você está lendo — e que vão ajudar você a escrever código, depurar análises, redigir relatórios e gerenciar referências.
+
+## "Agentes de IA" são diferentes de "chatbots"
+
+Você provavelmente já usou um **chatbot** como o ChatGPT, o Claude.ai ou o Gemini no navegador. O chatbot **conversa**: você pergunta, ele responde. Para fazer alguma coisa com a resposta, **você** precisa copiar, colar e executar.
+
+Um **agente de IA** é uma evolução desse modelo. Ele continua conversando, mas também **age**:
+
+- lê os arquivos do seu computador (com sua permissão);
+- executa comandos no seu sistema;
+- observa o resultado e ajusta o que está fazendo;
+- edita arquivos diretamente;
+- itera com você até a tarefa ficar pronta.
+
+Para análise de dados e escrita científica, isso muda tudo. Em vez de "me dê um código que faz X", você diz "abra meu projeto e calcule X com base nos dados em `/raw/`" — e o agente faz, mostrando o que executou e por quê. Esse modelo de trabalho é o que chamamos de **Vibe Coding**, e é o que dá nome ao curso.
+
+::: {.callout-note}
+## Você ainda mantém o controle
+Em todos os agentes que vamos instalar, **você aprova cada ação importante** (rodar comando, editar arquivo, fazer commit no Git). O agente não age sem permissão. Vamos voltar a esse ponto no Módulo 1, capítulo de **Conceitos Fundamentais**.
+:::
+
+## Os três agentes deste curso
+
+| Agente | Empresa | Forma principal de uso | Recomendação |
+|---|---|---|---|
+| **Claude** (Cowork + Claude Code) | Anthropic | Aplicativo desktop unificado (CLI também disponível) | **Recomendado** ⭐ |
+| **Codex** | OpenAI | Aplicativo desktop (CLI também disponível) | Opcional |
+| **Gemini CLI** | Google | Linha de comando (CLI) | Opcional |
+
+Os três são produtos diferentes, com modelos de IA diferentes por baixo dos panos. Cada um tem pontos fortes próprios, mas para os propósitos deste curso o **Claude** é o caminho principal — pelos motivos que veremos a seguir.
+
+::: {.callout-tip}
+## Recomendação direta: instale apenas o Claude
+Para a maior parte dos alunos, instalar **somente o Claude Desktop** já é o bastante. Codex e Gemini CLI estão neste capítulo como **opcionais**, para quem quer comparar agentes ou já tem assinatura/conta nessas plataformas. Se está em dúvida, **pule** essas duas seções por agora e instale só o Claude — pode voltar e instalar os outros depois.
+:::
+
+## Claude Desktop (recomendado): Cowork + Claude Code
+
+### O que é o Claude Desktop
+
+O **Claude Desktop** é o aplicativo oficial da [Anthropic](https://www.anthropic.com) que reúne, em uma só janela, **três modos de uso** do Claude:
+
+- **Chat** — conversa simples, equivalente ao Claude.ai no navegador.
+- **Cowork** — modo agêntico para **trabalho de conhecimento não-coding**: leitura de documentos, organização de bibliografia, escrita acadêmica, análise de dados em planilhas, fluxos com Drive/Slack/Outlook, etc. É o modo que mais nos serve em pesquisa científica não-programação.
+- **Claude Code** — modo agêntico para **trabalho com código**: análises em R/Python, edição de arquivos do projeto Quarto, comandos de Git, execução de scripts.
+
+```
+                    ┌──────────────────────────────┐
+                    │      Claude Desktop          │
+                    │   (um único aplicativo)      │
+                    ├──────────────────────────────┤
+                    │  Chat    │  Cowork  │  Code  │
+                    └──────────────────────────────┘
+                       conversa   pesquisa  programação
+```
+
+A grande vantagem é que **você não precisa pular entre ferramentas** — quando estiver lendo um artigo no Cowork e quiser rodar uma análise, basta mudar de aba. As três janelas compartilham seu histórico de conversa e seus arquivos.
+
+::: {.callout-warning}
+## Cowork exige plano pago
+O **Chat** e o **Claude Code** funcionam no plano gratuito do Claude. Mas o **Cowork** está disponível somente nos planos pagos: **Pro** (USD 20/mês), **Max**, **Team** ou **Enterprise**. Se você não tem assinatura, ainda assim instale o Claude Desktop — Chat e Code já cobrem a maior parte do que faremos. Cowork será opcional ao longo do curso, e indicaremos as alternativas sempre que aparecer.
+:::
+
+### Instalando o Claude Desktop
+
+::: {.panel-tabset group="os"}
+
+#### macOS
+
+**Passo 1. Baixe o instalador.**
+
+1. Acesse [claude.com/download](https://claude.com/download).
+2. Clique no botão de download para macOS. O arquivo é um `.pkg` universal — funciona em Apple Silicon e Intel.
+
+**Passo 2. Execute o instalador.**
+
+1. Na pasta Downloads, dê duplo-clique no `.pkg`.
+2. Siga o assistente: **Continuar** → **Continuar** → **Concordar** → **Instalar**.
+3. Digite a senha do Mac quando solicitada.
+4. Quando concluído, clique em **Fechar**.
+
+**Passo 3. Abra o Claude Desktop.**
+
+1. Vá em **Aplicativos → Claude**.
+2. No primeiro aviso de segurança, clique em **Abrir**.
+3. O app abre uma tela de login. Faça login com sua conta da Anthropic (a mesma que você usa em [claude.ai](https://claude.ai), se já tem). Se não tem conta, é possível criar gratuitamente nesse passo.
+
+#### Windows
+
+**Passo 1. Baixe o instalador.**
+
+1. Acesse [claude.com/download](https://claude.com/download).
+2. Clique no botão de download para Windows. O arquivo é um `.msix` (instalador oficial moderno do Windows).
+
+**Passo 2. Execute o instalador.**
+
+1. Na pasta Downloads, dê duplo-clique no `.msix`.
+2. Se o Windows mostrar um aviso de segurança, clique em **Sim** ou **Instalar**.
+3. Aguarde a instalação concluir.
+
+**Passo 3. Abra o Claude Desktop.**
+
+Vá em **Menu Iniciar → Claude**. Faça login com sua conta da Anthropic.
+
+#### Linux
+
+::: {.callout-warning}
+## Não há versão oficial do Claude Desktop para Linux
+Em maio de 2026, a Anthropic ainda não disponibiliza um instalador oficial do Claude Desktop para Linux. Se você está no Linux, há duas alternativas:
+
+1. **Use o Claude pelo navegador** em [claude.ai](https://claude.ai) (Chat e Cowork rodam direto, sem instalação).
+2. **Use o Claude Code pelo terminal** — ele tem suporte oficial para Linux. Veja a seção *"Alternativa: Claude Code pelo terminal"* logo abaixo.
+
+A combinação dessas duas alternativas cobre praticamente tudo o que o Desktop oferece em outros sistemas.
+:::
+
+:::
+
+### Alternativa: Claude Code pelo terminal
+
+::: {.callout-tip collapse="true"}
+## Para quem prefere CLI ou está no Linux
+Se você está no Linux ou prefere usar o Claude Code direto pelo terminal (sem o app Desktop), há um caminho oficial. Requer **Node.js 20+** instalado, exatamente como Codex e Gemini CLI mais adiante.
+
+**Instalação:**
+
+```bash
+npm install -g @anthropic-ai/claude-code
+```
+
+**Para usar**, em qualquer pasta de projeto:
+
+```bash
+claude
+```
+
+Na primeira execução, o Claude Code abre uma página no navegador para você fazer login com sua conta Anthropic. Funciona em macOS, Windows (via WSL ou PowerShell) e Linux.
+
+Para a maior parte dos alunos com Mac ou Windows, **o Desktop é o caminho mais simples**, e o curso vai assumir o Desktop como padrão. O modo CLI tem documentação completa em [code.claude.com/docs](https://code.claude.com/docs).
+:::
+
+## Codex (OpenAI)
+
+### O que é o Codex
+
+O **Codex** é o agente de programação da [OpenAI](https://openai.com). Ele compartilha o nome com um modelo descontinuado de 2021, mas a versão atual (2025–2026) é um produto **completamente diferente** e está disponível em **quatro pontos de acesso**, todos cobertos pela mesma assinatura ChatGPT (Plus, Pro, Business, Enterprise ou Edu):
+
+- **App Desktop** — para macOS Apple Silicon (lançado em fevereiro de 2026) e Windows (desde março de 2026). **Caminho recomendado deste curso.**
+- **Web** — em [chatgpt.com/codex](https://chatgpt.com/codex), funciona em qualquer navegador.
+- **Extensão de IDE** — para VS Code, integrando o Codex direto no editor.
+- **CLI** — versão original em linha de comando, ainda atual e oficialmente suportada.
+
+Vamos focar na instalação do **app Desktop**, que é o caminho mais amigável para a maior parte dos alunos. A instalação da **CLI** fica como **alternativa** no fim desta seção, para quem está no Linux ou prefere trabalhar pelo terminal.
+
+::: {.callout-tip}
+## Se você só vai usar o Claude
+Se decidiu seguir o curso usando **somente** o Claude Desktop, pode pular o restante deste capítulo e ir direto para o próximo. Codex e Gemini CLI são opcionais.
+:::
+
+### Instalando o Codex Desktop (recomendado)
+
+::: {.panel-tabset group="os"}
+
+#### macOS
+
+::: {.callout-warning}
+## Apple Silicon obrigatório
+O app Desktop do Codex **requer Mac com Apple Silicon** (M1, M2, M3, M4 ou mais novo) rodando **macOS 14 ou superior**. **Macs com chip Intel não são suportados** — nesses casos, use a versão **web** em [chatgpt.com/codex](https://chatgpt.com/codex) ou a **CLI** (descrita no fim desta seção).
+:::
+
+**Passo 1. Baixe o instalador.**
+
+1. Acesse [chatgpt.com/codex](https://chatgpt.com/codex).
+2. Clique no botão de download para macOS. O arquivo é um `.dmg`.
+
+**Passo 2. Instale.**
+
+1. Na pasta Downloads, dê duplo-clique no arquivo `.dmg`.
+2. Abre uma janela com o ícone do Codex e um atalho para a pasta **Applications**.
+3. **Arraste o ícone do Codex** para cima do ícone da pasta Applications.
+4. Feche a janela e ejete o `.dmg` (clique com o botão direito no ícone do disco no Finder e escolha **Ejetar**).
+
+**Passo 3. Abra o Codex.**
+
+1. Vá em **Aplicativos → Codex** (ou pressione `⌘ + Espaço`, digite `Codex` e pressione **Enter**).
+2. No primeiro aviso de segurança ("Codex foi baixado da internet, deseja realmente abrir?"), clique em **Abrir**. Se o macOS bloquear sem oferecer essa opção, vá em **Ajustes do Sistema → Privacidade e Segurança**, role até a mensagem sobre o Codex e clique em **Abrir Mesmo Assim**.
+3. O app abre uma tela de login. Faça login com sua conta **ChatGPT** (a mesma que você usa no [chatgpt.com](https://chatgpt.com)) ou cole uma chave de API da OpenAI.
+
+#### Windows
+
+Há dois caminhos oficiais para instalar o Codex no Windows — escolha o que for mais conveniente. A Microsoft Store é a mais simples; o site da OpenAI dá o instalador direto.
+
+**Passo 1. Baixe o instalador.**
+
+- **Pela Microsoft Store** *(recomendado)*: abra a **Microsoft Store** (Menu Iniciar → Microsoft Store), busque por **"Codex"** e selecione o app oficial da OpenAI. Atualizações futuras vêm automaticamente pela Store.
+- **Pelo site oficial**: acesse [chatgpt.com/codex](https://chatgpt.com/codex) e clique no botão de download para Windows.
+
+**Passo 2. Instale.**
+
+- Pela Microsoft Store, clique em **Obter** / **Instalar** — a instalação é automática.
+- Pelo instalador direto, dê duplo-clique no arquivo baixado e siga o assistente. Se o Windows mostrar um aviso de segurança, clique em **Sim** ou **Instalar**.
+
+**Passo 3. Abra o Codex.**
+
+Vá em **Menu Iniciar → Codex** e faça login com sua conta **ChatGPT** ou cole uma chave de API da OpenAI.
+
+#### Linux
+
+::: {.callout-warning}
+## Não há versão oficial do Codex Desktop para Linux
+Em maio de 2026, a OpenAI ainda não disponibiliza um app Desktop oficial do Codex para Linux. Se você está no Linux, há duas alternativas:
+
+1. **Use o Codex pelo navegador** em [chatgpt.com/codex](https://chatgpt.com/codex) — Chat e a maior parte das funções agênticas rodam direto, sem instalação.
+2. **Use o Codex pelo terminal (CLI)** — descrito na próxima seção. Tem suporte oficial para Linux.
+
+A combinação dessas duas alternativas cobre o que o Desktop oferece em outros sistemas.
+:::
+
+:::
+
+### Alternativa: Codex pelo terminal (CLI)
+
+::: {.callout-tip collapse="true"}
+## Para quem prefere CLI ou está no Linux
+A versão original do Codex é uma **ferramenta de linha de comando** — caminho preferido por quem trabalha primariamente em projetos de código com Git e já vive no terminal. Funciona em macOS, Windows (via WSL ou PowerShell) e Linux. Requer **Node.js 20 ou superior** instalado — consulte o [Apêndice: Node.js e npm](../B2-apendice/01-nodejs-npm.qmd) se ainda não tem.
+
+**Instalação:**
+
+```bash
+npm install -g @openai/codex
+```
+
+A flag `-g` instala o pacote globalmente — assim o comando `codex` fica disponível em qualquer pasta.
+
+Alternativa no Mac com Homebrew:
+
+```bash
+brew install --cask codex
+```
+
+Funciona da mesma forma; é só uma forma diferente de instalar o mesmo programa.
+
+**Para confirmar:**
+
+```bash
+codex --version
+```
+
+**Para usar**, em qualquer pasta de projeto:
+
+```bash
+codex
+```
+
+Na primeira execução, o Codex abre uma página no navegador para você fazer login com sua conta **ChatGPT** ou colar uma chave de API. Após o login, você pode fechar a página — o Codex já está pronto para uso no terminal.
+:::
+
+## Gemini CLI (Google)
+
+### O que é o Gemini CLI
+
+O **Gemini CLI** é o agente de programação do [Google](https://gemini.google.com), construído em torno dos modelos Gemini. É **open source** (código disponível em [github.com/google-gemini/gemini-cli](https://github.com/google-gemini/gemini-cli)) e tem uma característica relevante para estudantes: **a quota gratuita é generosa** (no momento desta escrita, mais de 1000 requisições por dia para usuários autenticados com conta Google).
+
+### Instalando o Gemini CLI
+
+::: {.callout-warning}
+## Pré-requisito: Node.js
+O Gemini CLI é instalado pelo **npm**, que vem com o **Node.js**. Confirme que você tem **Node.js 20 ou superior** instalado, ou consulte o [Apêndice: Node.js e npm](../B2-apendice/01-nodejs-npm.qmd) para instruções rápidas.
+:::
+
+Com o Node.js já instalado, abra o terminal e execute:
+
+```bash
+npm install -g @google/gemini-cli
+```
+
+Para confirmar:
+
+```bash
+gemini --version
+```
+
+### Primeira execução
+
+Em qualquer pasta de projeto, digite:
+
+```bash
+gemini
+```
+
+Na primeira execução, o Gemini CLI abre uma página no navegador para você fazer login com sua **conta Google**. Após autorizar, pode fechar a página — o agente fica pronto para uso.
+
+## Qual agente escolher?
+
+Os três agentes fazem o mesmo tipo de trabalho — diferem em estilo, qualidade do raciocínio em tarefas específicas e ecossistema. Como recomendação prática:
+
+- **Claude** — escolha padrão para o curso. Excelente em tarefas longas que envolvem leitura de muitos arquivos, escrita técnica e raciocínio passo a passo. O **Cowork** é particularmente forte em fluxos de pesquisa não-coding (revisão bibliográfica, escrita de relatórios, organização de Zotero).
+- **Codex** — escolha natural se você já tem assinatura ChatGPT Plus/Pro e quer aproveitar a quota incluída. Bom para tarefas de programação rápidas e diretas.
+- **Gemini CLI** — escolha natural para quem trabalha bastante com **Google Workspace** (Drive, Docs, Sheets) e quer integração nativa. Quota gratuita generosa também o torna atraente para estudantes.
+
+**Você não precisa decidir agora.** Pode instalar os três e experimentar — eles convivem sem conflito no mesmo computador.
+
+## O que vem a seguir
+
+Última parada do Módulo 0: o **Git**, o sistema que vamos usar para versionar o código, colaborar com outros pesquisadores e publicar o trabalho final na web. É o capítulo mais técnico desta etapa, mas também um dos que mais agregam valor à prática de pesquisa reprodutível.

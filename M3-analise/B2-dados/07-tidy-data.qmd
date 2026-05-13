@@ -1,0 +1,172 @@
+---
+title: "Tidy data"
+---
+
+Você recebe duas planilhas com os mesmos dados — pressão arterial sistólica de 100 pacientes em três medições (semana 0, semana 12, semana 24). Os dados são literalmente os mesmos. Mas as duas planilhas estão organizadas de jeitos diferentes:
+
+**Planilha A:**
+
+| paciente | sem_0 | sem_12 | sem_24 |
+|---|---|---|---|
+| 1 | 142 | 138 | 132 |
+| 2 | 156 | 148 | 145 |
+| 3 | 138 | 130 | 128 |
+
+**Planilha B:**
+
+| paciente | semana | pressao |
+|---|---|---|
+| 1 | 0 | 142 |
+| 1 | 12 | 138 |
+| 1 | 24 | 132 |
+| 2 | 0 | 156 |
+| 2 | 12 | 148 |
+| ... | ... | ... |
+
+Mesma informação, layouts opostos. Em Excel, a Planilha A é mais legível "como tabela" — cada paciente em uma linha. Mas em R/Python, fazer um gráfico de evolução temporal a partir da A é desconfortável; a partir da B, é uma linha de código. Por que essa diferença?
+
+A resposta é o conceito de **tidy data** (*dados arrumados*) — formalizado por Hadley Wickham em paper canônico de 2014 [@wickham2014tidy] e que se tornou base de toda uma família de ferramentas modernas de ciência de dados (o **tidyverse** em R, abordagens semelhantes em pandas/Polars). Este capítulo é sobre essas três regras simples e por que elas mudam tudo.
+
+## As três regras
+
+A definição formal cabe em três frases [@wickham2014tidy]:
+
+1. **Cada variável forma uma coluna.**
+2. **Cada observação forma uma linha.**
+3. **Cada tipo de unidade de observação forma uma tabela.**
+
+Soa óbvio. Mas a maioria das planilhas que circulam no mundo viola pelo menos uma das três regras — e a Planilha A do exemplo viola a primeira (a "variável" é semana de medição, mas em vez de uma coluna, virou três colunas; o valor `pressao` está espalhado em três colunas).
+
+Aplicando as regras na Planilha A:
+
+- A variável `paciente` está numa coluna. ✓
+- A variável `pressao` está espalhada em três colunas (`sem_0`, `sem_12`, `sem_24`). ✗
+- A variável `semana` não existe explicitamente — está codificada nos nomes das colunas. ✗
+
+A Planilha B respeita as três regras:
+
+- A variável `paciente` está numa coluna. ✓
+- A variável `semana` está numa coluna. ✓
+- A variável `pressao` está numa coluna. ✓
+
+A diferença não é cosmética. É **conceitual**, e tem consequência prática profunda.
+
+## O paper que mudou um ecossistema
+
+Hadley Wickham era um estudante de doutorado em estatística na Iowa State University quando publicou pacotes que mudariam R: **`reshape`** (2007), depois **`reshape2`** (2010), depois **`ggplot2`** (2007), depois **`plyr`** (2011), depois **`dplyr`** (2014), e ao longo do caminho consolidou o que ele chamou de **tidyverse** — uma família de pacotes com filosofia coerente.
+
+O paper *Tidy Data* foi publicado em 2014 no *Journal of Statistical Software* [@wickham2014tidy], e formalizou a filosofia que estava por trás dos pacotes. O argumento central: **uma vez que dados estão num formato "arrumado", uma família pequena de ferramentas funciona universalmente sobre eles**. Você não precisa de uma função especial para "calcular média por grupo se as colunas estão de tal jeito"; precisa de uma função genérica para "calcular agregação por grupo", e ela funciona em qualquer dataset arrumado.
+
+A consequência: **o trabalho de análise de dados se divide em duas fases distintas**. Primeiro, *arrumar* (transformar o que veio do mundo no formato tidy); depois, *operar* sobre dados arrumados com ferramentas genéricas. A primeira fase é feia e custosa; a segunda é limpa e rápida. Mas só dá para chegar à segunda se a primeira foi bem feita.
+
+Esse insight gerou ondas. **dplyr** (manipulação de dados arrumados), **tidyr** (transformação entre formatos), **ggplot2** (visualização que assume dados arrumados), **purrr** (programação funcional sobre dados arrumados) — todos os pacotes do tidyverse compartilham o pressuposto. Em paralelo, em Python, `pandas` foi adotando padrões similares; bibliotecas como **siuba** e **polars** levam a filosofia ainda mais longe.
+
+Em pesquisa científica, o impacto foi tão grande que o termo "tidy" virou substantivo: pesquisador hoje fala em "deixar os dados em formato tidy" como ação rotineira, sem precisar explicar do que se trata.
+
+## Os dois formatos: wide e long
+
+Os dois layouts da abertura (Planilha A e Planilha B) têm nomes técnicos:
+
+- **Wide** (largo): Planilha A. Cada observação ocupa **uma linha**, valores da mesma variável distribuídos em **várias colunas**. Comum em planilhas e em saída de instrumentos de medição.
+- **Long** (longo): Planilha B. Cada observação ocupa **várias linhas**, valores da mesma variável **na mesma coluna**. É o formato tidy quando há repetições por unidade.
+
+Tidy data **é geralmente long**, mas não sempre. A regra é: cada variável em uma coluna. Se você tem um único exame por paciente (idade, sexo, pressão), o layout natural já é tidy e cabe em uma linha por paciente. Quando há **múltiplas medições da mesma variável** (acompanhamento longitudinal, repetições experimentais), tidy exige formato long.
+
+A conversão entre wide e long — o pivoteamento — é uma das operações mais frequentes em análise de dados. Em R com `tidyr`:
+
+```r
+library(tidyr)
+
+# wide -> long
+dados_long <- dados_wide |>
+  pivot_longer(
+    cols = c(sem_0, sem_12, sem_24),
+    names_to = "semana",
+    values_to = "pressao"
+  )
+
+# long -> wide
+dados_wide <- dados_long |>
+  pivot_wider(
+    names_from = semana,
+    values_from = pressao
+  )
+```
+
+Em Python com `pandas`:
+
+```python
+# wide -> long
+dados_long = dados_wide.melt(
+    id_vars="paciente",
+    value_vars=["sem_0", "sem_12", "sem_24"],
+    var_name="semana",
+    value_name="pressao"
+)
+
+# long -> wide
+dados_wide = dados_long.pivot(
+    index="paciente",
+    columns="semana",
+    values="pressao"
+)
+```
+
+Aprenda esses dois pares de funções. Eles vão aparecer em todo trabalho de análise.
+
+## Por que tidy importa para a análise
+
+Demonstração concreta. Na Planilha A (wide), gerar gráfico de linha mostrando evolução por paciente exige:
+
+```r
+# Wide: precisa transformar antes de plotar
+ggplot(dados_long, aes(x = semana, y = pressao, group = paciente)) +
+  geom_line()
+# Mas dados_long só existe se você converteu manualmente; em wide, ggplot não sabe o que fazer
+```
+
+Na Planilha B (long, tidy), o mesmo gráfico:
+
+```r
+ggplot(dados_long, aes(x = semana, y = pressao, group = paciente)) +
+  geom_line()
+```
+
+A linha é idêntica. A diferença está em ter (ou não) os dados em formato tidy antes. Calcular média de pressão por semana — em tidy é `dados_long |> group_by(semana) |> summarize(media = mean(pressao))`; em wide, é uma operação ad-hoc por coluna.
+
+A regra geral: **se você está escrevendo código contorcido para fazer uma análise simples, frequentemente o problema é que os dados não estão tidy**. Reorganizar primeiro é quase sempre o caminho mais curto.
+
+::: {.callout-tip}
+## Quando wide ainda faz sentido
+Tidy não é dogma. Há contextos onde **wide é deliberadamente melhor**:
+
+- **Apresentação para humanos.** Tabela de resultados num artigo é tipicamente wide — é o que cabe na página e o que o leitor lê. Você analisa em long, apresenta em wide.
+- **Matriz de correlação.** Naturalmente wide (variável × variável). Forçar long aqui é estranho.
+- **Algumas operações específicas** que exigem múltiplas variáveis na mesma linha (cálculos entre colunas, certas regressões em modelos mistos).
+
+A regra prática: **mantenha os dados em tidy durante a análise**, converta para wide só na saída final, em função do destino.
+:::
+
+## A terceira regra: uma tabela por tipo de unidade
+
+A primeira e a segunda regras (variável → coluna, observação → linha) são as mais conhecidas. A terceira é menos lembrada e igualmente importante: **cada tipo de unidade de observação em uma tabela própria**.
+
+Em pesquisa clínica, isso significa: pacientes em uma tabela; internações em outra; prescrições em outra; exames em outra. Não tente colapsar tudo em uma tabela única — ela vira monstro com colunas duplicadas, valores faltantes onde não deveriam, e dificuldade de manutenção.
+
+Aqui as três regras conversam diretamente com **bancos relacionais** (capítulo anterior). Tabelas tidy separadas por tipo de unidade *são* o esquema natural de um banco SQLite bem desenhado. As chaves primárias e estrangeiras conectam as tabelas. SQL faz os joins. Tidy data e bancos relacionais são duas faces da mesma disciplina conceitual.
+
+## Conexão com IA
+
+Agentes lidam bem com transformações tidy:
+
+**1. Identificar quando dados não estão tidy.** *"Estou tentando fazer um gráfico de linha mas o `ggplot` reclama. Aqui está o `head` do meu data frame. O que está errado?"* — agente identifica que dados estão wide e propõe o `pivot_longer` correto.
+
+**2. Gerar código de pivoteamento complexo.** Quando você tem 30 colunas com nomes em padrão (ex.: `pas_sem0`, `pas_sem12`, ..., `freq_sem0`, `freq_sem12`, ...), pivotar para tidy exige extrair informação dos nomes (semana e variável). O agente faz isso com `pivot_longer(names_pattern = ...)` corretamente — escrever à mão é tedioso e sujeito a erro.
+
+**3. Sugerir esquema tidy a partir de dados desorganizados.** Você cola os primeiros registros de uma planilha caótica recebida e pergunta: *"como deveria ser o esquema tidy disso, em uma ou várias tabelas?"* O agente decompõe e propõe.
+
+## O que vem a seguir
+
+Tidy data é a disciplina que governa **a estrutura interna** das suas tabelas. O último capítulo do Bloco trata da disciplina que governa **como as tabelas se distribuem em arquivos e pastas** — a **organização de arquivos** num projeto de pesquisa. Como organizar `dados/raw`, `dados/processed`, `scripts`, `output`, `README` de forma que o seu eu-do-futuro (e seus colaboradores) entenda a estrutura sem precisar de explicação.
+
+→ [08 · Organização de arquivos](08-organizacao-arquivos.qmd)

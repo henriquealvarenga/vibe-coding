@@ -1,0 +1,79 @@
+---
+title: "Versionamento e Git"
+sidebar: bloco-git
+---
+## Controle de Versão (versionamento)
+
+Quando trabalhamos em qualquer documento — seja um texto, uma planilha, um código de programação ou uma análise de dados — estamos constantemente fazendo alterações. Adicionamos parágrafos, corrigimos erros, reorganizamos seções, testamos ideias que às vezes funcionam e às vezes precisam ser descartadas. Esse processo de modificação contínua gera um problema fundamental: como manter o registro do que foi alterado, quando, por quem e por quê?
+
+O **controle de versão** (também chamado de *versionamento*) é a prática de gerenciar essas mudanças de forma sistemática. Em sua forma mais básica, é o que fazemos intuitivamente quando salvamos um arquivo com um novo nome antes de fazer alterações arriscadas: guardamos uma cópia do estado anterior para poder voltar a ele se necessário. Mas essa abordagem manual rapidamente se torna caótica.
+
+Na prática cotidiana, a maioria das pessoas tenta controlar versões através de nomes de arquivos. Um documento começa como `relatorio.docx`, depois vira `relatorio_v2.docx`, então `relatorio_revisado.docx`, seguido de `relatorio_final.docx` e, inevitavelmente, `relatorio_final_FINAL.docx` e `relatorio_final_FINAL_corrigido.docx`. Em pouco tempo, a pasta está repleta de arquivos com nomes confusos, e questões simples se tornam impossíveis de responder: Qual é realmente a versão mais atual? O que exatamente mudou entre a versão 2 e a versão final? Onde está aquele parágrafo que foi deletado há duas semanas mas agora precisa ser recuperado?
+
+O problema se agrava dramaticamente quando há colaboração. Se duas pessoas editam o mesmo documento simultaneamente, como combinar as alterações? Se alguém introduz um erro, como identificar exatamente o que foi modificado e por quem? Em equipes grandes, com dezenas ou centenas de pessoas trabalhando nos mesmos arquivos, o caos seria total sem um sistema adequado.
+
+Os **sistemas de controle de versão** surgiram para resolver esses problemas de forma automatizada e confiável. Em vez de depender de nomes de arquivos ou cópias manuais, essas ferramentas registram automaticamente cada conjunto de alterações (chamado de *commit*), criando um histórico completo e navegável do projeto. Cada commit guarda não apenas o estado dos arquivos, mas também quem fez a alteração, quando ela foi feita, e uma mensagem explicando o motivo. É possível comparar qualquer duas versões, voltar a estados anteriores, e trabalhar em modificações experimentais sem risco de perder o trabalho estável.
+
+Na indústria de software, o controle de versão é absolutamente essencial há décadas. Projetos como o Linux — com milhões de linhas de código e milhares de colaboradores ao redor do mundo — seriam simplesmente impossíveis sem essas ferramentas. Mas os benefícios se estendem a qualquer área que envolva trabalho com documentos digitais: pesquisa acadêmica, redação, análise de dados, design, e muito mais.
+
+## Uma Breve História do Controle de Versão
+
+A história dos sistemas de controle de versão acompanha a própria evolução da programação colaborativa. À medida que os projetos de software cresciam em tamanho e complexidade, a necessidade de ferramentas para gerenciar mudanças se tornava cada vez mais urgente.
+
+### A Primeira Geração: Controle Local
+
+O primeiro sistema de controle de versão amplamente utilizado foi o **SCCS** (Source Code Control System), desenvolvido em 1972 por Marc Rochkind nos laboratórios da Bell Labs. O SCCS permitia que programadores registrassem alterações em arquivos individuais, mantendo um histórico de revisões. Porém, funcionava apenas localmente — em uma única máquina — e controlava um arquivo por vez.
+
+Em 1982, Walter Tichy, da Universidade de Purdue, criou o **RCS** (Revision Control System) como uma alternativa mais eficiente ao SCCS. O RCS introduziu um formato de armazenamento mais inteligente, guardando apenas as diferenças (*deltas*) entre versões em vez de cópias completas de cada arquivo. Isso economizava espaço em disco, um recurso precioso na época. O RCS ainda existe e é usado em alguns sistemas Unix até hoje, embora seja considerado obsoleto para a maioria das aplicações.
+
+Esses sistemas da primeira geração tinham uma limitação fundamental: eram locais. Apenas uma pessoa podia trabalhar em um arquivo de cada vez, e não havia forma de coordenar o trabalho entre múltiplos desenvolvedores em diferentes computadores.
+
+### A Segunda Geração: Modelo Cliente-Servidor
+
+Com a expansão das redes de computadores nos anos 1980 e 1990, surgiu a necessidade de sistemas que permitissem colaboração remota. A solução foi o modelo cliente-servidor: um servidor central armazenava o repositório oficial, e os desenvolvedores se conectavam a ele para obter arquivos e enviar suas alterações.
+
+O **CVS** (Concurrent Versions System), lançado em 1990 por Dick Grune, foi o primeiro sistema a permitir que múltiplos desenvolvedores trabalhassem simultaneamente nos mesmos arquivos. O CVS introduziu o conceito de *branching* (ramificação), permitindo criar linhas paralelas de desenvolvimento que depois podiam ser reunidas. Ele se tornou extremamente popular no mundo open source durante os anos 1990, sendo usado em projetos importantes como o Mozilla Firefox.
+
+Em 2000, o **Subversion** (também conhecido como **SVN**) foi criado pela CollabNet como um sucessor do CVS, corrigindo várias de suas limitações. O Subversion tratava commits como operações atômicas (ou todas as mudanças eram salvas, ou nenhuma), permitia versionar diretórios inteiros e não apenas arquivos individuais, e mantinha histórico de arquivos renomeados ou movidos. O SVN dominou o desenvolvimento de software durante boa parte dos anos 2000 e ainda é usado em algumas organizações.
+
+Porém, os sistemas cliente-servidor tinham um problema estrutural: a dependência do servidor central. Sem conexão com o servidor, não era possível fazer commits, ver o histórico ou criar branches. Se o servidor ficasse fora do ar, todo o trabalho parava. E se o servidor fosse perdido sem backup adequado, o histórico inteiro do projeto desaparecia.
+
+### A Terceira Geração: Sistemas Distribuídos
+
+A virada conceitual veio com os **sistemas distribuídos** de controle de versão. Neles, cada desenvolvedor possui uma cópia completa do repositório, incluindo todo o histórico. Não há dependência de um servidor central para as operações do dia a dia — commits, branches, navegação pelo histórico, tudo funciona localmente.
+
+O **BitKeeper**, criado em 1998 por Larry McVoy, foi um dos pioneiros dessa abordagem. Embora fosse um software proprietário (pago), McVoy ofereceu licenças gratuitas para projetos open source. Em 2002, Linus Torvalds, criador do Linux, adotou o BitKeeper para gerenciar o desenvolvimento do kernel — um projeto com milhões de linhas de código e milhares de colaboradores.
+
+A decisão foi controversa. Muitos na comunidade open source criticavam o uso de uma ferramenta proprietária para desenvolver o projeto open source mais importante do mundo. A tensão culminou em 2005, quando a licença gratuita do BitKeeper foi revogada após um desenvolvedor ser acusado de fazer engenharia reversa no software.
+
+### O Nascimento do Git
+
+A revogação da licença do BitKeeper deixou a comunidade Linux em uma situação crítica. O kernel tinha milhares de desenvolvedores ao redor do mundo, e eles precisavam de uma ferramenta de controle de versão imediatamente. Linus Torvalds avaliou as alternativas disponíveis — CVS, Subversion, Monotone, GNU Arch — mas nenhuma atendia aos requisitos de um projeto do tamanho e complexidade do Linux.
+
+Torvalds decidiu, então, criar sua própria ferramenta. Em abril de 2005, ele começou a trabalhar no Git. Em apenas duas semanas, o sistema já estava funcional o suficiente para gerenciar seu próprio código-fonte. Em junho do mesmo ano, o kernel Linux já era oficialmente mantido com Git.
+
+O nome "Git" tem uma história curiosa. Em inglês britânico, a palavra é uma gíria para "pessoa desagradável" ou "idiota". Torvalds, conhecido pelo senso de humor ácido e autoirônico, disse que nomeou o projeto em homenagem a si mesmo. A documentação oficial do Git brinca com múltiplos significados: pode ser uma combinação aleatória de três letras que não conflita com nenhum comando Unix; pode ser o verbo *get* mal escrito; ou pode significar "Global Information Tracker" quando você está de bom humor, e "Goddamn Idiotic Truckload of sh*t" quando não está.
+
+Piadas à parte, Torvalds projetou o Git com objetivos técnicos muito claros, baseados em sua experiência com o BitKeeper e nas necessidades específicas do desenvolvimento do Linux:
+
+**Velocidade.** Operações como commits, diffs e merges deveriam ser extremamente rápidas, mesmo em repositórios com décadas de histórico e milhões de arquivos. Torvalds otimizou o Git para que a maioria das operações fosse quase instantânea.
+
+**Design distribuído.** Cada cópia do repositório seria completa e autônoma. Desenvolvedores poderiam trabalhar offline, fazer commits, criar branches, navegar pelo histórico — tudo sem conexão com nenhum servidor. A sincronização aconteceria apenas quando desejado.
+
+**Integridade dos dados.** Cada arquivo e cada commit no Git é identificado por um hash criptográfico (SHA-1). Isso significa que qualquer alteração, por menor que seja, muda completamente o identificador. É matematicamente impossível modificar o histórico sem que isso seja detectado.
+
+**Suporte a desenvolvimento não-linear.** O Git foi projetado para lidar com milhares de branches paralelas sendo criadas, modificadas e mescladas constantemente. Branches no Git são leves — criar uma nova branch é praticamente instantâneo e ocupa espaço mínimo.
+
+O Git cresceu rapidamente para além do Linux. Em 2007, projetos como Perl, Ruby on Rails e Android já haviam migrado para ele. A combinação de velocidade, confiabilidade e o poderoso sistema de branches conquistou desenvolvedores ao redor do mundo.
+
+### O Surgimento do GitHub
+
+O Git, por si só, é uma ferramenta de linha de comando. Poderosa, mas não exatamente amigável para iniciantes. E embora o Git seja distribuído por natureza, na prática as equipes precisam de um local comum para sincronizar seu trabalho.
+
+Em 2008, Tom Preston-Werner, Chris Wanstrath e PJ Hyett lançaram o **GitHub** — uma plataforma web que hospeda repositórios Git e adiciona uma camada de colaboração social. O GitHub não inventou nada tecnicamente novo, mas transformou a experiência de usar Git. Através de uma interface visual intuitiva, qualquer pessoa podia criar repositórios, navegar pelo código, ver o histórico de alterações, e contribuir para projetos.
+
+Mais do que isso, o GitHub introduziu recursos que facilitavam a colaboração aberta: *forks* (cópias pessoais de repositórios), *pull requests* (solicitações para incorporar alterações), *issues* (rastreamento de bugs e tarefas), e perfis públicos que funcionavam como portfólios de desenvolvedores.
+
+O impacto foi transformador. O GitHub se tornou a rede social dos programadores, o lugar onde o código open source vivia e crescia. Projetos que antes eram mantidos em listas de e-mail obscuras ganharam visibilidade. Contribuir para software open source, que antes exigia navegar por processos burocráticos complicados, passou a ser tão simples quanto clicar em um botão.
+
+Em 2018, a Microsoft adquiriu o GitHub por 7,5 bilhões de dólares — um reconhecimento de como a plataforma se tornou central para a indústria de tecnologia. Hoje, o GitHub hospeda mais de 200 milhões de repositórios e é usado por mais de 100 milhões de desenvolvedores. Mas a plataforma expandiu muito além do público programador.

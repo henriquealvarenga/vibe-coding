@@ -1,0 +1,91 @@
+---
+title: "Introdução: o que é uma IDE"
+sidebar: bloco-ambientes
+---
+
+Imagine seu desktop nos primeiros dias de uma análise. Uma janela com o Terminal aberto, esperando comandos. Outra com um editor de texto exibindo o script `.R`. Uma terceira com a planilha do Excel mostrando os dados. Uma quarta com o navegador num PDF de artigo. Você alterna entre as quatro com `Cmd+Tab`, copia um pedaço de código aqui, cola ali, volta para o terminal para rodar, troca de janela para ver o gráfico que abriu numa pré-visualização do Mac. Sete janelas, três monitores, cinquenta minutos para uma análise que tem dez linhas de código.
+
+Esse é o problema que a **IDE** existe pra resolver: juntar tudo numa janela só. Editor de código, console que executa, painel de gráficos, lista de variáveis em memória, terminal embutido, controle de versão — tudo a uma tecla de distância. O nome em inglês é **Integrated Development Environment** (Ambiente de Desenvolvimento Integrado), e o termo aparece no curso o tempo todo. Este capítulo abre o Bloco respondendo três perguntas: o que é uma IDE, de onde a categoria veio, e por que estes três (Positron, RStudio, VS Code) e não outros.
+
+## Um pouco de história
+
+A história das IDEs é, em parte, a história de uma frustração que se repete a cada geração: programadores cansados de alternar entre ferramentas que não conversam.
+
+**Os primeiros editores em mainframe (anos 1960-70).** Editores como **TECO** (1962, no MIT) e **ED** (1969, no Unix) eram orientados a linha — você editava texto digitando comandos como "vá para a linha 5, troque a palavra X pela Y". Não havia tela inteira de edição visual; havia uma teleimpressora que imprimia o texto numa folha contínua. Compilar o código exigia um comando separado, em um programa separado, com saída noutro lugar.
+
+**Smalltalk-80 (1980, Xerox PARC).** Pesquisadores do laboratório Xerox PARC criaram um ambiente onde **tudo vivia numa janela só**: editor, lista de classes, navegador de objetos, debugger ao vivo. Era radical para a época — a primeira vez que "ambiente integrado" virou conceito coerente, com edição visual, *inspector* de objetos, e a noção de que ferramenta de desenvolvimento podia ser um espaço unificado, não uma colcha de retalhos.
+
+**Turbo Pascal (1983, Borland).** Smalltalk era para pesquisa; Turbo Pascal foi o primeiro IDE comercial de massa. A Borland vendia um pacote para PC com editor + compilador + depurador num único programa, em uma única janela, por preço acessível. Programar em Pascal nos anos 1980 era essencialmente sinônimo de Turbo Pascal. O modelo "edição + execução + debug numa janela" virou padrão.
+
+**Visual Studio (1997, Microsoft).** A Microsoft consolidou a categoria com o Visual Studio: IDE pesada, paga, voltada a desenvolvimento profissional Windows (C++, Visual Basic, depois C#). Por uma década, "IDE séria" era quase sinônimo de Visual Studio.
+
+**Eclipse (2001, IBM).** O Eclipse mudou a regra do jogo ao se posicionar como **plataforma extensível**: o núcleo do programa era pequeno, e tudo que ele fazia (suporte a Java, a C++, a HTML, etc.) era plugin. Qualquer um podia escrever um plugin. A consequência: dezenas de IDEs especializadas brotaram em cima do Eclipse — para Java, para PHP, para Android, para análise estatística (no caso do **StatET**, plugin de R que existiu por anos).
+
+**O nascimento das "IDEs de ciência de dados" (anos 2010).** Aqui aparece uma família de IDEs que não compete com Visual Studio ou Eclipse — ela ocupa um nicho diferente. Pesquisadores não programam aplicações; pesquisadores **conversam com dados**. Querem rodar uma linha, ver o resultado, rodar a próxima, examinar o gráfico, ajustar e re-rodar. A categoria se cristaliza com três marcos:
+
+- **Spyder** (2009, parte da distribuição Anaconda de Python). IDE para Python científico, com console interativo + visualização de variáveis + plots.
+- **RStudio** (2011, criado por J.J. Allaire). Faz para R o que Spyder fazia para Python: console + editor + plots + ambiente + ajuda, tudo numa janela. Vira o padrão absoluto entre estatísticos e biostatísticos. Capítulo dedicado adiante.
+- **Jupyter** (2014, evolução do IPython lançado em 2001). Não é exatamente uma IDE — é um *notebook* baseado em navegador — mas ocupa o mesmo nicho cognitivo. "Tudo numa página, executável célula por célula." Domina aprendizado de máquina e ensino de ciência de dados.
+
+**O que torna essas IDEs diferentes** das genéricas como Eclipse e Visual Studio é a integração profunda com **REPL persistente** (sigla explicada já já), com inspeção de variáveis em memória, com gráficos inline, com workflow de análise interativa em vez de compilação batch.
+
+**Visual Studio Code (2015, Microsoft).** Em paralelo, a Microsoft lançou o **VS Code** — um editor de texto que rapidamente cresceu para a categoria de IDE leve. Open source, gratuito, baseado em web (na tecnologia Electron), com ecossistema massivo de extensões. Em poucos anos virou o editor mais usado do mundo segundo a [Stack Overflow Developer Survey](https://survey.stackoverflow.co/) (todos os anos desde 2018).
+
+**Positron (2024, Posit PBC).** A Posit (empresa que era RStudio Inc. até o rebranding de 2022) decidiu construir uma IDE que combinasse o melhor dos dois mundos: a base técnica do VS Code (modular, extensível, polyglot) com a experiência de uso do RStudio (workflow de ciência de dados, com painéis dedicados a dados, plots e variáveis). Anunciado em 2024, ainda em estágio inicial mas já funcional. É a IDE recomendada deste curso. Capítulo dedicado adiante.
+
+## O que faz de uma IDE uma IDE
+
+Resumindo a diferença prática entre uma IDE e um editor de texto comum (Bloco de Notas, TextEdit, nano):
+
+| Recurso | O que é | Por que importa para pesquisa |
+|---|---|---|
+| **REPL persistente** | Read-Eval-Print Loop — console que mantém um ambiente vivo entre execuções (você roda `x <- 5`, depois pode usar `x` na próxima linha) | Permite "conversar com os dados" — explorar um data frame interativamente, testar hipóteses sem reiniciar a sessão |
+| **Visualização de dados** | Painel que abre tabelas como planilha interativa | Espiar um `data.frame` sem precisar abrir o Excel |
+| **Plots inline** | Gráficos aparecem na própria IDE, não em janela separada | Iterar visualizações sem trocar de janela |
+| **Ambiente de variáveis** | Painel mostra todas as variáveis carregadas, com tipo e valor | Saber o que está em memória sem digitar `ls()` toda hora |
+| **Autocompletar inteligente** | Sugestões baseadas no contexto (objetos do projeto, colunas do data frame, funções importadas) | Reduz erros de digitação e descobre funções por exploração |
+| **Linter** | Marca erros de sintaxe e estilo enquanto você escreve | Descobre o erro antes de rodar |
+| **Debugger** | Ferramenta para pausar a execução, inspecionar variáveis, executar passo a passo | Investigar bugs sem `print()` espalhado pelo código |
+| **Refactor** | Renomear variáveis em todo o projeto, extrair função, mover código | Reorganizar análise sem quebrar referências |
+| **Integração com Git** | Painel de controle de versão embutido | Commit, push, pull sem sair da IDE (Módulo 3) |
+| **Terminal embutido** | Terminal acessível dentro da própria IDE | Roda `quarto render` ou comandos de shell sem abrir outro programa |
+| **Suporte a Quarto** | Renderização ao vivo, preview, syntax highlighting | Edita `.qmd` com feedback imediato (Módulo 2) |
+
+## Glossário de siglas
+
+Já apareceram quatro siglas neste capítulo, e mais aparecem nos próximos. Vale fixar:
+
+- **IDE** — *Integrated Development Environment*. Ambiente integrado de desenvolvimento. Programa que reúne edição, execução e visualização numa só janela.
+- **REPL** — *Read-Eval-Print Loop*. "Ler, avaliar, imprimir, repetir" — o ciclo que descreve um console interativo. Você digita uma expressão (`mean(dados$idade)`), ela é avaliada, o resultado é impresso, e o cursor volta esperando a próxima. Toda IDE de ciência de dados gira em torno de um REPL persistente.
+- **GUI** — *Graphical User Interface*. Interface gráfica de usuário (com janelas, ícones, botões). Oposto de CLI.
+- **CLI** — *Command Line Interface*. Interface de linha de comando. O Terminal do Bloco anterior é uma CLI.
+- **OSS** — *Open Source Software*. Software de código aberto. Aparece no termo "Code OSS" — a versão sem branding nem telemetria do VS Code, sobre a qual o Positron é construído.
+- **PARC** — *Palo Alto Research Center*. O laboratório da Xerox onde Smalltalk e várias outras ideias fundamentais (mouse, ethernet, interface gráfica) foram inventadas nos anos 1970.
+
+## Por que essas três no curso
+
+Há dezenas de IDEs viáveis para pesquisa. Por que Positron, RStudio e VS Code, e não Spyder, PyCharm, Jupyter, Sublime, Atom, Emacs, Vim, ou outras?
+
+A escolha atende três critérios práticos:
+
+1. **Suporte a R, Python e Quarto na mesma ferramenta.** As três cobrem o stack completo do curso. Spyder e PyCharm são ótimos para Python mas fracos em R; Emacs e Vim exigem configuração extensa.
+2. **Manutenção ativa e comunidade grande.** Todas as três são mantidas por organizações sólidas (Posit, Microsoft) com horizonte longo. Atom (que era popular nos anos 2010) foi descontinuado em 2022 — ferramenta que some no meio do caminho atrapalha curso.
+3. **Cobertura do espaço de escolha.** As três representam pontos diferentes do trade-off:
+
+| IDE | Posicionamento | Quando faz mais sentido |
+|---|---|---|
+| **Positron** | Recomendada do curso. Polyglot (R + Python + outros), recente, ainda em evolução | Para a maioria dos alunos. Cobre todo o curso de cabo a rabo. |
+| **RStudio** | Clássica, R-first, amplamente conhecida | Se você já usa há anos e não quer trocar agora; se sua instituição padronizou |
+| **VS Code** | IDE universal, base do Positron, extensão massiva de uso fora de pesquisa | Se você programa profissionalmente em outras linguagens (web, infra) e quer uma só ferramenta para tudo |
+
+A leitura recomendada deste Bloco é **abrir o capítulo da IDE que você de fato vai usar** (provavelmente Positron) e dar uma olhada nos outros dois apenas como contexto. Os capítulos são curtos, podem ser lidos em qualquer ordem, e nenhum deles depende da leitura do anterior. Conhecer um pouco das outras duas ajuda só quando você precisar abrir um projeto antigo de colega ou trocar de máquina.
+
+## Conexão com IA
+
+Todas as três IDEs têm hoje **integração nativa ou via plugin com agentes de IA**: Positron começa a embutir o Claude e outros via Posit Assistant; o VS Code tem GitHub Copilot, Continue, Cline, e dezenas de outras extensões; o RStudio tem extensões via *addin*. A diferença entre IDEs nesse ponto é menor do que parece — todas conseguem ser configuradas para conversar com agentes, e todas aceitam Claude Code, Codex CLI ou Gemini CLI rodando no terminal embutido. Os capítulos seguintes apontam o estado atual de cada uma, mas a tendência é convergência.
+
+## O que vem a seguir
+
+O próximo capítulo abre a IDE recomendada do curso: o **Positron**. A história da Posit, o que herda do VS Code, o que herda do RStudio, o estado atual em 2026, e o motivo pelo qual ele foi escolhido como ferramenta padrão.
+
+→ [02 · Positron](02-positron.qmd)

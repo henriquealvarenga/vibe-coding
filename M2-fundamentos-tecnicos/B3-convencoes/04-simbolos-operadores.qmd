@@ -1,0 +1,211 @@
+---
+title: "Símbolos e operadores"
+---
+
+Esse é um capítulo opcional. Leia se term algum interesse mais profundo em entender a linguagem R e Python.
+
+Quem nunca viu código olha para `df %>% filter(idade >= 18) |> mutate(faixa = idade %/% 10 * 10)` e enxerga hieróglifo. Cada um daqueles símbolos tem nome, função e — em alguns casos — sutileza importante para a análise estar correta.
+
+Este capítulo é um **dicionário de consulta**. A intenção não é decorar tudo, mas saber onde voltar quando você encontrar um símbolo desconhecido no código que está editando ou que o agente sugeriu.
+
+## Atribuição: `<-` e `=`
+
+Em **R**, atribuição idiomática usa a seta para a esquerda:
+
+``` r
+idade_anos <- 45
+```
+
+O `=` também funciona, mas é evitado fora de chamadas de função (`mean(x = c(1, 2, 3))`):
+
+``` r
+idade_anos = 45   # funciona, mas destoa do estilo tidyverse
+```
+
+A seta vem de uma herança histórica. A linguagem **S** (precursora do R, criada nos Bell Labs nos anos 1970) herdou a notação da linguagem **APL**, que tinha uma tecla dedicada `←` no teclado original [@ihaka1996]. Quando S migrou para teclados ASCII, `←` virou `<-`. R manteve a convenção.
+
+Em **Python**, atribuição é sempre `=`:
+
+``` python
+idade_anos = 45
+```
+
+Python tem ainda o operador *walrus* (morsa) `:=`, introduzido na versão 3.8 (2019) — atribui dentro de uma expressão:
+
+``` python
+if (n := len(dados)) > 100:
+    print(f"Dataset tem {n} linhas")  # n foi definido na linha de cima
+```
+
+::: {.callout-warning}
+## A confusão clássica: `=` × `==`
+Um único `=` é **atribuição** (guarda valor). Dois `==` são **comparação de igualdade** (testa se dois valores são iguais).
+
+``` python
+x = 5      # ATRIBUI 5 a x
+x == 5     # PERGUNTA: x é igual a 5? → True
+```
+
+Trocar `=` por `==` (ou vice-versa) é o erro mais comum de iniciante e fonte de bugs silenciosos quando o código não dá erro mas faz a coisa errada.
+:::
+
+## Comparação
+
+Iguais nas duas linguagens:
+
+| Operador | O que testa | Exemplo |
+|---|---|---|
+| `==` | igualdade | `idade == 18` |
+| `!=` | diferente | `grupo != "controle"` |
+| `<`, `>` | menor / maior | `pressao > 140` |
+| `<=`, `>=` | menor ou igual / maior ou igual | `idade >= 18` |
+
+## Operadores lógicos
+
+| O que faz | R (vetorizado) | R (escalar, dentro de `if`) | Python |
+|---|---|---|---|
+| E | `&` | `&&` | `and` |
+| OU | `\|` | `\|\|` | `or` |
+| NÃO | `!` | `!` | `not` |
+
+A diferença em R entre `&` e `&&` é sutil mas relevante:
+
+``` r
+# vetorizado: compara elemento a elemento
+c(TRUE, FALSE, TRUE) & c(TRUE, TRUE, FALSE)
+# → TRUE FALSE FALSE
+
+# escalar: avalia o primeiro elemento, ideal dentro de if()
+if (idade >= 18 && pressao < 140) { ... }
+```
+
+A partir do R 4.3 (abril de 2023), `&&` e `||` em valores não-escalares emitem aviso, reforçando a recomendação tidyverse de reservá-los para dentro de `if`.
+
+## Aritméticos: as armadilhas R × Python
+
+Os aritméticos comuns (`+`, `-`, `*`, `/`) são iguais. O resto pega muito gente:
+
+| Operação | R | Python | Atenção |
+|---|---|---|---|
+| Potência | `2 ^ 3` ou `2 ** 3` | `2 ** 3` | `^` em Python NÃO é potência — é XOR (ou exclusivo) bit a bit |
+| Módulo (resto da divisão) | `7 %% 3` | `7 % 3` | `%` em R é parte de operadores especiais (ex.: `%>%`), não módulo |
+| Divisão inteira | `7 %/% 3` | `7 // 3` | `//` em Python é divisão inteira; em outras linguagens, `//` é comentário (ver capítulo 03) |
+
+Exemplo completo:
+
+``` r
+# R
+2 ^ 3      # 8 — potência
+7 %% 3     # 1 — resto da divisão
+7 %/% 3    # 2 — quociente inteiro
+```
+
+``` python
+# Python
+2 ** 3     # 8 — potência
+7 % 3      # 1 — resto da divisão
+7 // 3     # 2 — divisão inteira
+```
+
+## O pipe: `|>` e `%>%` (só em R)
+
+O **pipe** (encanador) passa o resultado de uma operação como primeiro argumento da próxima. É o que torna o estilo tidyverse legível:
+
+``` r
+# Sem pipe — leitura "de dentro para fora"
+arrange(filter(mutate(dados, idade_dec = idade %/% 10), idade_dec >= 5), desc(idade))
+
+# Com pipe — leitura linear, "passo a passo"
+dados |>
+  mutate(idade_dec = idade %/% 10) |>
+  filter(idade_dec >= 5) |>
+  arrange(desc(idade))
+```
+
+Existem **duas versões do pipe em R**:
+
+- **`|>`** — pipe **nativo**, embutido no R desde a versão 4.1 (maio de 2021). Não precisa de pacote.
+- **`%>%`** — pipe do pacote `magrittr` (Bache e Wickham, 2014), incluído automaticamente no tidyverse. Funciona desde versões antigas do R; oferece algumas funcionalidades extras (como o ponto `.` para indicar onde o argumento entra).
+
+O tidyverse style guide [@wickham2024tidystyle] recomenda preferir o `|>` nativo para projetos novos. Os dois funcionam intercambiavelmente em quase todos os casos.
+
+::: {.callout-tip}
+## Atalho do pipe nos IDEs
+- **Positron / RStudio:** `Ctrl + Shift + M` (Windows/Linux) ou `Cmd + Shift + M` (Mac) insere o pipe. Vá em *Tools → Global Options → Code → Editing* para escolher entre inserir `|>` ou `%>%`.
+:::
+
+**Em Python, não existe pipe nativo.** Algumas bibliotecas (`toolz`, `sspipe`) oferecem sintaxe similar, mas raramente são usadas em ciência de dados. O equivalente idiomático em Python é encadear métodos:
+
+``` python
+# Python — equivalente ao pipe, via encadeamento de métodos
+(dados
+    .assign(idade_dec=lambda d: d.idade // 10)
+    .query("idade_dec >= 5")
+    .sort_values("idade", ascending=False)
+)
+```
+
+## Operadores específicos de R
+
+| Símbolo | Nome / função | Exemplo |
+|---|---|---|
+| `~` | fórmula (variável dependente ~ independentes) | `lm(desfecho ~ idade + sexo, data = df)` |
+| `$` | acessa coluna ou elemento nomeado | `df$idade` |
+| `[ ]` | indexação por posição ou lógica | `df[1, ]` (primeira linha) |
+| `[[ ]]` | extrai um único elemento de lista | `lista[[1]]` |
+| `:` | sequência inclusiva | `1:5` → `1 2 3 4 5` |
+| `?` | abre a página de ajuda | `?mean` |
+| `??` | busca em todas as páginas de ajuda | `??regression` |
+| `<<-` | super-atribuição (escopo pai) | uso avançado, raro |
+| `->` | atribuição à direita (rara) | `45 -> idade` |
+
+## Operadores específicos de Python
+
+| Símbolo | Nome / função | Exemplo |
+|---|---|---|
+| `:` | sequência **exclusiva** + diversos usos | `range(1, 5)` → `1 2 3 4` (note: 5 fica de fora!) |
+| `f"..."` | *f-string*, interpolação de variáveis | `f"idade média: {media:.1f}"` |
+| `@` | decorador | `@staticmethod` (avançado) |
+| `**` (em chamada) | desempacota dicionário | `funcao(**parametros)` |
+| `*` (em chamada) | desempacota lista | `funcao(*argumentos)` |
+| `[ ]` | indexação | `lista[0]` (primeiro elemento — Python conta de zero!) |
+| `.` | acessa atributo ou método | `df.shape`, `texto.upper()` |
+
+::: {.callout-warning}
+## Sequência inclusiva × exclusiva
+- **R:** `1:5` produz `1 2 3 4 5` (cinco elementos — inclui o último).
+- **Python:** `range(1, 5)` produz `1 2 3 4` (quatro elementos — exclui o último).
+- **Python:** `lista[1:5]` pega os elementos das posições 1, 2, 3, 4 (não a 5).
+
+Mais uma diferença de "off-by-one" que gera bugs em quem alterna entre as duas linguagens.
+:::
+
+## Tabela de referência rápida (R × Python)
+
+| O que | R | Python |
+|---|---|---|
+| Atribuição | `<-` | `=` |
+| Igualdade | `==` | `==` |
+| E lógico (vetor) | `&` | (use `np.logical_and` ou pandas) |
+| E lógico (escalar) | `&&` | `and` |
+| Potência | `^` ou `**` | `**` |
+| Módulo | `%%` | `%` |
+| Divisão inteira | `%/%` | `//` |
+| Pipe | `\|>` ou `%>%` | (não existe nativo) |
+| Sequência | `1:5` (1 a 5, inclusivo) | `range(1, 6)` (exclusivo no fim) |
+| Acesso a elemento | `lista[[1]]`, `df$col` | `lista[0]`, `df["col"]` |
+
+## Conexão com IA
+
+Símbolos densos é onde agentes de IA mais ajudam — você cola um trecho de código incompreensível no chat e pergunta "o que cada símbolo aqui faz?". Funciona bem porque é texto compacto, com semântica bem definida; o modelo não precisa adivinhar contexto.
+
+Vale **dois cuidados**:
+
+- **Confirme a versão do R/Python.** Pipe nativo `|>` só existe em R ≥ 4.1; *walrus* `:=` só em Python ≥ 3.8. Se o agente sugerir e seu ambiente for mais antigo, dá erro de sintaxe.
+- **Não confunda `^` em Python.** Se o agente gerar código Python com `^` para potência, é alucinação clássica (confusão com R/MATLAB). `^` em Python é XOR bit a bit. Sempre revise antes de rodar em estatística.
+
+## O que vem a seguir
+
+O próximo capítulo é sobre o "símbolo" mais traiçoeiro: o **espaço em branco que define estrutura** — em alguns lugares ele é decoração, em outros ele é sintaxe obrigatória. Indentação.
+
+→ [05 · Indentação](05-indentacao.qmd)

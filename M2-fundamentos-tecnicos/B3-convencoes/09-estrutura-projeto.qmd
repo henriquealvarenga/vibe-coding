@@ -1,0 +1,146 @@
+---
+title: "Estrutura clássica de projeto técnico"
+---
+
+Você recebe a pasta de um projeto de um colega. Abre. Vê 47 arquivos soltos na raiz: três versões da planilha original (`dados.xlsx`, `dados_v2.xlsx`, `dados_FINAL.xlsx`), seis scripts (`script.R`, `script1.R`, `script_novo.R`, `analysis.R`, `Untitled1.R`, `temp.py`), gráficos PNG misturados, um PDF do artigo, e um arquivo chamado `IMPORTANTE LER PRIMEIRO.docx` que ninguém leu.
+
+Esse projeto pode até funcionar — mas é hostil. Para o colega futuro. Para o seu eu de daqui a 6 meses. Para qualquer agente de IA que tente ajudar. E, principalmente, para a reprodutibilidade da pesquisa.
+
+Há um padrão simples e amplamente adotado para evitar isso.
+
+## A estrutura clássica
+
+Uma versão minimalista que funciona para a grande maioria de projetos de pesquisa em R, Python ou ambos:
+
+``` text
+meu-projeto/
+│
+├── README.md              ← porta de entrada do projeto
+├── LICENSE                ← termos de uso e redistribuição
+├── AGENTS.md              ← regras para agentes de IA (M1-B2-05)
+├── .gitignore             ← arquivos que o Git ignora
+├── renv.lock              ← versões travadas (R) — capítulo 08
+├── pyproject.toml         ← dependências Python (se aplicável)
+│
+├── data/
+│   ├── raw/               ← dados brutos, INTOCÁVEIS
+│   └── processed/         ← dados limpos, gerados a partir de raw
+│
+├── R/                     ← funções e scripts em R
+├── analysis/              ← análises principais (.qmd, .R, .py, .ipynb)
+├── output/
+│   ├── figures/           ← gráficos gerados
+│   └── tables/            ← tabelas geradas
+│
+└── references/
+    └── references.bib     ← bibliografia
+```
+
+Variações existem, mas a espinha dorsal é estável: **dados separados de código, código separado de output, e configuração na raiz**.
+
+@noble2009quick, em "A Quick Guide to Organizing Computational Biology Projects" (PLOS Comp Bio), formalizou esta estrutura para ciência computacional há mais de quinze anos; @marwick2018packaging atualizou os princípios para o ecossistema R moderno; e @wilson2017good os incorporou em "Good Enough Practices in Scientific Computing" como conjunto mínimo defensável.
+
+## Os arquivos da raiz
+
+**`README.md`** — primeira coisa que qualquer pessoa (ou agente) lê ao abrir o projeto. Em 5–10 parágrafos, responde: *o que esse projeto faz, como rodar, onde estão os principais arquivos, quem manter contato*. O GitHub renderiza automaticamente no topo do repositório.
+
+**`LICENSE`** — define como outras pessoas podem usar seu trabalho. Sem licença, o padrão legal na maioria das jurisdições é "todos os direitos reservados" — ironicamente o mais restritivo. Para pesquisa científica, opções comuns: **MIT** ou **Apache 2.0** (permissivas, para código), **CC BY 4.0** (para dados, texto, figuras). Sem `LICENSE`, seu repositório público no GitHub é tecnicamente "olhe mas não toque".
+
+**`AGENTS.md`** — regras de projeto para agentes de IA (Claude, Codex, Gemini). Coberto em detalhe no [capítulo M1-B2-05](../../M1-ia-pesquisa/B2-agentes/05-arquivo-agents.qmd). É o único arquivo dessa lista que é específico da era 2025-em-diante.
+
+**`.gitignore`** — lista do que o Git **não** deve versionar (capítulo 06 deste bloco). Para projeto típico de pesquisa: `.venv/`, `.Rproj.user/`, `renv/library/`, `.DS_Store`, `*.log`, e — crítico — qualquer arquivo com segredo (`.env`, chaves de API).
+
+**`renv.lock` / `pyproject.toml`** — versões travadas das dependências (capítulo 08). Vai pro Git **junto** com a declaração de intenção (`DESCRIPTION` em R, ou seção `[project.dependencies]` em `pyproject.toml`).
+
+## A pasta `data/` e o princípio sagrado
+
+Aqui mora a regra mais importante de organização de projeto científico:
+
+::: {.callout-warning}
+## **Dado bruto é READ-ONLY. Sempre.**
+O conteúdo de `data/raw/` **nunca é editado, sobrescrito ou modificado**. Toda transformação (limpeza, filtragem, recodificação) **gera um arquivo novo** em `data/processed/`. Se você precisar refazer a análise do zero, deve ser possível apagar `data/processed/` inteira e recriá-la rodando os scripts a partir de `data/raw/`.
+:::
+
+A regra parece exagerada até a primeira vez que você sobrescreve `dados.csv` "só para corrigir um problema" e percebe três meses depois que aquela edição alterou silenciosamente uma coluna que o resto da análise dependia. Sem o original, não há como voltar.
+
+Implementação prática:
+
+- **Permissão de só-leitura** no `data/raw/` (no terminal: `chmod -R a-w data/raw/`). Vira físico-impedimento, não só convenção.
+- **Versionar o `data/raw/` no Git** se o tamanho permitir; **não versionar** o `data/processed/` (regenerado por código).
+- **Documentar a origem** do dado bruto num `data/raw/README.md` (data de extração, URL, contato).
+
+@noble2009quick coloca essa separação como o ponto número um da organização de projeto computacional. @wilson2017good formaliza a regra como "create the data you wish you had": se você fosse refazer o estudo do zero hoje, qual seria a estrutura ideal? Construa essa, em `data/processed/`, a partir de `data/raw/`.
+
+## Código, análise, output: três pastas, três funções
+
+A separação entre **código reutilizável**, **análise específica do estudo** e **artefatos gerados** evita confusão sobre o que mudar onde:
+
+| Pasta | O que vai dentro | Editado por humano? |
+|---|---|---|
+| `R/` (ou `src/`) | Funções utilitárias chamadas por várias análises | Sim |
+| `analysis/` (ou `notebooks/`) | `.qmd`, `.R`, `.py`, `.ipynb` da análise principal — narrativa + código | Sim |
+| `output/` (ou `figures/`, `tables/`) | Gráficos PNG/PDF, tabelas CSV/HTML — artefatos gerados | **Não** — apague e regenere |
+
+A regra prática: tudo em `output/` deve ser **regenerável** a partir do código + dados — então não vai pro Git (entra no `.gitignore`) e pode ser apagado a qualquer momento sem perda.
+
+::: {.callout-tip}
+## Variações por tipo de projeto
+- **Pacote R:** segue o layout do CRAN (`R/`, `man/`, `tests/`, `vignettes/`, `DESCRIPTION`, `NAMESPACE`). Mais rígido — ferramentas como `devtools` esperam essa estrutura. Ver @marwick2018packaging.
+- **Projeto Python instalável:** `src/meupacote/`, `tests/`, `pyproject.toml`. Padrão moderno (PEP 517/518).
+- **Site Quarto** (como este curso): `_quarto.yml` na raiz, capítulos em pastas temáticas, `docs/` (gerada) com o site renderizado.
+- **Análise simples** (uma única investigação): pode dispensar `R/` se não há funções a reutilizar — só `analysis/`, `data/`, `output/`.
+:::
+
+## A estrutura específica deste curso
+
+Como exemplo concreto, este curso adota uma variação adaptada para *site Quarto*:
+
+``` text
+Vibe_Coding_Project/
+├── README.md
+├── AGENTS.md
+├── _quarto.yml                ← configuração do site (cap. 07)
+├── styles.css, _head.html     ← visual do site
+├── index.qmd, prefacio.qmd    ← páginas-raiz
+│
+├── M0-setup/B1-instalacoes/   ← Módulo 0, Bloco 1
+├── M1-ia-pesquisa/
+│   ├── B1-conceitos/
+│   ├── B2-agentes/
+│   ├── B3-prompts/            (a escrever)
+│   └── B4-limites/            (a escrever)
+├── M2-fundamentos-tecnicos/
+│   ├── B1-terminal/
+│   ├── B2-ambientes/
+│   └── B3-convencoes/         ← onde este capítulo vive
+├── M3-analise/...
+├── M4-publicacao/...
+├── M5-capstone/...
+│
+├── images/                    ← figuras estáticas usadas em capítulos
+├── references/
+│   ├── references.bib
+│   ├── csl_styles/
+│   └── PDFs/                  ← (ignorada do site, só para consulta)
+│
+├── planejamento/              ← ementa, notas internas (ignorada do site)
+└── docs/                      ← saída renderizada (gerada por Quarto)
+```
+
+A nomeação `M{n}-modulo/B{n}-bloco/{nn}-titulo.qmd` é convenção interna do projeto (documentada no `AGENTS.md`), permitindo que a ordem alfabética dos arquivos coincida com a ordem narrativa do curso.
+
+## Conexão com IA
+
+Estrutura previsível ajuda agentes de IA a fazer a coisa certa sem instrução detalhada. Três efeitos práticos:
+
+- **O agente sabe onde criar arquivo novo.** "Crie um capítulo sobre encoding" — sem mais informação, agente que viu a estrutura coloca em `M2-fundamentos-tecnicos/B3-convencoes/10-encoding.qmd`. Estrutura desorganizada força você a especificar caminho a cada pedido.
+- **O agente respeita o `data/raw/` como read-only.** Se a regra "raw é intocável" está no `AGENTS.md`, o agente não vai sugerir editar arquivo bruto.
+- **O agente regenera `output/` em vez de tentar "consertar" gráfico antigo.** Reconhecendo a pasta como derivada, o agente prefere modificar o script que a gerou.
+
+@marwick2018packaging argumenta que o investimento em estrutura é "*pequeno*, *durável* e *altamente delegável*" — exatamente as três propriedades que tornam um projeto agradável de manter, com ou sem IA.
+
+## O que vem a seguir
+
+Estrutura cuida de **onde** as coisas ficam. O próximo capítulo cuida de uma propriedade transversal a todo arquivo de texto que você vai criar: **como os caracteres são representados em bytes** — e por que "informação" às vezes vira "informaÃ§Ã£o" no caminho.
+
+→ [10 · Encoding e caracteres especiais (UTF-8)](10-encoding.qmd)

@@ -1,0 +1,111 @@
+---
+title: "Quarto"
+---
+
+::: {.callout-note}
+Este capítulo apresenta vários nomes que podem soar estranhos num primeiro contato — Pandoc, Observable, Beamer, Revealjs. Não se preocupe em fixar todos agora; alguns vão ser apresentados em mais detalhe ao longo do curso, e outros são apenas pano de fundo.
+:::
+
+## O que é o Quarto?
+
+Quarto é um sistema de publicação científica e técnica de código aberto, desenvolvido pela Posit PBC (anteriormente RStudio), lançado oficialmente em 2022 como evolução multilíngue do R Markdown — que continua ativo e mantido — agora não dependendo exclusivamente da linguagem R [@allaire2022quarto]. Oferece suporte nativo a R, Python, Julia e Observable JavaScript, e pode ser utilizado em diferentes ambientes de desenvolvimento, como o RStudio, o Positron, o VS Code e o JupyterLab [@quarto2024guide].
+
+O princípio central do Quarto é a **reprodutibilidade**: em um único arquivo com extensão `.qmd`, o autor integra código executável, resultados (tabelas, gráficos, valores estatísticos) e narrativa textual. Ao renderizar o documento, o Quarto re-executa o código e incorpora os resultados automaticamente --- eliminando a necessidade de copiar e colar outputs manualmente e garantindo que o documento reflita sempre a análise atual [@wickham2023r4ds].
+
+## A origem do nome
+
+O nome remete a um formato histórico de livro. Na tipografia ocidental, *in quarto* (ou simplesmente *quarto*) designa um livro produzido a partir de uma folha inteira dobrada duas vezes, gerando quatro folhas e oito páginas [@gaskell1972new]. Esse formato foi amplamente adotado nos primeiros séculos da imprensa tipográfica europeia por ser mais manuseável do que o fólio e mais legível do que o oitavo.
+
+Embora a Posit não tenha documentado explicitamente a origem do nome, o paralelo é evidente: assim como o formato quarto viabilizou a disseminação do conhecimento impresso, o Quarto (software) busca viabilizar a disseminação do conhecimento científico reproduzível.
+
+## Estrutura de um documento `.qmd`
+
+Um documento Quarto é composto por três elementos fundamentais [@quarto2024guide].
+
+**1. Cabeçalho YAML**
+
+Delimitado por `---`, define metadados e opções de renderização:
+
+```yaml
+---
+title: "Análise de dados clínicos"
+author: "Henrique Alvarenga"
+format: html
+execute:
+  echo: false
+---
+```
+
+**2. Blocos de código (*code chunks*)**
+
+Delimitados por três crases, com a linguagem especificada entre chaves:
+
+````markdown
+```{{r}}
+#| label: fig-pressao
+#| fig-cap: "Distribuição da pressão arterial sistólica"
+
+hist(dados$pas)
+```
+````
+
+As opções de bloco prefixadas com `#|` controlam comportamentos como exibição do código (`echo`), avaliação (`eval`) e inclusão no documento (`include`) [@quarto2024guide].
+
+**3. Texto em Markdown**
+
+O corpo textual utiliza a sintaxe Markdown estendida pelo Pandoc, com suporte a equações LaTeX, referências cruzadas, citações bibliográficas e notas de rodapé [@macfarlane2023pandoc].
+
+## Ambientes de edição: o que é uma IDE?
+
+Para editar documentos Quarto com conforto e produtividade, o ambiente ideal é uma **IDE** (*Integrated Development Environment*, ou Ambiente de Desenvolvimento Integrado). Uma IDE é um programa que reúne em uma única interface tudo o que o autor-programador precisa: um editor de texto com recursos avançados, um console para executar código, um painel de visualização de resultados, um gerenciador de arquivos e ferramentas de depuração. Em vez de alternar entre um editor de texto, um terminal e um visualizador de gráficos separados, o usuário trabalha em um ambiente unificado. Os ambientes mencionados a seguir (RStudio, Positron, VS Code) são apresentados em mais detalhe no Bloco *Ambientes de trabalho* (Módulo 1).
+
+No contexto do Quarto, essa integração tem uma consequência direta: **o mesmo programa serve tanto para escrever o texto quanto para executar o código**. Não há distinção de ferramenta entre o momento em que o professor redige a explicação de um conceito e o momento em que escreve o comando que gera o gráfico correspondente. Isso desfaz uma separação artificial comum em fluxos de trabalho acadêmicos tradicionais, em que a análise ocorre em um software (R, SPSS, Excel) e a escrita ocorre em outro (Word, Google Docs), exigindo transposição manual dos resultados.
+
+Os principais ambientes com suporte oficial ao Quarto são:
+
+**RStudio**
+
+O ambiente mais familiar para usuários de R e ponto de entrada recomendado para iniciantes. Oferece edição visual (*Visual Editor*) que permite trabalhar no `.qmd` de forma similar a um processador de texto --- sem necessidade de escrever Markdown diretamente --- além de pré-visualização integrada e painel de renderização na interface [@rstudio2024ide].
+
+**Positron**
+
+IDE lançado pela Posit em 2024 como sucessor do RStudio, construído sobre a base do VS Code. Suporta R e Python no mesmo ambiente e tem integração nativa com Quarto. Representa a direção atual de desenvolvimento da Posit e tende a se tornar o ambiente padrão para usuários que trabalham com múltiplas linguagens [@positron2024].
+
+**VS Code**
+
+Editor de código da Microsoft, amplamente adotado em ciência de dados e desenvolvimento de software. Via extensão oficial *Quarto* (disponível no Marketplace), oferece realce de sintaxe, pré-visualização e execução de blocos de código. Opção natural para quem já utiliza o VS Code para Python ou outras linguagens [@quarto2024vscode].
+
+**JupyterLab**
+
+Para usuários habituados a notebooks Jupyter, o Quarto pode usar o Jupyter como engine de execução de arquivos `.qmd` com Python — mantendo a familiaridade dos kernels. Diferentemente do RStudio, Positron e VS Code, o JupyterLab não tem extensão Quarto integrada para edição visual do `.qmd`: a renderização é feita via linha de comando (`quarto render`) [@quarto2024jupyter].
+
+::: {.callout-tip}
+## Recomendação para começar
+
+Para a maior parte dos professores e pesquisadores em saúde que estão começando, **RStudio ou Positron são as escolhas mais indicadas** pela integração visual e pela menor curva de aprendizado.
+:::
+
+## Por que usar o Quarto na docência em saúde?
+
+Em áreas como medicina e ciências da saúde, a análise de dados raramente é um passo único e linear. Envolve importação, limpeza, exploração, modelagem e comunicação de resultados --- etapas que, quando realizadas em ferramentas separadas, dificultam a rastreabilidade e a verificação dos procedimentos [@wilson2017good].
+
+O Quarto resolve esse problema ao manter código e interpretação no mesmo lugar. Para o professor-pesquisador, isso implica:
+
+- **Reprodutibilidade pedagógica**: o aluno recebe não apenas o resultado final, mas todo o caminho analítico, executável e comentado.
+- **Flexibilidade de formato**: o mesmo arquivo `.qmd` pode gerar um relatório em HTML para publicação na web, um PDF para submissão formal ou uma apresentação de slides com o Revealjs [@quarto2024guide].
+- **Colaboração assíncrona**: documentos `.qmd` são arquivos de texto simples, compatíveis com controle de versão via Git/GitHub --- o que facilita revisões e colaboração entre coautores [@bryan2018excuse].
+
+## Formatos de saída
+
+O Quarto suporta uma ampla gama de formatos de saída, controlados pela opção `format:` no cabeçalho YAML [@quarto2024guide]:
+
+| Formato     | Uso típico                              |
+|-------------|-----------------------------------------|
+| `html`      | Relatórios web interativos              |
+| `pdf`       | Artigos e relatórios formais (via LaTeX)|
+| `docx`      | Compatibilidade com editores de texto   |
+| `revealjs`  | Apresentações em HTML                   |
+| `beamer`    | Apresentações em PDF (LaTeX)            |
+| `epub`      | Livros digitais                         |
+
+Projetos maiores podem utilizar o Quarto Book ou o Quarto Website (formato deste curso) para organizar múltiplos documentos `.qmd` em uma estrutura navegável e com referências cruzadas entre capítulos [@quarto2024guide].

@@ -1,0 +1,113 @@
+---
+title: "Retrospectiva e fechamento"
+---
+
+Esse é o último capítulo do curso. Você chegou aqui depois de ler — ou consultar — material que cobriu da história das IDEs nos anos 1980 ao depósito em Zenodo na era da IA generativa, passando por LGPD, Quarto, Git, R, Python, e a tese central: **que vibe coding torna pesquisa em saúde reprodutível acessível a quem antes não tinha condições técnicas para produzi-la**.
+
+Seu Capstone está publicado, com DOI, e — esperançosamente — pronto para uso em sala de aula. Vale fechar com uma reflexão sobre o que mudou, o que pode mudar, e o que vem depois.
+
+## O que mudou em quem percorreu o curso
+
+A transformação que esse curso propõe não é "aprender R" ou "aprender Python" ou "aprender Quarto". É **mais profunda do que técnica** — é mudança no que você entende como pesquisa possível.
+
+Antes: pesquisa em saúde com dados próprios estava restrita a quem **tinha tempo para aprender programação** ou **dinheiro para pagar SPSS/SAS** ou **acesso a estatístico que cuidasse da parte computacional**. Quem não tinha nenhum desses três frequentemente fazia pesquisa de menor escopo, com ferramentas mais frágeis, com resultados menos auditáveis. **Esse era o estado de coisas quando você começou o curso.**
+
+Depois: pesquisa em saúde reproduzível, FAIR, citável, depositada com DOI, está **acessível** a qualquer pesquisador com computador, internet e algumas semanas de aprendizado. **Você é uma demonstração disso** — produziu, em prazo razoável, um compêndio que cumpre padrões internacionais de ciência aberta. Não porque você virou programador (não virou). Porque a IA fez a parte que era barreira.
+
+Essa é a virada que o curso documenta e tentou ensinar a operacionalizar. **A reflexão que vale fazer agora é o quê isso significa para sua trajetória como pesquisador, professor, e — possivelmente — multiplicador**.
+
+## Multiplicação como função da docência
+
+O Capstone foi pensado como material didático **deliberadamente**. Razão: este curso fala para professores, e professores são multiplicadores. Cada professor que adota essa forma de trabalho impacta dezenas — ao longo de uma carreira, centenas — de estudantes.
+
+Algumas formas concretas de multiplicação que valem considerar:
+
+**1. Use o Capstone em aula.** O plano didático que você escreveu (capítulo 05) é o roteiro mínimo. Comece pequeno: uma aula em que você mostra o compêndio e os alunos clonam, restauram o ambiente, rodam, comparam números. Em uma hora, eles veem **pesquisa reprodutível na prática**, algo que muitos nunca viram.
+
+**2. Substitua exemplos de SPSS por exemplos do Capstone em aulas existentes.** Sem reformular o curso inteiro de uma vez. Aula sobre prevalência? Mostre o seu cálculo da PNS. Aula sobre comparação de grupos? Mostre o seu teste t. Substitui peça por peça.
+
+**3. Proponha o Capstone como exigência em pós-graduação.** Mestrado e doutorado em saúde poderiam exigir **dissertação como compendium reproduzível**, não só PDF. Algumas universidades já caminham nessa direção — [@marwick2018packaging] documenta casos.
+
+**4. Forme outros professores.** O curso está aberto, no GitHub. Se um colega quer aprender, indique. Se cinco colegas querem, ofereça oficina interna em seu departamento. **Ciclos de multiplicação institucional acontecem por iniciativa individual antes de virarem política**.
+
+**5. Contribua de volta para o curso.** Encontrou erro? Tem capítulo melhor escrito sobre o tema? Quer adicionar exemplo do seu domínio específico? Issue ou PR no repositório (link no prefácio). Esse curso é projeto vivo — pode crescer com a comunidade.
+
+## O que esse curso NÃO ensinou (e onde aprofundar)
+
+Para calibrar honestamente o que você ainda precisa aprender:
+
+**Bioestatística aplicada.** O curso ensinou a *executar* análises com IA — não a *escolher* quais análises são apropriadas. Para dominar metodologia estatística em pesquisa em saúde:
+
+- *Regression Modeling Strategies* (Frank Harrell, 2ª ed., 2015).
+- *Statistical Rethinking* (Richard McElreath, 2ª ed., 2020) para estatística bayesiana.
+- *Modern Epidemiology* (Lash, VanderWeele, Haneuse, Rothman, 4ª ed., 2021).
+- Cursos do Coursera/edX com Hadley Wickham, Roger Peng e equipes de Bloomberg School.
+
+**R e Python em profundidade.** O curso ensinou a usar via IA — não a programar. Para virar genuíno em R:
+
+- *R for Data Science* (Wickham, Çetinkaya-Rundel, Grolemund, 2ª ed., 2023, online em [r4ds.hadley.nz](https://r4ds.hadley.nz)).
+- *Manual Básico da Linguagem R* do autor [@alvarenga2024manualr] — referência canônica em PT-BR.
+- *Advanced R* (Wickham, 2ª ed., 2019, online em [adv-r.hadley.nz](https://adv-r.hadley.nz)).
+
+Para Python:
+
+- *Python for Data Analysis* (Wes McKinney, 3ª ed., 2022, online em [wesmckinney.com/book](https://wesmckinney.com/book/)).
+- *Python Data Science Handbook* (Jake VanderPlas, 2ª ed., 2023).
+
+**Reprodutibilidade computacional avançada.** Para níveis 4-5 (Docker, Binder, workflows complexos):
+
+- *The Turing Way* (community-driven, online em [the-turing-way.netlify.app](https://the-turing-way.netlify.app)) — referência canônica e crescente em ciência reprodutível.
+- *Computational Reproducibility in Archaeological Research* [@marwick2017computational].
+- *Reproducible Research with R and RStudio* (Christopher Gandrud, 3ª ed., 2018).
+
+**Vibe coding como técnica.** A área ainda é jovem, com material disperso. Acompanhar a comunidade que cresce em torno dela é a forma mais rápida de aprender:
+
+- Blogs de engenheiros que discutem sobre o tema (Simon Willison, Wes McKinney, Hadley Wickham).
+- Conferências da Posit (positconf), useR!, JuliaCon — começam a ter painéis sobre IA em workflows científicos.
+- Cursos modernos da DeepLearning.AI (Andrew Ng) sobre LLMs aplicados.
+
+## A escala temporal das mudanças
+
+Vale uma palavra de cautela. **As mudanças que esse curso descreve são recentes**. Vibe coding como técnica acessível tem **menos de três anos** em 2026. Algumas coisas vão evoluir rapidamente:
+
+- Modelos de IA vão ficar melhores (e mais baratos), aumentando a fluência da geração de código.
+- Workflows específicos podem mudar — agentes podem virar mais autônomos, ou voltar a ser mais ferramenta-de-precisão dependendo de como a indústria evolui.
+- Novas ferramentas vão surgir; algumas das atuais podem ser descontinuadas.
+- A regulamentação de IA (em saúde especialmente) está sendo escrita em tempo real.
+
+Isso significa que **o que você aprendeu aqui é o estado da arte de 2026**. Em 2030, o cenário será diferente. **A boa notícia**: os princípios fundamentais — separar dados raw e processed, versionar com Git, depositar com DOI, documentar uso de IA — não vão envelhecer. As ferramentas específicas (qual modelo, qual IDE, qual repositório) vão mudar; **a disciplina não muda**.
+
+Se você internalizou os princípios, está preparado para adaptar a ferramenta quando a próxima geração chegar.
+
+## A última recomendação
+
+Termine este curso fazendo uma coisa simples: **publique seu Capstone**. Não em "versão perfeita" daqui a meses. **Versão 1.0, agora**, com os defeitos que tem, com os números que produziu, com a reflexão didática que escreveu.
+
+A tentação de ficar polindo é grande, e em pesquisa séria isso atrapalha. Versionamento existe justamente para que você possa publicar 1.0 hoje e 1.1 daqui a um mês com correções. Cada versão tem DOI próprio. Cada uma é citável.
+
+A única forma de impactar é **publicar**. Trabalho não publicado, mesmo que excelente, não muda nada. Trabalho publicado mediocremente já entra no sistema, é encontrável por outros, abre conversas, gera melhorias.
+
+Vai lá, publica.
+
+## Encerramento
+
+Você chegou aqui. Percorreu **5 módulos**, **13 blocos**, **mais de 70 capítulos**, **centenas de páginas de prosa**. Produziu seu próprio Capstone reproduzível. Tem DOI, repositório no GitHub, site no GitHub Pages.
+
+Daqui a alguns anos — se a tese deste curso estiver correta — pesquisa em saúde reprodutível será **a norma**, não exceção. Você terá feito parte da geração de pesquisadores que **operacionalizou essa transição**.
+
+Quando isso acontecer, vai parecer óbvio. *"Como é que algum dia foi diferente? Como é que se fazia ciência sem reprodutibilidade?"*. A obviedade retroativa é o sinal de transição bem-sucedida — e o pesquisador que percorreu este curso terá contribuído para que ela aconteça.
+
+Boa pesquisa.
+
+— Final do curso.
+
+::: {.callout-tip}
+## Continuar a conversa
+Este material é vivo. Erros encontrados, sugestões de melhoria, novos capítulos para temas mal cobertos, ou simplesmente "obrigado, mudou minha forma de trabalhar" — tudo isso é bem-vindo. Caminhos para reportar estão no [Prefácio](/prefacio.qmd).
+
+E se você publicou seu Capstone — mande o link. Quero ver. Pode acabar virando referência em futuras versões deste curso.
+:::
+
+---
+
+→ [Voltar à página inicial](/index.qmd) · [Prefácio](/prefacio.qmd) · [Créditos](/creditos.qmd)

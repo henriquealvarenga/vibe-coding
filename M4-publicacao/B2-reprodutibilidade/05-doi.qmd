@@ -1,0 +1,151 @@
+---
+title: "DOI: identificador persistente"
+---
+
+Você cita um artigo seminal do início dos anos 2000. Cinco anos depois, o link que você usou na citação está quebrado — a revista mudou de servidor, o site institucional foi reorganizado, ou o artigo foi movido. **A referência continua existindo, mas o link não funciona mais**. Esse é o problema clássico de **link rot** (apodrecimento de link), e é a razão pela qual a comunidade científica criou os DOIs.
+
+**DOI** é a sigla para **Digital Object Identifier** — *identificador digital de objeto*. A ideia é simples: em vez de citar um artigo (ou dataset, ou software) por sua URL, você cita por um **identificador permanente** que **nunca muda**, mesmo se o objeto for movido para um servidor diferente, uma editora diferente, ou um país diferente. O DOI é o equivalente digital de um ISBN — um número que identifica a obra para sempre.
+
+Este capítulo explica o que DOI é, de onde veio, e como aplicá-lo em pesquisa para garantir que dados, código e artigos continuem citáveis daqui a décadas.
+
+## A história
+
+A IDF (International DOI Foundation) foi fundada em **1998** por um consórcio de editoras científicas (incluindo Elsevier, Wiley, Springer) para resolver justamente o problema de link rot que estava começando a aparecer com a transição de publicações em papel para online. A primeira versão da especificação técnica saiu em 2000.
+
+A genialidade do design: o DOI é apenas um **número** — não diz onde o objeto está. Quando alguém clica num link DOI, ele passa por um **resolver** (sistema central) que olha no momento atual onde o objeto está, e redireciona. Se o objeto muda de lugar, basta atualizar a entrada no resolver — o DOI continua funcionando.
+
+A estrutura de um DOI:
+
+```
+10.1038/sdata.2016.18
+└─┘ └────┘ └────────┘
+ ↑    ↑       ↑
+ │    │       └─ identificador específico do objeto (definido pela editora)
+ │    └─ prefixo da editora (1038 = Nature Portfolio)
+ └─ "namespace" do DOI (sempre 10.)
+```
+
+Para um leitor humano, o link funcional é `https://doi.org/10.1038/sdata.2016.18`. Esse link é **estável para sempre** — em 30 anos, o link continuará apontando para o local correto do artigo, mesmo que a Nature seja vendida, o servidor mude, ou a página tenha sido reorganizada.
+
+## DOIs em duas modalidades: artigo e dataset
+
+Por décadas, DOIs eram **só para artigos científicos**. A agência **CrossRef** (fundada em 2000) tornou-se a registradora dominante, com milhões de DOIs emitidos por editoras associadas. Você cita um artigo qualquer hoje — o DOI vem da CrossRef.
+
+Em **2009**, surgiu a **DataCite** [@datacite2024] — uma agência registradora especificamente para **dados de pesquisa, software, e outros artefatos não-textuais**. Foi marco da expansão do DOI para fora do escopo "artigo": agora código pode ter DOI, dataset pode ter DOI, slides podem ter DOI, vídeos podem ter DOI.
+
+A diferença prática:
+
+| | CrossRef | DataCite |
+|---|---|---|
+| **Foco** | Artigos científicos, livros, capítulos | Dados, software, posters, vídeos, qualquer artefato |
+| **Quem registra** | Editoras (Nature, Elsevier, Wiley, etc.) | Repositórios (Zenodo, Dryad, Figshare, etc.) |
+| **Custo para autor** | Geralmente zero (incluído na publicação) | Zero (Zenodo é gratuito) |
+| **Prefixo típico** | 10.1038, 10.1016, 10.1038, 10.1056 | 10.5281 (Zenodo), 10.6084 (Figshare) |
+
+Em 2026, **as duas agências se complementam**, e um pesquisador em uma carreira ativa interage com as duas regularmente — citando artigos via CrossRef-DOIs, citando datasets/código via DataCite-DOIs.
+
+## Como conseguir DOI
+
+Você não solicita DOI diretamente — recebe ao **depositar artefato em algum repositório que emite**. Os caminhos:
+
+**Para artigos:** o DOI vem com a publicação. Editora emite via CrossRef, sem ação sua.
+
+**Para preprints:** servidor de preprint (medRxiv, bioRxiv, arXiv) emite DOI no momento da submissão. **Permite citar trabalho não-publicado**, com data e versão registrada.
+
+**Para datasets, código, slides:** depósito em repositório que emita via DataCite. Os principais (cobertos no capítulo 04):
+
+- **Zenodo** (recomendado, gratuito, integração com GitHub)
+- **Figshare**
+- **OSF**
+- **Dryad** (específico para datasets que acompanham artigos)
+
+Em todos os casos, **DOI emitido em segundos a minutos** após o depósito. Sem custo, sem burocracia.
+
+## Citando software com DOI
+
+Esse é o tópico que ganhou tração nos últimos dez anos. Software de pesquisa — pipelines, pacotes, scripts de análise — **deve ser citado** quando usado em pesquisa, da mesma forma que artigos. O paper canônico que estabelece os princípios é Smith, Katz e Niemeyer 2016 [@smith2016software], publicado pela **FORCE11 Software Citation Working Group**.
+
+Os seis princípios de citação de software (Smith et al. 2016):
+
+1. **Importance.** Software usado em pesquisa deve ser citado, da mesma forma que artigo é citado.
+2. **Credit and attribution.** Atribuição justa aos desenvolvedores.
+3. **Unique identification.** Identificador único e máquina-resolvível (DOI).
+4. **Persistence.** Identificadores e metadados devem persistir mesmo se o software for descontinuado.
+5. **Accessibility.** Citação leva a uma versão acessível do software.
+6. **Specificity.** Citação aponta para a versão específica usada (não "última" ou "principal").
+
+Aplicação prática em manuscrito médico:
+
+> "Análises foram conduzidas em R 4.4.2 [@rcoreteam2024], com pacotes `survival` 3.5-7 [@therneau2023survival], `tidyverse` 2.0.0 [@wickham2019tidyverse]. Código completo da análise disponível em [DOI Zenodo do compêndio]."
+
+A última parte é a que importa: **DOI do compêndio Zenodo é citado no Métodos**. O leitor que quiser refazer a análise tem o link permanente para versão exata usada — não "o repositório no GitHub" (que pode mudar), mas o snapshot estável.
+
+## CITATION.cff: padrão emergente
+
+Um arquivo padrão útil em qualquer projeto Quarto/repositório é o **`CITATION.cff`** (*Citation File Format*). É arquivo YAML que descreve como o projeto deve ser citado, padronizado pela comunidade científica e adotado pelo GitHub e pelo Zenodo.
+
+Exemplo:
+
+```yaml
+cff-version: 1.2.0
+message: "Se você usar este software, por favor cite como abaixo."
+type: software
+title: "vibecoding-coorte: análise de coorte clínica via vibe coding"
+authors:
+  - family-names: "Silva"
+    given-names: "Henrique"
+    orcid: "https://orcid.org/0000-0001-2345-6789"
+version: "1.0.0"
+date-released: "2026-05-04"
+doi: "10.5281/zenodo.1234567"
+license: MIT
+repository-code: "https://github.com/usuario/projeto"
+```
+
+Quando você commita `CITATION.cff` no GitHub, **a interface web do GitHub passa a oferecer botão "Cite this repository"** que gera citação formatada (BibTeX, APA, etc.) automaticamente. Zenodo também usa esse arquivo na hora de gerar o registro.
+
+Esforço: ~5 minutos para criar. Resultado: pesquisador externo cita seu trabalho corretamente sem perguntar a você.
+
+## ORCID: identificador para pessoas
+
+Tema relacionado que vale conhecer: **ORCID** (*Open Researcher and Contributor ID*) — um DOI-like, mas para **pessoas** em vez de objetos. Cada pesquisador tem um ORCID único (formato `0000-0000-0000-000X`), persistente ao longo da carreira mesmo se mudar de nome, instituição, ou afiliação.
+
+Em 2026, **ter ORCID é praticamente obrigatório** em ciência ativa. Revistas exigem; agências financiadoras integram; Zenodo registra. Cadastro é gratuito em [orcid.org](https://orcid.org), leva 5 minutos.
+
+Em todos os arquivos meta-textuais (CITATION.cff, .zenodo.json, manuscritos), incluir o ORCID dos autores garante atribuição correta — mesmo se daqui a 20 anos seu nome mudou ou tem homônimo em outra instituição.
+
+## Cuidados com versões e DOIs
+
+Particularidade importante de DOIs em datasets/código: **versionamento**.
+
+- Quando você publica versão 1.0 no Zenodo, recebe DOI específico (ex.: `10.5281/zenodo.1234567`).
+- Quando publica versão 2.0 com correções, recebe **DOI diferente** (ex.: `10.5281/zenodo.1234890`).
+- Há também um **"DOI conceito"** que aponta sempre para a versão mais recente.
+
+A regra prática: **em manuscritos, cite o DOI da versão específica usada** (não o conceito). Razão: se daqui a um ano você publicar versão 3.0 com mudanças metodológicas, leitor do artigo original precisa conseguir chegar à versão exata da época da publicação. **DOI específico** garante isso.
+
+::: {.callout-tip}
+## Em texto: cite DOI específico; em README do projeto: mostre o DOI conceito
+A boa prática que combina os dois:
+
+- **No artigo** (Métodos / Disponibilidade de dados): cite DOI específico da versão usada.
+- **No README do GitHub e na página inicial do Zenodo**: exiba badge do DOI conceito ("All versions DOI"). Leitor que chega no projeto vê sempre a versão mais recente, mas pode descer para versão específica do artigo se quiser.
+
+Zenodo gera badges automaticamente em formato Markdown que você cola no README.
+:::
+
+## Conexão com IA
+
+Agentes ajudam com DOI em três pontos:
+
+**1. Validação de citação.** Cole referência bibliográfica em texto livre, agente identifica o DOI e gera entry BibTeX correta. Útil quando você está coletando referências de fontes diversas.
+
+**2. Geração de CITATION.cff.** Descreva o projeto, agente gera CITATION.cff completo. Mais rápido que escrever YAML do zero.
+
+**3. Diagnóstico de DOI quebrado ou ausente.** *"Esta referência foi citada no nosso artigo mas o DOI não resolve. O que aconteceu?"* — agente verifica se o DOI existe, se houve erro de transcrição, se o registro foi descontinuado.
+
+## O que vem a seguir
+
+Os cinco capítulos anteriores cobriram os princípios e ferramentas individuais — FAIR, ambientes, compêndio Quarto, Zenodo, DOI. O capítulo final do Bloco **integra tudo num estudo de caso completo**: um projeto de coorte clínica, do dado bruto à publicação reprodutível com DOI, mostrando como cada peça vista até aqui se encaixa na prática.
+
+→ [06 · Estudo de caso](06-estudo-caso.qmd)

@@ -1,0 +1,152 @@
+---
+title: "Instalação de ambientes"
+---
+
+Você terminou um projeto em janeiro. Tudo funcionando: R 4.4, `dplyr` 1.1.4, `ggplot2` 3.5.1, gráficos saindo bonitos, modelo rodando. Submeteu o artigo, recebeu pareceres em junho. Volta ao projeto em julho — e nada funciona. O modelo dá erro estranho. Os gráficos saem diferentes. Uma função que você usava virou obsoleta. O que mudou? **Nada no seu código** — você nem mexeu. O que mudou foi tudo o resto: você atualizou o R, atualizou os pacotes, mexeu em outros projetos que requeriam versões diferentes de coisas.
+
+Esse é o problema que **ambientes isolados** existem para resolver. Este capítulo é sobre o porquê eles existem, como a solução evoluiu historicamente, e quais ferramentas usar hoje em R e Python. Não é tema empolgante, mas é a coisa que separa um projeto reproduzível em três anos de um projeto reproduzível só na máquina do autor por seis meses.
+
+## O problema, explicado devagar
+
+Quando você instala um pacote num computador (qualquer pacote — `dplyr` em R, `pandas` em Python), três coisas estão envolvidas:
+
+1. **A linguagem em si** (R 4.4.2, Python 3.12.5) — versão específica.
+2. **O pacote que você instalou** (`dplyr` 1.1.4) — versão específica.
+3. **Os pacotes dos quais o seu pacote depende** — porque `dplyr` por dentro usa `vctrs`, `rlang`, `tibble`, etc., cada um em versão específica.
+
+Esses três níveis precisam **conviver entre si**. `dplyr` 1.1.4 só funciona com `vctrs` 0.6.3 ou superior; `vctrs` 0.6.3 só roda em R 4.0+. Se algum desses números mudar, pode quebrar.
+
+Agora multiplique isso pela realidade do dia-a-dia. Você tem **vários projetos em paralelo**: a coorte clínica de 2023, a meta-análise de 2024, o projeto novo de 2026. Cada um foi escrito numa época em que as versões disponíveis eram diferentes. Todos eles compartilham — por padrão — a mesma instalação global de R/Python na sua máquina. Resultado: **atualizar um pacote para o projeto novo quebra o projeto antigo**.
+
+Esse problema tem nome: **"dependency hell"** (inferno de dependências). É um clássico da computação, e a humanidade levou décadas para chegar a soluções razoáveis.
+
+## A solução: ambientes isolados
+
+A ideia central é simples: **cada projeto tem sua própria cópia isolada da linguagem e dos pacotes**. Quando você atualiza algo no projeto novo, o projeto antigo não vê — ele continua com as versões dele. Quando você compartilha o projeto novo com um colaborador, ele também recria a mesma combinação exata de versões.
+
+Tecnicamente, isso é feito de duas formas (que se combinam):
+
+- **Ambiente virtual** (*virtual environment*) — uma pasta no projeto contendo cópia da linguagem e dos pacotes específicos do projeto. Quando você "ativa" esse ambiente, comandos como `R` ou `python` apontam para essas cópias, não para a versão global.
+- **Lockfile** — arquivo de texto que lista todas as versões exatas instaladas no ambiente. Quem clona o projeto consegue recriar o ambiente idêntico a partir do lockfile.
+
+A combinação ambiente virtual + lockfile é o que torna possível reproduzir um projeto em qualquer máquina, em qualquer época. E essa combinação demorou décadas para amadurecer.
+
+## A evolução em Python
+
+A história de ambientes virtuais em Python é instrutiva — passou por várias gerações de soluções, cada uma resolvendo limites da anterior:
+
+**Era pré-virtualenv (~1991-2007).** Python não tinha noção de ambientes. Você instalava pacotes com `pip` (ou `easy_install`, antecessor) **diretamente na instalação global**. Conflitos eram resolvidos manualmente — desinstalar uma versão, instalar outra, torcer para nada quebrar. Em ambiente Linux, frequentemente ferramentas do sistema operacional dependiam do Python global e quebravam quando o usuário mexia. Era doloroso.
+
+**virtualenv (Ian Bicking, 2007).** Bicking criou a primeira ferramenta amplamente adotada para criar ambientes Python isolados. A ideia: copiar o interpretador Python para uma pasta do projeto, e qualquer pacote instalado quando esse Python isolado está ativo vai para a pasta — não para o sistema. Foi a libertação inicial do "dependency hell".
+
+**PEP 405 e `venv` embutido (Python 3.3, 2012).** Em 2012, a comunidade Python adotou oficialmente o conceito — Python 3.3 passou a incluir `venv` na biblioteca-padrão, sem necessidade de instalar virtualenv separado. Hoje (2026), `python -m venv ambiente` é o caminho mais básico para criar ambiente isolado:
+
+``` bash
+python -m venv .venv          # cria pasta .venv com Python isolado
+source .venv/bin/activate     # ativa (Mac/Linux)
+.venv\Scripts\activate        # ativa (Windows)
+pip install pandas             # instala dentro do ambiente isolado
+```
+
+**Anaconda e conda (Continuum Analytics, 2012).** Em paralelo, uma empresa chamada Continuum Analytics (depois renomeada Anaconda Inc.) lançou a **Anaconda Distribution** — Python pré-instalado com 250+ pacotes científicos pré-compilados, mais o gerenciador de pacotes **conda**. Diferencial: conda gerencia também dependências **não-Python** (bibliotecas C, Fortran, R) — útil em ciência de dados onde muitos pacotes Python (NumPy, scipy) dependem de bibliotecas compiladas. Conda virou padrão em academia e ciência de dados nos anos 2010.
+
+**Poetry (2018).** Dependency resolver moderno — quando você pede `pandas`, ele resolve **toda a árvore de dependências** garantindo versões compatíveis entre si, e gera lockfile automaticamente. Resolveu um problema sério do `pip` clássico, que nem sempre garantia consistência da árvore.
+
+**uv (Astral, 2024).** A geração mais nova de ferramenta. Escrita em **Rust**, é dezenas de vezes mais rápida que pip/poetry. Combina criação de ambiente, resolução de dependências, instalação e geração de lockfile numa ferramenta única. Em 2025-2026, virou padrão emergente — o que poetry foi para 2020, uv tem sido para 2025.
+
+**A recomendação atual** (2026): para projetos novos em Python, **use `uv`**. Para projetos legados ou em ambientes corporativos engessados, conda/pip continuam funcionando.
+
+## A evolução em R
+
+R seguiu trajetória mais lenta. Por **mais de duas décadas**, R simplesmente não tinha noção robusta de ambientes — pacotes eram instalados globalmente em uma única biblioteca compartilhada, e conflitos entre projetos eram resolvidos por força bruta.
+
+**packrat (RStudio, 2014).** Primeira tentativa séria. RStudio Inc. (depois Posit) criou o pacote `packrat` para gerenciar dependências por projeto. Funcionava — mas era complicado, lento, e os arquivos gerados ocupavam muito espaço (cópias completas de cada pacote por projeto). A adoção foi morna; muito pesquisador continuou no global.
+
+**renv (RStudio/Posit, 2019).** Substituto direto e moderno do `packrat`. Mais simples, mais rápido, com cache compartilhado entre projetos (não duplica pacotes desnecessariamente). Em 2026, `renv` é o **padrão de fato** para ambientes em R — análogo ao `venv`/`uv` em Python.
+
+O fluxo básico em R:
+
+``` r
+# Dentro do projeto, num console R:
+renv::init()        # cria estrutura: pasta renv/, lockfile renv.lock
+                    # snapshot inicial dos pacotes em uso
+
+install.packages("dplyr")   # instala normalmente; vai para o ambiente do projeto
+
+renv::snapshot()    # atualiza renv.lock com o estado atual
+
+# Em outra máquina ou no futuro:
+renv::restore()     # lê renv.lock e instala exatamente as mesmas versões
+```
+
+A diferença prática: **antes de `renv`, projetos em R simplesmente não eram reprodutíveis a longo prazo**. Era preciso anotar manualmente versões usadas e torcer para conseguir reinstalar. Depois de `renv`, qualquer projeto pode ser exatamente recriado dois, cinco, dez anos depois.
+
+## O conceito de "lockfile"
+
+Em ambas as ecossistemas, o **lockfile** é a peça que garante reprodutibilidade. É um arquivo de texto (geralmente JSON ou TOML) que lista cada pacote instalado, sua versão exata, e — frequentemente — um *hash* criptográfico que identifica o conteúdo do pacote.
+
+Em Python (com `uv`), o arquivo é `uv.lock`:
+
+``` toml
+[[package]]
+name = "pandas"
+version = "2.2.3"
+source = { registry = "https://pypi.org/simple" }
+hash = "sha256:abc123..."
+```
+
+Em R (com `renv`), é o `renv.lock`:
+
+``` json
+{
+  "dplyr": {
+    "Package": "dplyr",
+    "Version": "1.1.4",
+    "Source": "Repository",
+    "Repository": "CRAN",
+    "Hash": "fedd9d00c2944ff00a0e2696ccf048ec"
+  }
+}
+```
+
+Esses arquivos vão para o **Git** junto com o código (são versionados). Quem clona o projeto roda um único comando (`renv::restore()` em R, `uv sync` em Python) e tem o ambiente exatamente reconstituído. O capítulo M2-B3-08 (Versão semântica, dependências e lockfiles) cobre o tema com mais profundidade.
+
+::: {.callout-tip}
+## A regra prática mínima
+Você não precisa virar especialista em ambientes. Em R: rode `renv::init()` no início de cada projeto novo, `renv::snapshot()` antes de cada commit relevante, `renv::restore()` quando clonar projeto de outra pessoa. Em Python: `uv init` no início, `uv add pandas` para adicionar pacote, `uv sync` para reinstalar. Essas seis operações cobrem 90% do uso cotidiano.
+:::
+
+## Por que isso é tão importante quanto parece técnico
+
+O problema de reprodutibilidade que ambientes isolados resolvem **não é teórico**. Em 2018, o pesquisador Yves Codère publicou estudo na *PLOS ONE* mostrando que apenas uma fração pequena dos artigos científicos com código publicado conseguia ser reproduzida na prática — frequentemente porque versões de bibliotecas haviam mudado e ninguém documentou. Em medicina, com a pressão crescente por reprodutibilidade (revistas exigindo código aberto, agências exigindo dados FAIR), saber gerenciar ambientes deixou de ser refinamento para virar obrigação ética.
+
+Há um caso comum em consultorias estatísticas: pesquisador procura ajuda meses depois para responder a parecerista, mas não consegue rodar o próprio código, e os resultados originais não conferem mais. **Quase sempre, a causa é falta de gestão de ambientes**. Pacotes atualizaram, cálculos mudaram silenciosamente, números do artigo deixaram de ser reproduzíveis. O custo institucional desse problema é grande — e a solução é técnica e disponível há anos. Adoção é, em larga medida, questão de cultura.
+
+::: {.callout-warning}
+## O que NÃO confiar em ambientes
+Ambientes isolam **pacotes da linguagem** (R, Python). Eles **não isolam**:
+
+- A versão do **sistema operacional** — código que funciona em macOS pode falhar em Linux por diferenças sutis.
+- Bibliotecas do **sistema** das quais pacotes dependem — `sf` em R precisa de GDAL/PROJ instalados no sistema; um colaborador em Linux precisa instalar GDAL via `apt`, em Mac via `brew`.
+- A **versão do R/Python em si** — `renv.lock` registra qual R foi usado, mas não garante que o colaborador tenha essa versão.
+
+Para isolamento completo (incluindo sistema operacional), a ferramenta é **Docker** — assunto fora do escopo deste capítulo, mas reaparece no Módulo 3 (Reprodutibilidade).
+:::
+
+## Conexão com IA
+
+Ambientes são um caso onde IA ajuda muito porque **comandos são chatos de decorar**:
+
+**1. Configuração inicial assistida.** *"Estou começando um projeto novo de análise de coorte em R + Quarto. Que comandos preciso rodar para configurar um ambiente reprodutível?"* — agente entrega a sequência: `mkdir`, `cd`, `renv::init()`, criar `.gitignore` apropriado, sugerir estrutura de pastas, etc.
+
+**2. Diagnóstico de quebra.** *"Meu projeto antigo dá erro 'package X not found' depois que atualizei o R. O que faço?"* — agente identifica que o ambiente do projeto antigo não tem o pacote, sugere `renv::restore()` para reinstalar, ou alternativas se restore falhar.
+
+**3. Migração entre ferramentas.** *"Tenho projeto antigo com `requirements.txt` (pip clássico) e quero migrar para `uv`. Como faço?"* — agente lista os passos sem você precisar ler documentação inteira.
+
+A regra que vale para tudo: **agente acerta os comandos comuns, mas casos atípicos exigem leitura humana**. Cuidado com situações onde o agente "consertou" um ambiente quebrado de forma que parece funcionar mas mascarou o problema (instalou pacote diferente do que o lockfile pedia, por exemplo).
+
+## O que vem a seguir
+
+Você sabe instalar e isolar ambientes para R e Python. Falta integrar isso ao **fluxo de documentação reprodutível** que combina ambas as linguagens dentro de documentos Quarto. Como Quarto escolhe entre o motor de execução do R (knitr) e o do Python (Jupyter), quando misturar as duas linguagens no mesmo documento, e como o ambiente isolado se conecta ao `.qmd` — é o tema do próximo capítulo.
+
+→ [13 · Documentação reproduzível](13-documentacao-reproduzivel.qmd)

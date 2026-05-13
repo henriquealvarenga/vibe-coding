@@ -1,0 +1,515 @@
+/*-- scss:defaults --*/
+
+// =========================================================================
+// Vibe Coding na Pesquisa Científica — Custom Theme
+//
+// Variáveis Bootstrap sobrescritas ANTES das regras (slate é a base).
+// Isso elimina a necessidade de !important em vários lugares e mantém
+// coerência com componentes Bootstrap (callouts, alerts, badges, etc).
+// =========================================================================
+
+$body-bg:           #1a1f2e;   // suavizado: era #0a0e1a (quase preto-marinho)
+$body-color:        #d4dae3;   // suavizado: era #f0f4f8 (branco quase puro)
+$primary:           #00d9c0;
+$link-color:        #00d9c0;
+$link-hover-color:  #5eead4;
+$code-color:        #5eead4;
+$code-bg:           #232a3d;   // ajustado: era #121826
+$pre-bg:            #232a3d;   // ajustado: era #121826
+$border-color:      #38445e;   // ajustado: era #2a3449
+
+/*-- scss:rules --*/
+
+/* Fontes Inter + JetBrains Mono são carregadas via include-in-header
+   (_head.html) com preconnect, evitando o bloqueio de @import. */
+
+/* ---------- Tipografia básica ---------- */
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.7;
+}
+
+/* ---------- 3. Páginas de capítulo (slate + EDL palette) ----------
+   Tema base é slate (dark do Bootstrap). Paleta dark suavizada
+   para conforto em leituras longas, mantendo accent teal #00d9c0. */
+
+body {
+  background-color: #1a1f2e;
+  color: #d4dae3;
+}
+
+a {
+  color: #00d9c0;
+}
+a:hover {
+  color: #5eead4;
+}
+
+#title-block-header {
+  border-bottom: 3px solid #00d9c0;
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+#title-block-header .title {
+  font-weight: 800;
+  font-size: 2rem;
+  color: #d4dae3;
+}
+#title-block-header .subtitle {
+  color: #b8c0cc;
+  font-weight: 500;
+}
+
+/* Sidebar nas páginas de capítulo */
+.sidebar {
+  background-color: #232a3d;
+}
+
+/* Título da sidebar em 2 linhas: Módulo (em cima) + Bloco (embaixo, menor) */
+.sidebar-title {
+  text-transform: none;
+  letter-spacing: normal;
+  line-height: 1.4;
+  font-weight: 700;
+  color: #d4dae3;
+}
+.sidebar-title .sidebar-bloco {
+  display: inline-block;
+  margin-top: 0.25rem;
+  font-size: 0.85em;
+  font-weight: 500;
+  color: #00d9c0;
+}
+.sidebar a,
+.sidebar .sidebar-item-text {
+  color: #b8c0cc;
+}
+.sidebar a:hover,
+.sidebar .sidebar-item-text:hover {
+  color: #00d9c0;
+}
+.sidebar .sidebar-item.active > .sidebar-item-container .sidebar-item-text,
+.sidebar .active > a {
+  color: #00d9c0 !important;
+  font-weight: 600;
+}
+.sidebar nav[id^="TOC"] {
+  padding: 1rem 0;
+}
+.sidebar nav[id^="TOC"] a {
+  color: #b8c0cc;
+}
+.sidebar nav[id^="TOC"] a.active {
+  color: #00d9c0;
+  border-left-color: #00d9c0;
+}
+
+/* Code blocks em páginas de capítulo
+   ($code-bg / $pre-bg / $code-color já vêm das defaults SCSS) */
+pre code {
+  color: #d4dae3;
+}
+
+/* Callouts */
+.callout {
+  border-radius: 12px;
+  margin: 1.5rem 0;
+  background-color: #232a3d;
+}
+
+/* Tabelas */
+table {
+  color: #d4dae3;
+}
+table thead {
+  border-bottom-color: #38445e;
+}
+table tbody tr {
+  border-bottom-color: #2a3349;
+}
+
+/* Footnotes / referências bibliográficas */
+.footnotes,
+#refs,
+.references {
+  color: #b8c0cc;
+}
+
+/* Links de navegação next/prev no rodapé do capítulo */
+.page-navigation a {
+  color: #00d9c0;
+}
+
+/* ---------- Página de Créditos ----------
+   Conteúdo todo centralizado horizontalmente. Cards de tech-stack em 2 colunas
+   no desktop/tablet, 1 coluna em mobile (≤600px).
+
+   IMPORTANTE: a página de créditos mantém intencionalmente a paleta dark
+   profunda original (#0a0e1a + #f0f4f8), para preservar a coerência visual
+   com a landing. Os capítulos é que ganharam paleta suavizada. */
+
+body.page-creditos {
+  background-color: #0a0e1a;
+  color: #f0f4f8;
+  text-align: center;
+}
+body.page-creditos #title-block-header {
+  text-align: center;
+}
+
+.contact-links {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 1.5rem 0 2rem 0;
+}
+.contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  background-color: #121826;
+  border: 1px solid #2a3449;
+  border-radius: 8px;
+  color: #a8b3c4 !important;
+  text-decoration: none !important;
+  font-size: 0.95rem;
+  transition: border-color 120ms ease, color 120ms ease, transform 120ms ease;
+}
+.contact-link:hover {
+  border-color: #00d9c0;
+  color: #00d9c0 !important;
+  transform: translateY(-1px);
+}
+
+.tech-stack {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  max-width: 640px;
+  margin: 1.5rem auto;
+}
+@media (max-width: 600px) {
+  .tech-stack {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tech-item {
+  background-color: #121826;
+  border: 1px solid #1e2638;
+  border-radius: 12px;
+  padding: 1.25rem 1.4rem;
+  text-align: left;
+}
+.tech-item h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #00d9c0;
+  border-bottom: none;
+}
+.tech-item p {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.75;
+  color: #a8b3c4;
+}
+.tech-item strong {
+  color: #f0f4f8;
+  font-weight: 600;
+}
+
+/* =========================================================================
+   4. Home page — estilo dark "EDL" (Epidemic Dynamics Lab inspired)
+   Escopo: somente .vc-home (a página inicial). Não afeta capítulos.
+   Paleta única teal (#00d9c0), tipografia Inter + JetBrains Mono.
+   ========================================================================= */
+
+.vc-home {
+  /* Paleta EDL */
+  --edl-bg-0: #0a0e1a;
+  --edl-bg-1: #121826;
+  --edl-bg-2: #1c2436;
+  --edl-bg-3: #252e44;
+  --edl-text-1: #f0f4f8;
+  --edl-text-2: #a8b3c4;
+  --edl-text-3: #6b7a90;
+  --edl-border-1: #1e2638;
+  --edl-border-2: #2a3449;
+  --edl-border-hover: #3a4a68;
+  --edl-accent: #00d9c0;
+  --edl-accent-soft: #00a98e;
+  --edl-accent-dim: rgba(0, 217, 192, 0.15);
+  --edl-accent-glow: rgba(0, 217, 192, 0.35);
+  --edl-r-md: 10px;
+  --edl-r-lg: 16px;
+  --edl-shadow-1: 0 4px 14px rgba(0, 0, 0, .35);
+  --edl-shadow-accent: 0 0 0 3px var(--edl-accent-glow);
+  --edl-maxw: 1200px;
+  --edl-t-fast: 120ms ease;
+  --edl-t-med: 220ms ease;
+
+  background: var(--edl-bg-0);
+  color: var(--edl-text-1);
+  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  line-height: 1.55;
+  /* Garante que o bloco da home ocupe a largura total mesmo quando Quarto
+     aplica gutters em algum container ancestral. */
+  width: 100%;
+  /* Stacking context para o starfield em ::before ficar atrás do conteúdo */
+  position: relative;
+  z-index: 0;
+  overflow-x: hidden;
+}
+
+/* ---- Starfield: micro-estrelinhas no fundo (efeito "universo") ---- */
+.vc-home::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background-image:
+    /* SPARKLES "+" — 3 estrelinhas de 4 pontas (cruz fina) com glow */
+    radial-gradient(2.5px 0.5px at  60px  70px, rgba(255,255,255,.75), transparent),
+    radial-gradient(0.5px 2.5px at  60px  70px, rgba(255,255,255,.75), transparent),
+    radial-gradient(2.5px 0.5px at  50px 240px, rgba(255,255,255,.70), transparent),
+    radial-gradient(0.5px 2.5px at  50px 240px, rgba(255,255,255,.70), transparent),
+    radial-gradient(2.5px 0.5px at 230px 320px, rgba(255,255,255,.75), transparent),
+    radial-gradient(0.5px 2.5px at 230px 320px, rgba(255,255,255,.75), transparent),
+    /* PONTOS COM GLOW — 3 estrelinhas redondas com brilho */
+    radial-gradient(circle at 320px  90px, rgba(255,255,255,.65) 1px, transparent 1.5px),
+    radial-gradient(circle at 280px 170px, rgba(255,255,255,.60) 1px, transparent 1.5px),
+    radial-gradient(circle at  90px 350px, rgba(255,255,255,.65) 1px, transparent 1.5px),
+    /* PONTOS SIMPLES — 6 estrelinhas só pontos, sem glow */
+    radial-gradient(circle at 200px  50px, rgba(255,255,255,.50) 1px, transparent 1.4px),
+    radial-gradient(circle at 130px 150px, rgba(255,255,255,.45) 1px, transparent 1.4px),
+    radial-gradient(circle at 180px 270px, rgba(255,255,255,.50) 1px, transparent 1.4px),
+    radial-gradient(circle at 320px 230px, rgba(255,255,255,.45) 1px, transparent 1.4px),
+    radial-gradient(circle at 310px 370px, rgba(255,255,255,.40) 1px, transparent 1.4px),
+    radial-gradient(circle at 380px 320px, rgba(255,255,255,.45) 1px, transparent 1.4px),
+    /* HALOS DE GLOW — atrás das 6 estrelinhas marcadas (3 sparkles + 3 pontos) */
+    radial-gradient(circle at  60px  70px, rgba(255,255,255,.14) 2.5px, transparent 5.5px),
+    radial-gradient(circle at  50px 240px, rgba(255,255,255,.12) 2.5px, transparent 5.5px),
+    radial-gradient(circle at 230px 320px, rgba(255,255,255,.14) 2.5px, transparent 5.5px),
+    radial-gradient(circle at 320px  90px, rgba(255,255,255,.10) 2.5px, transparent 5.5px),
+    radial-gradient(circle at 280px 170px, rgba(255,255,255,.10) 2.5px, transparent 5.5px),
+    radial-gradient(circle at  90px 350px, rgba(255,255,255,.10) 2.5px, transparent 5.5px);
+  background-size: 400px 400px;
+  background-repeat: repeat;
+  animation: vc-stars-rise 120s linear infinite;
+}
+
+@keyframes vc-stars-rise {
+  from { background-position: 0 0; }
+  to   { background-position: 0 -400px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vc-home::before { animation: none; }
+}
+
+.vc-home a {
+  color: var(--edl-accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--edl-t-fast), color var(--edl-t-fast);
+}
+.vc-home a:hover { border-bottom-color: var(--edl-accent); }
+
+.vc-home p { color: var(--edl-text-2); }
+
+/* ---- Hero ---- */
+.vc-hero {
+  position: relative;
+  padding: clamp(4rem, 10vw, 7rem) clamp(1.2rem, 5vw, 3rem) clamp(3rem, 8vw, 5.5rem);
+  overflow: hidden;
+  border-bottom: 1px solid var(--edl-border-1);
+  background:
+    radial-gradient(1200px 500px at 20% -20%, rgba(0, 217, 192, 0.12), transparent 60%),
+    radial-gradient(800px 400px at 85% -10%, rgba(124, 77, 255, 0.10), transparent 60%);
+}
+.vc-hero-bg {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  opacity: .85;
+}
+.vc-hero-pattern {
+  position: absolute;
+  left: 0; right: 0; bottom: -2rem;
+  width: 100%;
+  height: 65%;
+}
+.vc-hero-content {
+  position: relative;
+  max-width: var(--edl-maxw);
+  margin: 0 auto;
+  text-align: center;
+}
+.vc-hero-eyebrow {
+  display: inline-block;
+  padding: 6px 14px;
+  border: 1px solid var(--edl-border-2);
+  border-radius: 999px;
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--edl-text-2);
+  background: rgba(255, 255, 255, 0.02);
+  margin-bottom: 1.5rem;
+}
+.vc-hero-title {
+  font-size: clamp(2.4rem, 6vw, 4.25rem);
+  font-weight: 800;
+  letter-spacing: -.025em;
+  margin: 0 0 .5rem 0;
+  line-height: 1.05;
+  color: var(--edl-text-1);
+}
+.vc-accent { color: var(--edl-accent); }
+.vc-hero-subtitle {
+  max-width: 800px;
+  margin: .75rem auto 2.25rem auto;
+  font-size: clamp(1rem, 1.4vw, 1.15rem);
+  color: var(--edl-text-2);
+  line-height: 1.65;
+  text-align: center;
+}
+
+/* ---- Seção de blocos ---- */
+.vc-section {
+  padding: clamp(3rem, 6vw, 5rem) clamp(1.2rem, 5vw, 3rem);
+  max-width: var(--edl-maxw);
+  margin: 0 auto;
+}
+
+/* Agrupamento por Módulo */
+.vc-module-group {
+  margin-bottom: 3rem;
+}
+.vc-module-group:last-child { margin-bottom: 0; }
+
+.vc-module-group-header {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  margin-bottom: 1.25rem;
+  align-items: center;
+  text-align: center;
+}
+.vc-module-group-eyebrow {
+  display: inline-block;
+  padding: 4px 12px;
+  border: 1px solid var(--edl-border-2);
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  color: var(--edl-accent);
+  background: var(--edl-accent-dim);
+}
+.vc-module-group-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -.015em;
+  color: var(--edl-text-1);
+}
+
+.vc-modules-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.25rem;
+}
+
+.vc-module-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 0 1 320px;
+  max-width: 100%;
+  background: var(--edl-bg-1);
+  border: 1px solid var(--edl-border-1);
+  border-radius: var(--edl-r-lg);
+  padding: 1.5rem 1.4rem 1.4rem 1.4rem;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color var(--edl-t-med), background var(--edl-t-med),
+              transform var(--edl-t-med), box-shadow var(--edl-t-med);
+  min-height: 180px;
+}
+.vc-module-card:hover {
+  border-color: var(--edl-border-hover);
+  background: var(--edl-bg-2);
+  transform: translateY(-2px);
+  box-shadow: var(--edl-shadow-1);
+  border-bottom-color: var(--edl-border-hover);
+}
+.vc-module-card:focus-visible { outline: none; box-shadow: var(--edl-shadow-accent); }
+
+.vc-module-card-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--edl-accent-dim);
+  color: var(--edl-accent);
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .82rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+.vc-module-card-title {
+  font-size: 1.08rem;
+  font-weight: 600;
+  color: var(--edl-text-1);
+  margin: 0 0 .4rem 0;
+  line-height: 1.3;
+}
+.vc-module-card-subtitle {
+  font-size: .88rem;
+  color: var(--edl-text-2);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ---- Footer ---- */
+.vc-footer {
+  background: rgba(18, 24, 38, 0.6);
+  border-top: 1px solid var(--edl-border-1);
+  padding: 2.5rem clamp(1.2rem, 5vw, 3rem);
+}
+.vc-footer-inner {
+  max-width: var(--edl-maxw);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  text-align: center;
+}
+.vc-footer-credits { color: var(--edl-text-2); font-size: .95rem; margin: 0; }
+.vc-footer-links {
+  display: flex;
+  gap: 1.25rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.vc-footer-link {
+  color: var(--edl-text-2);
+  font-size: .9rem;
+  text-decoration: none;
+  transition: color var(--edl-t-fast);
+}
+.vc-footer-link:hover { color: var(--edl-accent); border-bottom: none; }
+.vc-footer-legal { color: var(--edl-text-3); font-size: .82rem; margin: 0; }
+
+/* ---- Mobile ---- */
+@media (max-width: 640px) {
+  .vc-modules-grid { flex-direction: column; align-items: center; }
+}

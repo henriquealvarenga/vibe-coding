@@ -1,0 +1,173 @@
+---
+title: "Lendo mensagens de erro (stack trace)"
+---
+
+A primeira vez que você vê uma mensagem como esta:
+
+``` text
+Traceback (most recent call last):
+  File "/Users/voce/projeto/analise.py", line 42, in <module>
+    media = sum(idades) / len(idades)
+            ~~~~~~~~~~~^^^^^^^^^^^^^
+TypeError: unsupported operand type(s) for /: 'int' and 'list'
+```
+
+A reação natural é desânimo: "deu erro, não sei o que fazer". A reação útil é o oposto: **agradecer**, porque esse texto te diz exatamente onde está o problema, qual a natureza dele e — quase sempre — como começar a resolver.
+
+Erro não é fracasso. **Erro é informação.** Saber lê-lo é metade do trabalho de programar.
+
+## Anatomia de uma mensagem de erro
+
+Toda mensagem de erro de R, Python ou Quarto tem três partes — em ordens ligeiramente diferentes, mas sempre as mesmas três:
+
+1. **Tipo do erro** — categoria do problema. Em Python: `TypeError`, `NameError`, `IndentationError`, `FileNotFoundError`, `ModuleNotFoundError`. Em R: a categoria vem em texto livre, geralmente como "Error in ...".
+2. **Mensagem em texto** — descrição humana do que deu errado. Esta é a parte que você lê primeiro.
+3. **Localização** — arquivo, linha e (às vezes) coluna onde o erro aconteceu. Em Python aparece com indicação visual `^^^` apontando o trecho exato; em R aparece com `at` ou no console o nome da função que falhou.
+
+Aplicando ao exemplo do começo:
+
+``` text
+Traceback (most recent call last):              ← cabeçalho do "stack trace"
+  File "/.../analise.py", line 42, in <module>  ← LOCALIZAÇÃO
+    media = sum(idades) / len(idades)           ← linha que deu o problema
+            ~~~~~~~~~~~^^^^^^^^^^^^^             ← ponto exato (Python 3.11+)
+TypeError: unsupported operand type(s) for /:    ← TIPO + MENSAGEM
+  'int' and 'list'
+```
+
+Tradução: "tentei dividir um inteiro (`sum(idades)` resulta num número) por uma lista (`len(idades)` deveria ser um número, mas algo está errado). Olhe a linha 42." — e de fato, alguém digitou `len(idades)` quando provavelmente quis `len(lista_idades)` ou esqueceu de chamar `len()`.
+
+## Como ler um *stack trace* (a pilha de chamadas)
+
+Quando o erro acontece dentro de uma função, que foi chamada por outra função, que foi chamada por outra... o erro mostra a **pilha** dessas chamadas. Esse é o *stack trace* (Python prefere o termo *traceback*; o conteúdo é o mesmo).
+
+A regra de ouro: **leia de baixo para cima**.
+
+``` text
+Traceback (most recent call last):
+  File "main.py", line 10, in <module>
+    resultado = calcular_imc(pacientes)
+  File "main.py", line 5, in calcular_imc
+    return [p.peso / p.altura**2 for p in lista]
+                     ^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'altura'
+```
+
+Lendo de baixo para cima:
+
+- **Última linha** (`AttributeError...`): a causa imediata. "Algo do tipo `dict` não tem atributo `altura`".
+- **Linha logo acima** (`return [p.peso / p.altura**2 ...]`): onde isso aconteceu. Você está iterando sobre `lista`, e o `p` que recebeu não é o objeto que esperava (esperava classe Paciente, recebeu dict).
+- **Mais acima** (`resultado = calcular_imc(pacientes)`): quem chamou. A variável `pacientes` foi montada como dict em vez de objetos Paciente.
+
+A causa-raiz quase sempre está no nível mais alto do *traceback* (mais próximo do seu código), não no mais baixo (que é o local exato). Mas o nível mais baixo é onde o sintoma apareceu — útil para confirmar o tipo de problema.
+
+Em **R** o equivalente aparece com `traceback()` após o erro, ou nos logs do RStudio/Positron. A leitura é a mesma — começar pelo topo, ler para baixo.
+
+## Erros mais comuns no fluxo do curso
+
+### R
+
+| Mensagem | O que costuma significar |
+|---|---|
+| `Error: object 'x' not found` | Variável `x` não existe (typo no nome, ou esqueceu de rodar a linha que cria) |
+| `Error: could not find function "x"` | Função não existe ou pacote não carregado (esqueceu de `library(...)`?) |
+| `Error in ... : object of type 'closure' is not subsettable` | Tentando usar `[]` numa função em vez de num dado (geralmente porque sobrescreveu o nome de uma função com uma variável) |
+| `Error in ... : non-numeric argument to binary operator` | Tentando fazer aritmética com texto |
+| `Error: cannot allocate vector of size X Mb` | RAM insuficiente — dataset grande demais para memória |
+
+### Python
+
+| Mensagem | O que costuma significar |
+|---|---|
+| `NameError: name 'x' is not defined` | Variável `x` não existe (typo, ou esqueceu de definir antes) |
+| `ModuleNotFoundError: No module named 'pandas'` | Pacote não instalado (rodar `uv pip install pandas` ou similar) |
+| `IndentationError: unexpected indent` | Indentação errada (ver capítulo 05) |
+| `KeyError: 'idade'` | Chave `'idade'` não existe no dicionário ou no DataFrame |
+| `TypeError: ... takes X positional arguments but Y were given` | Chamada de função com número errado de argumentos |
+| `FileNotFoundError: [Errno 2] No such file or directory: '...'` | Caminho do arquivo errado ou arquivo não está onde você acha que está |
+
+### Quarto
+
+| Mensagem | O que costuma significar |
+|---|---|
+| `ERROR: Pandoc died with exitcode "X"` | Algum problema durante a renderização — leia as linhas acima da mensagem para o contexto real |
+| `Validation of YAML metadata failed` | Cabeçalho YAML mal formado (ver capítulo 07) |
+| `compilation failed- error LaTeX Error: ...` | Renderizando para PDF e o LaTeX não consegue gerar (caractere especial não escapado, pacote LaTeX faltando) |
+| `Quitting from lines X-Y` | O erro real veio do código R/Python dentro de um chunk; veja as linhas indicadas |
+
+## Estratégia: o "fluxo do erro"
+
+Quando aparece um erro, siga uma sequência:
+
+**1. Leia a mensagem inteira.** Sério. Em particular, a **última linha** do *traceback* (que é o tipo + mensagem) e a **localização** (arquivo + linha). 80% dos erros se resolvem só de prestar atenção nesse texto.
+
+**2. Identifique a categoria.**
+
+- Erro de sintaxe (`SyntaxError`, `IndentationError`) → você digitou algo que a linguagem não entende.
+- Erro de nome (`NameError`, `object not found`) → variável ou função que não existe ali.
+- Erro de tipo (`TypeError`) → operação entre coisas incompatíveis.
+- Erro de arquivo (`FileNotFoundError`) → caminho errado.
+- Erro de pacote (`ModuleNotFoundError`, `could not find function`) → pacote não instalado ou não carregado.
+
+**3. Isole o problema.** Antes de mexer em nada, descubra: o erro acontece **toda vez**, ou só com **dado específico**? Acontece num **trecho específico**, ou em todo o script? Comente parte do código e veja onde a falha desaparece.
+
+**4. Pesquise.** Para erros comuns, a primeira frase do erro digitada na busca (ou colada num chat com Claude, Codex, Gemini) costuma resolver em segundos.
+
+**5. Conserte e teste.** Pequenas correções, uma de cada vez, testando entre cada uma. Mudar várias coisas e rodar é receita para confusão.
+
+## Como pedir ajuda ao agente para erro
+
+A diferença entre uma resposta útil e uma resposta inútil de um agente está em **como você cola o erro no chat**:
+
+**Ruim:**
+
+> "deu erro no meu R"
+
+**Bom:**
+
+> Estou rodando este código:
+>
+> ``` r
+> library(dplyr)
+> df <- read.csv("dados/coorte.csv")
+> resumo <- df |> summarize(media = mean(idade))
+> ```
+>
+> E recebo este erro:
+>
+> ``` text
+> Error in `summarize()`:
+> ! Problem while computing `media = mean(idade)`.
+> Caused by error:
+> ! object 'idade' not found
+> ```
+>
+> O que aconteceu e como conserto?
+
+Três elementos críticos: **o código**, **a mensagem de erro inteira** (não resumida — o `Caused by error:` aqui é a chave), e **o que você esperava**. O agente identifica em segundos: a coluna provavelmente se chama `Idade` (com maiúscula) ou `idade_anos`, não `idade`. Sem o erro completo, ele teria que adivinhar.
+
+::: {.callout-tip}
+## Pegue o erro inteiro
+Quando o erro acontece no console do R/Python, copie **tudo** desde a linha que diz `Error:` (ou `Traceback`) até a próxima linha em branco. Em terminal, faça scroll para cima — *tracebacks* longos cobrem várias linhas. No Positron/VS Code, o painel "Problems" ou "Output" mostra a versão completa.
+:::
+
+## Conexão com IA
+
+Leitura de erros é, possivelmente, **a melhor aplicação prática de agentes de IA para quem está aprendendo a programar**. Três motivos:
+
+- **O erro é texto pequeno e bem definido.** O agente não precisa adivinhar contexto — você cola o erro inteiro, ele responde de cara.
+- **A solução é geralmente conhecida.** Erros comuns (typos, pacote faltando, tipo errado) têm soluções canônicas. O agente acerta na primeira.
+- **Você aprende lendo.** Cada vez que o agente explica um erro, você incorpora um padrão. Em alguns meses, a maioria dos erros você já reconhece sem ajuda.
+
+O risco é o oposto: depender do agente sem nunca **olhar a mensagem antes**. Quem cola o erro no chat sem nem ler aprende menos do que quem tenta lê-lo primeiro, hipoteca uma causa, e só depois confirma com o agente. Faça o esforço de pelo menos identificar a categoria do erro antes de pedir ajuda.
+
+::: {.callout-warning}
+## Cuidado com soluções "que funcionaram"
+Às vezes o agente sugere uma mudança que **faz o erro sumir** sem realmente consertar a causa. Por exemplo, sugere `try / except: pass` para "esconder" um erro de leitura de arquivo, em vez de consertar o caminho. Sempre pergunte: a sugestão **resolveu o problema** ou apenas **silenciou o sintoma**?
+:::
+
+## O que vem a seguir
+
+Este capítulo encerra a parte mais técnica do bloco. O próximo — e último — é uma volta ao panorama: por que algumas ferramentas vivem na **linha de comando** (CLI), outras em **janelas com botões** (GUI), e algumas (como Claude Code) numa terceira categoria que mistura as duas (TUI). Saber em qual mundo você está em cada momento ajuda a escolher a ferramenta certa.
+
+→ [12 · Interfaces: CLI, GUI, TUI](12-interfaces-cli-gui-tui.qmd)

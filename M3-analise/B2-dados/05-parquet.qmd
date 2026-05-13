@@ -1,0 +1,153 @@
+---
+title: "Parquet (formatos colunares)"
+---
+
+Você tem um banco de prontuários de **2 milhões de pacientes** com 87 variáveis cada. Salvo em CSV, dá 1,8 GB. O R demora 4 minutos para carregar, ocupa 6 GB de RAM, e cada filtragem que você faz tem que reler o arquivo inteiro. Você precisa só das colunas `idade`, `sexo` e `pas_sistolica` — mas o CSV não dá essa opção: ou lê tudo, ou nada.
+
+O mesmo dataset salvo em **Parquet** ocupa 230 MB (8x menor), carrega em 12 segundos, e quando você pede só três colunas, ele lê só os bytes correspondentes a essas três colunas — pula o resto. Isso muda completamente como você trabalha com volumes grandes. Este capítulo é sobre como Parquet consegue isso, e quando vale fazer essa troca.
+
+## A diferença fundamental: linhas vs colunas
+
+CSV, Excel, SQLite e a maioria dos formatos tradicionais armazenam dados **por linha** — registro inteiro de uma observação contíguo no disco, depois o registro inteiro da próxima observação, e assim por diante. Esse layout é natural: corresponde a como o banco foi populado (paciente por paciente) e como você lê (uma linha de cada vez).
+
+Parquet vira isso de cabeça pra baixo: armazena dados **por coluna**. Todos os valores da coluna `idade` ficam juntos, depois todos os valores da coluna `sexo`, etc. Para o usuário, a tabela parece igual; no disco, a organização física é radicalmente diferente.
+
+```
+Layout por linhas (CSV, Excel, SQLite):
+[id=1, idade=42, sexo=F, pas=138] [id=2, idade=67, sexo=M, pas=156] [id=3, ...]
+
+Layout por colunas (Parquet):
+[id=1, id=2, id=3, ...] [idade=42, idade=67, idade=55, ...] [sexo=F, sexo=M, sexo=F, ...] [pas=138, pas=156, ...]
+```
+
+Por que isso importa? Três consequências práticas:
+
+1. **Compressão muito melhor.** Valores da mesma coluna tendem a ser similares (idade é sempre número entre 0 e 120; sexo tem só dois ou três valores). Compactar valores similares contíguos é dramático em comparação com compactar uma sopa de tipos diferentes.
+2. **Leitura seletiva por coluna.** Quando sua análise usa só 3 das 87 variáveis, Parquet lê só 3 colunas — pula fisicamente os bytes das outras 84. Em CSV isso é impossível (ler 3 colunas exige passar por todas).
+3. **Operações analíticas mais rápidas.** Calcular média de uma coluna, encontrar mínimo/máximo, contar valores únicos — todas essas operações são por-coluna por natureza, e Parquet entrega os bytes já organizados para isso.
+
+Em troca, leitura completa linha por linha é mais lenta em Parquet — mas raramente é o que você quer com dataset grande, justamente.
+
+## A história: do Dremel do Google ao Parquet aberto
+
+A ideia de armazenamento colunar é mais antiga que Parquet — bancos de dados analíticos comerciais já usavam variantes desde os anos 1990 (Sybase IQ, Vertica). Mas o que tornou Parquet possível foi um paper específico: **"Dremel: Interactive Analysis of Web-Scale Datasets"**, publicado por engenheiros do Google em 2010 [@melnik2010dremel].
+
+O Dremel era a infraestrutura interna que o Google usava para analisar logs e dados estruturados em escala. O paper tornou público dois algoritmos centrais: como **fragmentar registros aninhados em colunas** (*record shredding*) e como **remontá-los** quando necessário (*assembly*). Esses dois algoritmos resolviam o problema antigo de armazenar dados aninhados (como JSON) em formato colunar — algo que não era trivial.
+
+Em 2013, engenheiros do **Twitter** e da **Cloudera** lançaram um projeto open source implementando essas ideias num formato neutro: o **Apache Parquet**. O nome vem do estilo de revestimento de chão (parquete) — escolhido para evocar "a camada de baixo de um banco de dados com um arranjo interessante". Parquet 1.0 saiu em julho de 2013. Em abril de 2015, virou **projeto top-level da Apache Software Foundation** [@apacheparquet2024], cimentando seu status como padrão aberto de armazenamento colunar.
+
+A adoção foi rápida no mundo de big data (Hadoop, Spark) e gradual em ciência de dados via bibliotecas como **Apache Arrow** (que tornou trivial a leitura/escrita de Parquet em R, Python e outras linguagens). Hoje, Parquet é o formato padrão de fato para datasets analíticos médios e grandes em qualquer pipeline moderno — desde análise de logs em empresas até bioinformática e dados genômicos.
+
+## Anatomia de um arquivo Parquet
+
+Um arquivo Parquet não é texto — é um formato binário com layout específico:
+
+```
+[Magic number "PAR1"]
+[Row Group 1]
+  [Column 1 chunk: dados comprimidos da coluna 1 deste grupo]
+  [Column 2 chunk: dados comprimidos da coluna 2 deste grupo]
+  ...
+[Row Group 2]
+  ...
+[Footer: metadados — schema, tipos, estatísticas, índices]
+[Magic number "PAR1"]
+```
+
+Três coisas a notar:
+
+- **Row groups.** Parquet divide os dados em blocos de linhas (típico: 128 MB por grupo). Dentro de cada bloco, os dados são organizados por coluna. Esse design permite paralelizar leitura: diferentes grupos podem ser lidos por threads diferentes.
+- **Compressão por coluna.** Cada *column chunk* pode usar algoritmo de compressão diferente, otimizado para o tipo da coluna. Snappy, gzip, zstd, lz4 são os mais comuns.
+- **Metadados ricos no footer.** Schema, tipos das colunas, estatísticas (min, max, contagem de nulos por chunk), índices de blocos. Um leitor que quer só uma coluna pode ler o footer pequeno, descobrir os bytes exatos da coluna desejada, e ir direto neles, sem tocar no resto.
+
+A consequência: Parquet **preserva tipos de dados** nativamente. Inteiro é inteiro, ponto flutuante é ponto flutuante, data é data, booleano é booleano. Não há ambiguidade nem necessidade de inferir como em CSV.
+
+## Quando Parquet vale a pena
+
+Heurística simples para decidir:
+
+| Característica | Use Parquet se... |
+|---|---|
+| **Tamanho** | Dataset > 100 MB em CSV |
+| **Workflow** | Você relê os mesmos dados muitas vezes (análise iterativa) |
+| **Variáveis** | Você usa um subconjunto pequeno de muitas colunas |
+| **Tipos** | Tipos importam (datas, decimais com precisão, categorias com valores específicos) |
+| **Compartilhamento** | Você compartilha com outros pesquisadores que usam R/Python/SQL |
+
+Quando **não** vale: dataset pequeno (< 10 MB), ou quando legibilidade humana importa mais que performance (compartilhamento com não-técnicos, arquivamento de longo prazo institucional). Para esses casos, CSV continua melhor.
+
+::: {.callout-tip}
+## A regra prática mais útil sobre tamanho
+Se um CSV passa de 100 MB, **o ganho de migrar para Parquet é mensurável**. Se passa de 1 GB, é dramático. Se passa de 10 GB, CSV é praticamente inviável e Parquet é compulsório.
+
+Em pesquisa clínica/epidemiológica típica (cohort de centenas a milhares de pacientes), datasets ficam abaixo dos 100 MB, e CSV basta. Em bioinformática, genômica e em registros nacionais (DataSUS, eletronic health records institucionais), a barreira é cruzada com facilidade.
+:::
+
+## Lendo e escrevendo Parquet
+
+Em R, via biblioteca **`arrow`**:
+
+```r
+library(arrow)
+
+# Lê um arquivo Parquet completo
+dados <- read_parquet("dados/coorte.parquet")
+
+# Lê apenas colunas específicas (operação rápida em arquivo grande)
+dados <- read_parquet("dados/coorte.parquet", col_select = c("id", "idade", "pas_sistolica"))
+
+# Escreve com compressão (default é Snappy, equilíbrio bom)
+write_parquet(dados, "dados/coorte.parquet")
+```
+
+Em Python, via **`pyarrow`** ou **`pandas`**:
+
+```python
+import pandas as pd
+import pyarrow.parquet as pq
+
+# Lê o arquivo completo
+dados = pd.read_parquet("dados/coorte.parquet")
+
+# Lê apenas colunas específicas
+dados = pd.read_parquet("dados/coorte.parquet", columns=["id", "idade", "pas_sistolica"])
+
+# Escreve
+dados.to_parquet("dados/coorte.parquet", compression="snappy")
+```
+
+A operação de **converter CSV existente para Parquet** é simples — uma linha em qualquer linguagem — e quase sempre vale a pena fazer cedo no projeto, deixando o CSV original como backup arquivado e usando Parquet no fluxo de análise.
+
+## Particionamento: o próximo nível
+
+Parquet permite ainda **particionar** o dataset em múltiplos arquivos baseados em valores de coluna — útil quando o dataset cresce muito. Em vez de um `coorte.parquet` de 50 GB, você tem:
+
+```
+dados/coorte/
+├── ano=2020/
+│   ├── parte-001.parquet
+│   └── parte-002.parquet
+├── ano=2021/
+│   └── parte-001.parquet
+├── ano=2022/
+│   └── parte-001.parquet
+...
+```
+
+Quando você consulta filtrando por `ano == 2022`, o leitor lê só os arquivos da pasta `ano=2022/`, ignorando o resto. Em R, `open_dataset()` da biblioteca `arrow` lê essa estrutura como se fosse um único dataset. Em Python, `pyarrow.dataset` ou `pandas.read_parquet()` apontando para a pasta. Esse padrão é **central em pipelines de big data** e relevante em pesquisa quando os volumes são grandes — caso típico em registros nacionais, dados de imagem médica em escala, ou genômica populacional.
+
+## Conexão com IA
+
+Agentes ajudam em três frentes específicas com Parquet:
+
+**1. Decidir quando migrar de CSV.** *"Tenho um CSV de 850 MB que releio várias vezes por dia em três análises diferentes. Vale converter pra Parquet?"* — agente avalia o trade-off com você.
+
+**2. Escolher schema apropriado.** *"Aqui está o `head` do meu CSV. Quais tipos Parquet otimizados eu deveria usar?"* — agente sugere `int32` vs `int64`, `float32` vs `float64`, `category` para variáveis categóricas, etc. Trade-off entre tamanho e precisão.
+
+**3. Diagnosticar lentidão em Parquet.** *"Meu Parquet de 5 GB demora 2 minutos para uma query simples — o que pode estar errado?"* — agente sugere checar particionamento, row group size, ou tipo de compressão.
+
+## O que vem a seguir
+
+Parquet resolve "datasets grandes para análise". O próximo formato resolve um problema diferente: **múltiplas tabelas com relações entre si**, queries com joins, dados que ultrapassam memória RAM mas continuam sendo consultados de forma transacional. É o **SQLite** — o banco de dados embarcado mais usado do mundo, e a alternativa séria a CSV/Excel quando seu projeto cresce em complexidade relacional.
+
+→ [06 · SQLite](06-sqlite.qmd)

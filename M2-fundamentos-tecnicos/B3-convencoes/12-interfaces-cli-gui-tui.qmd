@@ -1,0 +1,123 @@
+---
+title: "Interfaces: CLI, GUI, TUI"
+---
+
+Você abriu o terminal, digitou `claude`, apertou Enter. Esperava ou texto puro rolando ou uma janela nova. Em vez disso, surgiu **dentro do mesmo terminal** uma caixa colorida, com cursor piscando, atalhos listados na parte de baixo, e o que parece um campo de texto convencional. Você consegue rolar a "tela" anterior, escolher entre opções com setas. Não é exatamente um terminal "puro". Não é exatamente uma janela.
+
+Bem-vindo ao mundo das **TUIs** — e ao último capítulo deste bloco, que organiza um vocabulário que você vai usar o resto do curso: **CLI, GUI, TUI**, três famílias de interface, cada uma com lugar próprio.
+
+## As três famílias
+
+| Sigla | Nome completo | Como funciona | Exemplo no curso |
+|---|---|---|---|
+| **CLI** | *Command Line Interface* | Texto puro, comandos linha-a-linha, sem layout interativo | `git commit`, `quarto render`, `ls -la` |
+| **GUI** | *Graphical User Interface* | Janelas, botões, ícones, mouse | Finder, Positron, Excel, navegador web |
+| **TUI** | *Text-based User Interface* | Texto, mas com layout interativo (menus, painéis, scroll) dentro do terminal | Claude Code, Codex CLI, Gemini CLI, `htop`, `vim` |
+
+A confusão comum é tratar TUI como sinônimo de CLI. Não é: ambas vivem no terminal e usam só caracteres, mas o **modo de interação** é diferente — CLI é "uma linha de cada vez", TUI é "uma tela inteira que reage".
+
+## CLI: a linha de comando pura
+
+Você digita um comando, aperta Enter, recebe a resposta:
+
+``` bash
+$ ls
+analise.R  dados.csv  README.md
+
+$ wc -l dados.csv
+12453 dados.csv
+
+$ git status
+On branch main
+nothing to commit, working tree clean
+```
+
+Cada interação é independente: comando entra, resposta sai, cursor volta para o prompt. Sem janela, sem mouse, sem menu. É a interface mais antiga do computador moderno — herdada do Unix nos anos 1970, sucessora dos *teletypes* dos anos 1960.
+
+Pontos fortes da CLI:
+
+- **Reprodutível.** Um comando que rodou hoje vai rodar igual amanhã.
+- **Composável.** Saída de um comando vira entrada de outro com `|` (pipe shell).
+- **Automatizável.** Roteiriza-se em scripts; agendas-se com cron; encadeia-se em pipelines.
+- **Universal.** Conexão SSH em servidor remoto sem interface gráfica? Só CLI funciona.
+
+Limitação principal: curva de aprendizado. Você precisa **saber** o comando — não dá para "explorar pelos menus".
+
+## GUI: janelas, ícones e mouse
+
+A interface gráfica que você usa no dia a dia: Finder, Word, Excel, Positron, navegador web. Inventada na Xerox PARC em 1973, popularizada pelo Apple Macintosh em 1984, virou padrão do consumo desde então.
+
+Pontos fortes da GUI:
+
+- **Descoberta.** Você navega pelos menus, vê o que existe, aprende explorando.
+- **Visual.** Plotagem de dados, edição de imagem, leitura de PDF — atividades onde "ver é entender" pedem GUI.
+- **Multi-tarefa visível.** Várias janelas abertas, alternância rápida com o olho.
+
+Limitação: difícil reproduzir. "Cliquei aqui, depois ali, depois aqui" não vira documentação confiável; outra pessoa numa versão diferente do programa pode encontrar menus em outro lugar. Para análise científica reprodutível, a GUI é boa para **explorar**, não para **registrar**.
+
+## TUI: o melhor dos dois mundos (em texto)
+
+A TUI vive **dentro** do terminal — não é janela do sistema operacional — mas tem layout interativo: painéis, menus, atalhos de teclado, áreas que rolam de forma independente. Você navega com setas e Tab, não com mouse.
+
+Exemplos clássicos (que existem desde os anos 1980):
+
+- **`vim`** — editor de texto modal, totalmente em terminal, com modos de edição, comandos por letra, navegação por teclado.
+- **`htop`** — monitor de processos do sistema, com gráficos de barras feitos em caracteres ASCII e seleção interativa.
+- **`tmux`** — gerenciador de painéis dentro do terminal, permite múltiplas "telas" no mesmo terminal.
+- **`mc`** (Midnight Commander) — gerenciador de arquivos com dois painéis lado a lado, em texto.
+
+Exemplos modernos relevantes para o curso:
+
+- **`claude`** (Claude Code) — chat com o agente em painel central, lista de contexto, atalhos no rodapé.
+- **`codex`** (Codex CLI) — interface similar, com mesma lógica de painel + chat + comandos.
+- **`gemini`** (Gemini CLI) — análogo do Google.
+
+Por que esses agentes escolheram TUI em vez de GUI ou CLI pura? Três motivos:
+
+1. **O conteúdo é texto.** A saída do modelo é texto; a entrada do usuário é texto. Janela com botões não acrescenta nada — só adiciona peso.
+2. **Vivem onde o desenvolvedor já está.** Quem escreve código está no terminal/IDE. O agente "aparece" sem mudar de contexto.
+3. **Permitem layout que CLI pura não permite.** Conversa longa rolando, sem perder o prompt; lista de arquivos lidos visível em paralelo; barra de status com modelo + custo + atalhos. Tudo isso seria impraticável em CLI puramente linear.
+
+## Quando usar cada uma na pesquisa
+
+Para o fluxo deste curso, a divisão prática:
+
+| Situação | Interface natural |
+|---|---|
+| Análise exploratória de dados (gráficos, tabelas, prototipagem) | **GUI** — Positron, RStudio |
+| Edição de texto longo (capítulos, manuscrito) | **GUI** — Positron, VS Code; eventualmente Word/Pages |
+| Renderizar site Quarto, rodar análise reprodutível, automação | **CLI** — `quarto render`, `Rscript`, `python` |
+| Operações de Git (`commit`, `push`, `merge`) | **CLI** — apesar de existirem GUIs (GitHub Desktop, fork) |
+| Conversar com agente de IA para pedir código, debug, refatoração | **TUI** — Claude Code, Codex, Gemini CLI |
+| Conversar com agente de IA para tarefa exploratória, research | **GUI** — Claude.ai (web), ChatGPT (web), Gemini (web) |
+
+Não é regra rígida. A maioria das pessoas usa as três famílias no mesmo dia, alternando conforme a tarefa.
+
+::: {.callout-note}
+## CLI ≠ "antigo". TUI ≠ "intermediário"
+A tentação é colocar as três num eixo de "mais primitivo → mais sofisticado": CLI velha, GUI nova, TUI no meio. **Não é isso.** São famílias que coexistem porque cada uma serve melhor um conjunto de tarefas. CLI continua sendo o melhor jeito de automatizar; TUI é a invenção mais recente das três (em sua forma moderna), exatamente porque agentes de IA precisaram de algo entre as duas pontas.
+:::
+
+## Conexão com IA
+
+Saber em qual interface você está ajuda a calibrar expectativa quando interage com agentes:
+
+- **Web GUI (claude.ai, gemini.google.com):** ótima para perguntas conceituais, exploração, brainstorm. Limitação: o agente **não** tem acesso ao seu computador a menos que você cole código manualmente.
+- **TUI agêntica (Claude Code, Codex CLI):** o agente vê seus arquivos, edita, roda comandos. É onde "vibe coding" acontece de fato — mas exige confiança e revisão a cada passo.
+- **GUI Cowork (do Claude Desktop):** modo de Cowork (este aqui) tem acesso a uma pasta selecionada do seu computador. Combina capacidade agêntica com visual de aplicativo desktop.
+
+Saber a interface define o que o agente **pode** ou **não pode** fazer. Pedir "renderize o site Quarto" para o Claude.ai web não funciona — ele não tem acesso ao seu disco. O mesmo pedido para o Claude Code roda `quarto render` e te entrega o resultado.
+
+## Encerrando o Bloco
+
+Este bloco organizou os "elementos invisíveis" do fluxo técnico — convenções, símbolos, encoding, estrutura, erros, interfaces. Nenhum deles é central a uma análise específica; todos são camada base que tornam a análise possível, reproduzível e amistosa para colaboradores (humanos e agentes).
+
+A intenção é que esses doze capítulos virem **camada de consulta**: não algo que você lê uma vez e tenta memorizar, mas um lugar onde você volta sempre que aparecer um símbolo desconhecido, um arquivo invisível, um *traceback* assustador ou um YAML quebrado.
+
+A partir do próximo bloco, o curso entra em modo de **produção**. Você começa a escrever Quarto, manejar dados, programar em R e Python, publicar resultados — e os tópicos deste bloco passam a ser ferramentas que você usa, não conteúdo que você estuda.
+
+## O que vem a seguir
+
+Encerramos aqui o **Módulo 1 — Fundamentos**. A partir do **Módulo 2**, começamos a produzir: escrita técnica em Markdown e Quarto, manejo de dados e análise em R e Python.
+
+→ [Próximo bloco: Markdown, Quarto e Escrita Técnica](/M3-analise/B1-markdown/01-markdown.qmd)

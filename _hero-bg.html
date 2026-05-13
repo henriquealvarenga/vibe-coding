@@ -1,0 +1,51 @@
+<div class="vc-hero-bg" aria-hidden="true">
+  <svg class="vc-hero-pattern" viewBox="0 0 1200 400"
+       preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <linearGradient id="vc-grad-data" x1="0" x2="1" y1="0" y2="0">
+        <stop offset="0%"   stop-color="#00d9c0" stop-opacity="0" />
+        <stop offset="50%"  stop-color="#00d9c0" stop-opacity=".55" />
+        <stop offset="100%" stop-color="#00d9c0" stop-opacity="0" />
+      </linearGradient>
+      <linearGradient id="vc-grad-signal" x1="0" x2="1" y1="0" y2="0">
+        <stop offset="0%"   stop-color="#7c3aed" stop-opacity="0" />
+        <stop offset="50%"  stop-color="#7c3aed" stop-opacity=".55" />
+        <stop offset="100%" stop-color="#7c3aed" stop-opacity="0" />
+      </linearGradient>
+      <linearGradient id="vc-grad-data-2" x1="0" x2="1" y1="0" y2="0">
+        <stop offset="0%"   stop-color="#22d3ee" stop-opacity="0" />
+        <stop offset="50%"  stop-color="#22d3ee" stop-opacity=".40" />
+        <stop offset="100%" stop-color="#22d3ee" stop-opacity="0" />
+      </linearGradient>
+      <linearGradient id="vc-grad-data-3" x1="0" x2="1" y1="0" y2="0">
+        <stop offset="0%"   stop-color="#5eead4" stop-opacity="0" />
+        <stop offset="50%"  stop-color="#5eead4" stop-opacity=".30" />
+        <stop offset="100%" stop-color="#5eead4" stop-opacity="0" />
+      </linearGradient>
+    </defs>
+
+    <!-- Senoide roxa (banda superior): centro y=130, amplitude 35, período 600. -->
+    <path d="M0,130 C108,95 192,95 300,130 C408,165 492,165 600,130 C708,95 792,95 900,130 C1008,165 1092,165 1200,130"
+          fill="none" stroke="url(#vc-grad-signal)" stroke-width="2" />
+
+    <!-- Senoide teal (camada 1): 2 ciclos completos, período 600px, centro y=240, amplitude 60. -->
+    <path d="M0,240 C108,180 192,180 300,240 C408,300 492,300 600,240 C708,180 792,180 900,240 C1008,300 1092,300 1200,240"
+          fill="none" stroke="url(#vc-grad-data)" stroke-width="2.5" />
+
+    <!-- Senoide ciano (camada 2): mesma forma, deslocada 40px à direita. -->
+    <g transform="translate(40, 0)">
+      <path d="M0,240 C108,180 192,180 300,240 C408,300 492,300 600,240 C708,180 792,180 900,240 C1008,300 1092,300 1200,240"
+            fill="none" stroke="url(#vc-grad-data-2)" stroke-width="2.5" />
+    </g>
+
+    <!-- Senoide mint (camada 3): mesma forma, deslocada 80px à direita. -->
+    <g transform="translate(80, 0)">
+      <path d="M0,240 C108,180 192,180 300,240 C408,300 492,300 600,240 C708,180 792,180 900,240 C1008,300 1092,300 1200,240"
+            fill="none" stroke="url(#vc-grad-data-3)" stroke-width="2.5" />
+    </g>
+
+    <!-- Cursor de prompt (canto inferior esquerdo) -->
+    <text x="80" y="370" font-family="'JetBrains Mono', ui-monospace, monospace"
+          font-size="22" fill="#00d9c0" opacity=".55" font-weight="500">&gt;_</text>
+  </svg>
+</div>

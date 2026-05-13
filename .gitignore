@@ -1,0 +1,45 @@
+# ─── Quarto ───
+/docs/
+/.quarto/
+/_freeze/
+
+# ─── macOS ───
+.DS_Store
+
+# ─── Backups e temporários ───
+*.bak
+*.orig
+*.tmp
+*~
+
+# ─── R (renv) ───
+/renv/library/
+/renv/local/
+/renv/cellar/
+/renv/staging/
+/renv/python/
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+
+# ─── Python (venv) ───
+__pycache__/
+*.pyc
+.venv/
+
+# ─── Editores ───
+.vscode/
+.idea/
+
+# ─── Arquivos fonte de apresentação ───
+# Bundles do Keynote/PowerPoint pesam centenas de MB (empacotam imagens,
+# vídeos e fontes). Renderização vive no .qmd; o arquivo fonte fica local.
+*.key
+*.pptx
+*.ppt
+*.odp
+
+# ─── Específico deste projeto ───
+/OLD_FILES/
+/references/PDFs/

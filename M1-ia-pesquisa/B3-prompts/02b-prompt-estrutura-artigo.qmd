@@ -1,0 +1,428 @@
+---
+title: "Prompt de estrutura de artigo: BJPsych"
+---
+
+Esta é a versão **especializada para o Brazilian Journal of Psychiatry (BJPsych)** do prompt do capítulo anterior. A diferença em relação ao genérico: aqui o agente já recebe a URL confirmada do estilo CSL no Zotero, a URL confirmada das *Instructions for Authors* da revista, e a estrutura de pastas com nomes em inglês (a revista publica em inglês). Use este capítulo se você vai submeter para BJPsych. Se for para outro periódico, copie este prompt e troque os dois URLs e o nome da pasta — a moldura segue válida.
+
+O prompt está em inglês porque o agente trabalha melhor em inglês para tarefas de execução (mkdir, curl, R), e porque os nomes de arquivos e seções do manuscrito ficam em inglês. As decisões de design e o comportamento "plan-first → entrevistar antes de criar" são os mesmos do `02`.
+
+## O prompt
+
+You are an expert in academic publishing and Quarto.
+
+Create the complete folder and file structure for a scientific article to be
+submitted to the Brazilian Journal of Psychiatry (BJPsych).
+
+This project will be used by a researcher who is not familiar with Quarto or
+Positron. Keep all technical complexity hidden inside _quarto.yml. The .qmd
+files the researcher edits should look as clean and simple as possible.
+
+Your job is to build the structure only — do not write the article content,
+do not simulate data, and do not run any analysis. The project must be
+complete and ready for the researcher to open, write, and render.
+
+────────────────────────────────────────────
+HARD RULES (apply to the entire task)
+────────────────────────────────────────────
+
+DO NOT access the internet at any point. Do not run curl, wget, WebFetch,
+WebSearch, or any tool that touches the network. Do not download files
+(CSL, DOCX, PDFs, fonts, anything). Do not look up journal guidelines
+online or from memory of online sources.
+DO NOT infer or invent journal-specific rules (running-title length,
+abstract structure, allowed languages, citation style specifics).
+Use sensible, generic defaults and label them as
+"verify before submission".
+DO NOT create the CSL file or the Word reference template. The folders
+references/csl/ and templates/ must exist but stay empty. The CSL is
+addressed in Step 7. The Word template is non-blocking: the
+reference-doc: line in _quarto.yml stays commented out so that
+quarto render works immediately with Pandoc defaults until the
+researcher adds the journal's template.
+All file generation must be local and offline.
+────────────────────────────────────────────
+STEP 1 — CREATE FOLDER STRUCTURE AND ROOT SCAFFOLDING
+────────────────────────────────────────────
+
+1a) Create folders (safe even if some already exist):
+
+```bash
+mkdir -p sections analysis data/raw data/processed \
+         output/tables output/figures \
+         references/csl templates submission \
+         instructions-for-authors
+```
+
+Target project structure:
+
+```text
+bjpsych-article/
+├── _quarto.yml                ← all technical settings (researcher does not edit)
+├── manuscript.qmd             ← MAIN file (clean YAML, includes sections)
+├── README.md                  ← project description + how to render
+├── .gitignore                 ← ready for when Git is initialized later
+├── sections/                  ← IMRaD sections, included by manuscript.qmd
+│   ├── 00-abstract.qmd
+│   ├── 01-introduction.qmd
+│   ├── 02-methods.qmd
+│   ├── 03-results.qmd
+│   ├── 04-discussion.qmd
+│   └── 05-conclusion.qmd
+├── analysis/                  ← scripts that generate tables and figures
+│   ├── 01-cleaning.R
+│   ├── 02-analysis.R
+│   └── 03-figures.R
+├── data/
+│   ├── raw/                   ← read-only, gitignored
+│   └── processed/             ← derived, gitignored
+├── output/
+│   ├── tables/                ← generated tables (.csv, .html)
+│   └── figures/               ← generated figures (.png, .pdf)
+├── references/
+│   ├── references.bib         ← single bibliography file
+│   └── csl/                   ← EMPTY — CSL will be added later (Step 7)
+├── templates/                 ← EMPTY — Word template optional, added when available
+├── instructions-for-authors/  ← EMPTY — PDF may be added later (Step 7)
+└── submission/                ← rendered files for submission (gitignored)
+```
+
+1b) Create .gitignore at the project root:
+
+```text
+# Data — never version raw or derived data
+data/raw/
+data/processed/
+
+# Generated output — regenerable from analysis/
+output/
+submission/
+
+# Quarto cache and freeze
+_freeze/
+.quarto/
+
+# R environment library (lockfile is versioned, library is not)
+renv/library/
+renv/local/
+renv/cellar/
+renv/staging/
+
+# OS junk
+.DS_Store
+Thumbs.db
+```
+
+1c) Create README.md at the project root with:
+
+One-paragraph placeholder description (researcher fills in)
+"How to render" section with: quarto render manuscript.qmd
+"How to reproduce" note pointing to renv::restore() after cloning
+A "Pending artefacts before submission" section listing:
+• CSL file at references/csl/ — required for citations to render
+with the journal's style. Until present, the csl: line in
+_quarto.yml will cause render to fail; comment it out for a
+preview-quality render, or place the file and leave the line
+as is.
+• BJPsych Word reference template at
+templates/bjpsych-template.docx — NOT required for render to
+work. The reference-doc: line in _quarto.yml is commented
+out by default, so DOCX renders use Pandoc's generic styling.
+Once the journal's template is in place, uncomment that line
+in _quarto.yml. Do not submit a manuscript rendered with
+Pandoc defaults — the formatting will not meet journal
+requirements.
+────────────────────────────────────────────
+STEP 2 — PROJECT CONFIGURATION (_quarto.yml)
+────────────────────────────────────────────
+Create _quarto.yml with ALL technical settings:
+
+```yaml
+project:
+  type: default
+  output-dir: submission
+
+# NOTE: The file referenced by csl: is NOT created during setup.
+# The researcher must add it before rendering with citations,
+# or comment out this line for a preview render.
+bibliography: references/references.bib
+csl: references/csl/brazilian-journal-of-psychiatry.csl
+
+execute:
+  echo: false
+  warning: false
+  message: false
+
+format:
+  docx:
+    # Word reference template for BJPsych formatting.
+    # The line below is commented out so that quarto render
+    # works immediately using Pandoc's default styling.
+    # AFTER placing the journal's template at
+    # templates/bjpsych-template.docx, uncomment the line.
+    # Submitting a manuscript rendered without the journal's
+    # template is NOT acceptable for final submission.
+    # reference-doc: templates/bjpsych-template.docx
+    fig-dpi: 300
+    tbl-cap-location: top
+    fig-cap-location: bottom
+    number-sections: false
+    lang: en  # generic default; researcher to verify
+  pdf:
+    documentclass: article
+    papersize: a4
+    fontsize: 11pt
+    linestretch: 1.5
+    geometry:
+      - margin=2.5cm
+    number-sections: false
+    fig-pos: "H"
+    keep-tex: false
+```
+
+DOCX is the primary output for review and submission. PDF is included for
+sharing polished versions. Both render from the same manuscript.qmd.
+
+────────────────────────────────────────────
+STEP 3 — MANUSCRIPT FILE AND SECTION FILES
+────────────────────────────────────────────
+
+3a) Create manuscript.qmd. The YAML contains only the fields the
+researcher needs to fill in; everything else lives in _quarto.yml.
+
+```markdown
+---
+title: "Article Title"
+author:
+  - name: "Author Name"
+    orcid: "0000-0000-0000-0000"
+    affiliation: "Institution, City, Country"
+    email: "email@institution.edu"
+    corresponding: true
+  - name: "Co-author Name"
+    orcid: "0000-0000-0000-0000"
+    affiliation: "Institution, City, Country"
+running-title: "Short title — verify length limit before submission"
+date: today
+---
+
+{{{< include sections/00-abstract.qmd >}}}
+{{{< include sections/01-introduction.qmd >}}}
+{{{< include sections/02-methods.qmd >}}}
+{{{< include sections/03-results.qmd >}}}
+{{{< include sections/04-discussion.qmd >}}}
+{{{< include sections/05-conclusion.qmd >}}}
+
+## Acknowledgments {.unnumbered}
+
+[Funding sources, collaborators.]
+
+## Conflicts of Interest {.unnumbered}
+
+[Declare any conflicts, or state: The authors declare no conflicts of interest.]
+
+## Funding {.unnumbered}
+
+[Funding sources and grant numbers.]
+
+# References {.unnumbered}
+
+::: {#refs}
+:::
+```
+
+3b) Create each file in sections/ with a top-level heading and a short
+placeholder line. Section files have NO YAML of their own — they are
+includes and inherit context from manuscript.qmd. Use a generic IMRaD
+structure with a structured abstract; do NOT try to enforce specific
+journal rules.
+
+```markdown
+sections/00-abstract.qmd:
+
+  ## Abstract {.unnumbered}
+
+  **Objective:** [State the study objective.]
+  **Methods:** [Describe study design, participants, main analyses.]
+  **Results:** [Summarise principal findings.]
+  **Conclusions:** [State the main conclusion.]
+
+  **Keywords:** keyword1; keyword2; keyword3.
+
+sections/01-introduction.qmd:
+
+  ## Introduction
+
+  [Background, rationale, and objective of the study.]
+
+sections/02-methods.qmd:
+
+  ## Methods
+
+  ### Study Design and Participants
+
+  [Describe study design, setting, inclusion/exclusion criteria.]
+
+  ### Measures
+
+  [Describe instruments and outcome variables.]
+
+  ### Statistical Analysis
+
+  [Describe statistical methods, software, significance threshold.]
+
+sections/03-results.qmd:
+
+  ## Results
+
+  [Present findings. Reference tables as @tbl-label and figures as
+  @fig-label.]
+
+sections/04-discussion.qmd:
+
+  ## Discussion
+
+  [Interpret results, compare with literature, discuss limitations.]
+
+sections/05-conclusion.qmd:
+
+  ## Conclusion
+
+  [Main conclusion and clinical or scientific implication.]
+```
+────────────────────────────────────────────
+STEP 4 — PLACEHOLDER BIBLIOGRAPHY (references/references.bib)
+────────────────────────────────────────────
+Create references/references.bib with a single placeholder entry so the
+file is not empty and Quarto does not error on render.
+
+```bibtex
+% This file is managed by Zotero + Better BibTeX.
+% To add references: export your Zotero collection in Better BibTeX
+% format with the "Keep updated" option pointing to this file
+% (references/references.bib).
+% Cite in text using [@placeholder2024] or @placeholder2024.
+
+@article{placeholder2024,
+  author  = {Author, Name},
+  title   = {Article title},
+  journal = {Journal Name},
+  year    = {2024},
+  volume  = {1},
+  number  = {1},
+  pages   = {1--10},
+  doi     = {10.0000/placeholder}
+}
+```
+────────────────────────────────────────────
+STEP 5 — DO NOT CREATE CSL OR DOCX TEMPLATE
+────────────────────────────────────────────
+Skip creation of:
+
+references/csl/brazilian-journal-of-psychiatry.csl
+templates/bjpsych-template.docx
+Both folders exist but stay empty. The CSL is addressed in Step 7.
+
+The DOCX template is non-blocking: the reference-doc: line in
+_quarto.yml is commented out (see Step 2), so quarto render works
+immediately with Pandoc's default styling. The researcher uncomments that
+line after placing the journal's template at
+templates/bjpsych-template.docx.
+
+────────────────────────────────────────────
+STEP 6 — VERIFICATION (LOCAL ONLY, NO RENDER)
+────────────────────────────────────────────
+
+Show the complete folder tree.
+Confirm these files EXIST and are non-empty:
+_quarto.yml
+manuscript.qmd
+README.md
+.gitignore
+references/references.bib
+sections/00-abstract.qmd
+sections/01-introduction.qmd
+sections/02-methods.qmd
+sections/03-results.qmd
+sections/04-discussion.qmd
+sections/05-conclusion.qmd
+Confirm these files are intentionally ABSENT (folders exist, files do not):
+references/csl/brazilian-journal-of-psychiatry.csl
+templates/bjpsych-template.docx
+Confirm in _quarto.yml that the reference-doc: line under
+format: docx: is present BUT commented out, with the explanatory
+block above it. This is what allows render to work without the
+Word template.
+Validate manuscript.qmd YAML and code-fence balance statically.
+Display the first 30 lines of manuscript.qmd.
+Do NOT run quarto render. Render will work for DOCX as soon as
+the CSL question in Step 7 is resolved (either the file is provided
+or the csl: line is commented out). The Word template is optional
+for an initial preview render.
+State the render command for the researcher:
+quarto render manuscript.qmd
+List explicitly any external assumption you had to make
+(default language, default running-title placeholder, default abstract
+structure, etc.) — flag each as "verify before submission".
+────────────────────────────────────────────
+STEP 7 — FINAL QUESTIONS TO THE RESEARCHER
+────────────────────────────────────────────
+
+After completing Steps 1–6, ASK the researcher the following two
+questions and WAIT for their reply before doing anything else. Do not act
+on either step on your own initiative.
+
+QUESTION 1 — CSL (citation style file)
+"The Brazilian Journal of Psychiatry CSL file was intentionally not
+created. The folder references/csl/ is empty.
+Would you like to:
+(a) place the CSL there yourself, or
+(b) have me download it for you from the official source?
+Please reply (a) or (b)."
+
+QUESTION 2 — Instructions for Authors
+"The journal Instructions for Authors PDF is not yet present in
+instructions-for-authors/.
+Would you like to:
+(a) place the PDF there yourself, or
+(b) skip this step for now?
+Please reply (a) or (b)."
+
+If the researcher replies (a), do nothing further on that point. If they
+reply (b) to QUESTION 1, then (and only then) you may fetch the CSL from
+a single trusted source. If they reply (b) to QUESTION 2, do nothing
+further — do not attempt to fetch the PDF.
+
+Do not bundle these questions with other actions. Stop and wait.
+
+
+
+
+
+
+────────────────────────────────────────────
+NOTE ABOUT GIT
+────────────────────────────────────────────
+This prompt does not initialize Git. The researcher may not be familiar
+with version control yet, and will start versioning when ready.
+
+The .gitignore file is already in place (Step 1b), so once Git is
+initialized it will immediately ignore data/, output/, submission/,
+_freeze/, and renv library folders.
+
+When the researcher is ready to start versioning, they should run, from
+the project root:
+
+```bash
+git init
+git add .
+git commit -m "initial structure"
+```
+
+From that point on, every change to manuscript.qmd, sections/, analysis/,
+and configuration files can be tracked with Git.
+
+## O que vem a seguir
+
+Estrutura BJPsych pronta. Volte ao fluxo normal do bloco: o próximo passo, igual ao do capítulo `02`, é dar à IA o contrato persistente que ela vai consultar em toda conversa futura sobre este projeto — o `AGENTS.md`.
+
+→ [03 · Prompt para AGENTS.md customizado](03-prompt-agents-md.qmd)

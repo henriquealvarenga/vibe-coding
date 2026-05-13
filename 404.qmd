@@ -1,0 +1,19 @@
+---
+title: "Página não encontrada"
+subtitle: "Erro 404"
+toc: false
+sidebar: false
+---
+
+A página que você procura não existe — pode ter sido movida, renomeada ou
+o link que você seguiu pode estar desatualizado.
+
+## O que fazer agora
+
+- Voltar para a [página inicial](/) e navegar pelos módulos.
+- Usar a busca no topo (ícone de lupa) para encontrar o conteúdo desejado.
+- Conferir os [créditos](creditos.qmd) se procurava informações sobre o projeto.
+
+Se você chegou aqui a partir de um link em outro site e acha que ele
+deveria funcionar, [entre em contato](mailto:henrique@ufsj.edu.br) para
+que possamos corrigir.

@@ -1,0 +1,426 @@
+---
+title: "R e Python"
+---
+
+Neste capítulo você vai instalar as duas linguagens de programação que usaremos ao longo do curso: **R** e **Python**. Não é preciso ter nenhuma experiência prévia com programação — vamos do zero, passo a passo, com instruções específicas para macOS, Windows e Linux.
+
+## Por que R e Python na pesquisa científica?
+
+R e Python são, hoje, as duas linguagens mais usadas em análise de dados e ciência. Elas se complementam:
+
+- **R** nasceu, em 1993, especificamente para **estatística**. É a linguagem com a maior coleção de pacotes prontos para análise de dados clínicos, epidemiologia, ensaios clínicos, meta-análise e bioestatística em geral. Quase todo livro-texto de estatística aplicada à saúde traz exemplos em R.
+
+- **Python** é uma linguagem de propósito geral que se tornou padrão em **ciência de dados, aprendizado de máquina (machine learning) e inteligência artificial**. É também a linguagem dominante quando o trabalho envolve grandes volumes de dados, automação, integração com a web e modelos de IA generativa.
+
+Em vez de escolher um lado, este curso vai ensinar **as duas em paralelo**, lado a lado, para que você desenvolva o critério de saber **quando cada uma é a ferramenta certa**. A boa notícia: hoje, com o auxílio de agentes de IA, a barreira de entrada para escrever código em qualquer das duas linguagens é muito menor do que era há cinco anos.
+
+::: {.callout-note}
+## Não vamos programar agora
+Neste capítulo, **só vamos instalar**. Não escreveremos código de análise ainda — isso fica para o Módulo 2. Aqui o objetivo é deixar seu computador pronto.
+:::
+
+## O que vamos instalar
+
+| Software | Para que serve | Como instalaremos |
+|---|---|---|
+| **R** | Linguagem para estatística e análise de dados | Instalador oficial do CRAN |
+| **Anaconda Distribution** | Pacote completo que inclui Python + bibliotecas científicas + Jupyter + interface gráfica (Anaconda Navigator) | Instalador oficial do Anaconda |
+
+Ao final, você terá Python e R instalados e prontos para serem usados. As **interfaces de uso** (RStudio, Positron, VS Code, Jupyter) virão nos capítulos seguintes.
+
+::: {.callout-tip}
+## Selecione seu sistema operacional uma vez
+As abas abaixo (macOS / Windows / Linux) estão sincronizadas em todo o site: ao escolher seu SO em uma aba, todas as outras páginas do curso vão mostrar automaticamente as instruções correspondentes. Não precisa selecionar de novo a cada capítulo.
+:::
+
+## Instalando o R
+
+::: {.panel-tabset group="os"}
+
+### macOS
+
+**Passo 1. Descubra qual chip seu Mac usa.**
+
+Antes de baixar, você precisa saber se seu Mac tem chip **Apple Silicon** (M1, M2, M3, M4 etc.) ou **Intel**. Para verificar:
+
+1. Clique no menu Apple ( ) no canto superior esquerdo da tela.
+2. Clique em **Sobre Este Mac**.
+3. Olhe a linha **Chip** ou **Processador**:
+   - Se estiver escrito "Chip Apple M1", "M2", "M3" ou "M4" → você tem **Apple Silicon**.
+   - Se estiver escrito "Processador Intel..." → você tem um **Mac Intel**.
+
+Anote essa informação. Vamos usar daqui a pouco.
+
+**Passo 2. Baixe o instalador do R.**
+
+1. Acesse [cran.r-project.org](https://cran.r-project.org).
+2. Clique em **Download R for macOS**.
+3. Na página seguinte, na seção **Latest release**, baixe o arquivo correspondente ao seu chip:
+   - **Apple Silicon:** o arquivo termina em `-arm64.pkg` (ex.: `R-4.5.0-arm64.pkg`).
+   - **Intel:** o arquivo termina em `-x86_64.pkg` (ex.: `R-4.5.0-x86_64.pkg`).
+
+Baixar o arquivo errado é a causa mais comum de problemas no Mac, então confira novamente antes de clicar.
+
+**Passo 3. Execute o instalador.**
+
+1. Abra o arquivo `.pkg` baixado (na pasta Downloads).
+2. Siga o assistente clicando em **Continuar** → **Continuar** → **Concordar** → **Instalar**.
+3. Digite a senha do seu Mac quando solicitada.
+4. Aguarde a instalação concluir e clique em **Fechar**.
+
+O R fica disponível em **Aplicativos → R**.
+
+::: {.callout-tip collapse="true"}
+## Para quem já usa Homebrew (opcional)
+Se você já é usuário de [Homebrew](https://brew.sh) e prefere o terminal, pode instalar o R com:
+
+```bash
+brew install --cask r
+```
+
+Esse caminho é equivalente ao instalador oficial. Se você nunca ouviu falar em Homebrew, **ignore esta caixa** — o instalador `.pkg` do passo anterior é suficiente.
+:::
+
+### Windows
+
+**Passo 1. Baixe o instalador do R.**
+
+1. Acesse [cran.r-project.org](https://cran.r-project.org).
+2. Clique em **Download R for Windows**.
+3. Na página seguinte, clique em **base** (versão padrão para a maior parte dos usuários).
+4. Clique no link grande **Download R-X.X.X for Windows** (X.X.X é o número da versão atual; aceite o que estiver lá).
+
+O arquivo baixado é um `.exe` (ex.: `R-4.5.0-win.exe`).
+
+**Passo 2. Execute o instalador.**
+
+1. Na pasta Downloads, dê duplo-clique no arquivo `.exe`.
+2. Se o Windows mostrar um aviso de segurança, clique em **Sim** ou **Executar mesmo assim**.
+3. Selecione o idioma (Português) e clique em **OK**.
+4. Aceite o contrato de licença (clique em **Avançar**).
+5. **Mantenha o caminho de instalação padrão** — não mude a pasta sugerida.
+6. Em **Selecionar Componentes**, mantenha tudo marcado e clique **Avançar**.
+7. Em **Opções de Inicialização**, escolha **Não (aceitar padrão)** e clique **Avançar**.
+8. Mantenha o nome padrão da pasta no Menu Iniciar e clique **Avançar**.
+9. Em **Tarefas Adicionais**, mantenha as opções padrão e clique **Avançar**.
+10. Aguarde a instalação e clique em **Concluir**.
+
+O R fica disponível no **Menu Iniciar → R → R x64**.
+
+### Linux
+
+A instalação do R no Linux varia conforme a sua distribuição. Os comandos abaixo cobrem as três famílias mais comuns. Abra o terminal (atalho geralmente `Ctrl+Alt+T`) e execute o comando da sua distro.
+
+**Ubuntu / Debian / Linux Mint / Pop!_OS:**
+
+```bash
+sudo apt update
+sudo apt install r-base r-base-dev
+```
+
+**Fedora / Red Hat / CentOS / Rocky Linux:**
+
+```bash
+sudo dnf install R
+```
+
+**Arch / Manjaro:**
+
+```bash
+sudo pacman -S r
+```
+
+Para outras distribuições, ou para garantir a versão mais atual, consulte o [guia oficial do CRAN para Linux](https://cran.r-project.org/bin/linux/).
+
+:::
+
+## Instalando o Python (via Anaconda)
+
+Existem várias formas de instalar Python. Para este curso vamos usar a **Anaconda Distribution**, por três motivos:
+
+1. **Vem com tudo o que precisamos prontos:** Python + bibliotecas científicas (pandas, numpy, scikit-learn, matplotlib...) + Jupyter — em uma única instalação.
+2. **Tem interface gráfica.** O **Anaconda Navigator** permite abrir notebooks, criar ambientes e gerenciar pacotes apontando e clicando, sem precisar de terminal.
+3. **É o padrão em ciência e ensino.** A maior parte dos cursos universitários e tutoriais que você encontrará na internet assume Anaconda.
+
+::: {.callout-note}
+## Sobre o licenciamento
+A Anaconda Distribution é **gratuita para uso individual, acadêmico e em pesquisa não-comercial** — o nosso caso. Há cobrança apenas para uso institucional intenso em organizações comerciais com mais de 200 funcionários, o que não se aplica a estudantes e professores universitários trabalhando em pesquisa científica.
+:::
+
+::: {.callout-note collapse="true"}
+## Existe uma nova versão em beta — Anaconda Desktop
+Em **28 de abril de 2026**, a Anaconda lançou a versão **public beta** do **Anaconda Desktop** [[anúncio oficial](https://www.anaconda.com/blog/introducing-anaconda-desktop)], que será, com o tempo, a substituta natural do Anaconda Navigator. Ela mantém tudo o que o Navigator faz (criar e gerenciar ambientes conda, instalar pacotes, abrir Jupyter Notebook) e adiciona uma camada nova: **descoberta e execução de modelos de IA generativa diretamente no seu computador**, sem depender da nuvem.
+
+**Por que ainda não estamos usando o Anaconda Desktop neste curso:**
+
+- Acabou de sair em beta pública. A documentação ainda é imatura e a interface pode mudar de forma significativa nos próximos meses.
+- O Anaconda Navigator continuará sendo **oficialmente suportado pela Anaconda até o final de 2026**, então quem instalar agora não terá problemas durante toda a duração deste curso.
+- Para quem está dando os primeiros passos em programação, vale priorizar uma ferramenta estável e amplamente documentada.
+
+**O que faremos:** quando o Anaconda Desktop sair de beta — provavelmente no segundo semestre de 2026 — este capítulo será atualizado e a transição será explicada. Se você é uma pessoa curiosa e gosta de testar versões novas, sinta-se à vontade para baixar o Anaconda Desktop diretamente em [anaconda.com/download](https://www.anaconda.com/download) (procure pela aba **Desktop**); para fins do curso, no entanto, recomendamos seguir com o Anaconda Navigator descrito a seguir.
+:::
+
+::: {.panel-tabset group="os"}
+
+### macOS
+
+**Passo 1. Baixe o instalador do Anaconda.**
+
+1. Acesse [anaconda.com/download](https://www.anaconda.com/download).
+2. Pode aparecer um formulário pedindo seu e-mail. Você pode preencher (recebe e-mails ocasionais com novidades) **ou** clicar em **Skip registration / Pular** logo abaixo do formulário — em ambos os casos o download é o mesmo.
+3. Na página de download, escolha **macOS** e baixe o instalador correspondente ao seu chip:
+   - **Apple Silicon:** procure o arquivo com **Apple Silicon** ou `arm64` no nome.
+   - **Intel:** procure o arquivo com **Intel** ou `x86_64` no nome.
+4. Baixe a versão **Graphical Installer** (instalador gráfico, com `.pkg`), que é mais fácil para iniciantes.
+
+::: {.callout-warning}
+## Atenção ao tamanho
+O instalador do Anaconda tem cerca de **800 MB** e a instalação ocupa de **3 a 5 GB** em disco. Verifique se há espaço suficiente antes de começar.
+:::
+
+**Passo 2. Execute o instalador.**
+
+1. Abra o arquivo `.pkg` baixado.
+2. Siga o assistente: **Continuar** → **Continuar** → **Concordar** com os termos → **Instalar**.
+3. Digite a senha do Mac quando solicitada.
+4. Aguarde (a instalação leva alguns minutos).
+5. Quando concluída, clique em **Fechar**. Pode descartar o instalador na lixeira.
+
+**Passo 3. Abra o Anaconda Navigator pela primeira vez.**
+
+1. Vá em **Aplicativos → Anaconda Navigator**.
+2. A primeira abertura demora um pouco (até um minuto). Aguarde.
+3. Quando abrir, você verá uma janela com vários ícones de aplicativos disponíveis (Jupyter Notebook, JupyterLab, Spyder, etc.).
+
+Se você chegou nessa tela, **a instalação do Python via Anaconda está pronta**.
+
+### Windows
+
+**Passo 1. Baixe o instalador do Anaconda.**
+
+1. Acesse [anaconda.com/download](https://www.anaconda.com/download).
+2. Se aparecer formulário pedindo e-mail, preencha ou clique em **Skip registration / Pular**.
+3. Na página de download, escolha **Windows** e baixe o **Graphical Installer** (`.exe`).
+
+::: {.callout-warning}
+## Atenção ao tamanho
+O instalador tem cerca de **900 MB** e a instalação ocupa de **3 a 5 GB** em disco. Verifique se há espaço suficiente antes de começar.
+:::
+
+**Passo 2. Execute o instalador.**
+
+1. Na pasta Downloads, dê duplo-clique no arquivo `.exe` baixado.
+2. Se o Windows mostrar um aviso de segurança, clique em **Sim** ou **Executar mesmo assim**.
+3. Na primeira tela, clique em **Next**.
+4. Aceite o contrato de licença (**I Agree**).
+5. Em **Select Installation Type**, escolha **Just Me (recommended)** e clique **Next**.
+6. Mantenha o caminho de instalação padrão e clique **Next**.
+7. Em **Advanced Installation Options**, deixe as caixas como estão (a opção "Add Anaconda to PATH" virá **desmarcada** — é o correto, **não marque**). Clique **Install**.
+8. Aguarde a instalação (vários minutos).
+9. Clique **Next** e depois **Finish**. Pode desmarcar as caixas que oferecem tutoriais.
+
+**Passo 3. Abra o Anaconda Navigator pela primeira vez.**
+
+1. Vá em **Menu Iniciar → Anaconda Navigator**.
+2. A primeira abertura demora um pouco. Aguarde.
+3. Quando abrir, você verá uma janela com ícones de Jupyter Notebook, JupyterLab, Spyder, etc.
+
+Se chegou nessa tela, **a instalação do Python via Anaconda está pronta**.
+
+### Linux
+
+**Passo 1. Baixe o instalador.**
+
+1. Acesse [anaconda.com/download](https://www.anaconda.com/download).
+2. Escolha **Linux** e baixe o instalador `.sh` para sua arquitetura (geralmente `x86_64`).
+
+**Passo 2. Execute o script de instalação.**
+
+Abra o terminal, navegue até a pasta de Downloads e execute (ajuste o nome do arquivo para o que você baixou):
+
+```bash
+cd ~/Downloads
+bash Anaconda3-2025.XX-Linux-x86_64.sh
+```
+
+Siga as instruções:
+
+1. Pressione **Enter** para ler o contrato de licença, depois **Enter** várias vezes até o final, e digite **yes** para aceitar.
+2. Aceite o caminho padrão de instalação (apenas pressione **Enter**).
+3. Quando perguntar se quer rodar `conda init`, digite **yes**.
+
+Feche e reabra o terminal para que as mudanças tenham efeito.
+
+**Passo 3. Verifique a instalação.**
+
+No terminal, execute:
+
+```bash
+conda --version
+```
+
+Deve aparecer algo como `conda 24.x.x`.
+
+Para abrir a interface gráfica:
+
+```bash
+anaconda-navigator
+```
+
+:::
+
+## Teste de verificação
+
+Esta seção é importante: vamos confirmar que **as duas instalações funcionaram** antes de seguir adiante. É comum uma instalação parecer ter dado certo (sem mensagens de erro) e algo estar no lugar errado — sem o teste, você só descobriria isso 3 capítulos à frente, sem saber por onde começar a investigar.
+
+### Testando o R
+
+::: {.panel-tabset group="os"}
+
+#### macOS
+
+1. Abra **Aplicativos → R**.
+2. Vai aparecer uma janela com texto e um cursor após o sinal `>`. Esse é o **console do R**.
+3. Digite a expressão abaixo e pressione **Enter**:
+   ```r
+   2 + 2
+   ```
+   Deve aparecer:
+   ```
+   [1] 4
+   ```
+4. Agora digite e pressione **Enter**:
+   ```r
+   R.version.string
+   ```
+   Deve aparecer algo como:
+   ```
+   [1] "R version 4.5.0 (2025-04-11)"
+   ```
+
+Se viu os dois resultados acima, **o R está pronto**.
+
+#### Windows
+
+1. Abra **Menu Iniciar → R → R x64**.
+2. Vai aparecer uma janela chamada **RGui** com um console (texto e cursor após o sinal `>`).
+3. Digite e pressione **Enter**:
+   ```r
+   2 + 2
+   ```
+   Deve aparecer:
+   ```
+   [1] 4
+   ```
+4. Digite e pressione **Enter**:
+   ```r
+   R.version.string
+   ```
+   Deve aparecer algo como:
+   ```
+   [1] "R version 4.5.0 (2025-04-11)"
+   ```
+
+Se viu os dois resultados acima, **o R está pronto**.
+
+#### Linux
+
+1. No terminal, digite:
+   ```bash
+   R
+   ```
+   (a letra `R` maiúscula e Enter).
+2. O console do R abre dentro do próprio terminal, com cursor após o sinal `>`.
+3. Digite e pressione **Enter**:
+   ```r
+   2 + 2
+   ```
+   Deve aparecer:
+   ```
+   [1] 4
+   ```
+4. Digite:
+   ```r
+   R.version.string
+   ```
+   Deve aparecer algo como:
+   ```
+   [1] "R version 4.5.0 (2025-04-11)"
+   ```
+5. Para sair do R, digite `q()` e responda `n` quando perguntar se quer salvar a sessão.
+
+Se viu os resultados acima, **o R está pronto**.
+
+:::
+
+### Testando o Python (via Anaconda)
+
+Vamos usar o **JupyterLab**, que já vem com o Anaconda. É um ambiente que executa código Python no navegador.
+
+1. Abra o **Anaconda Navigator**.
+2. Procure o cartão chamado **JupyterLab** e clique em **Launch** (Iniciar). Pode demorar alguns segundos.
+3. Seu navegador padrão vai abrir uma página com o JupyterLab.
+4. No menu, clique em **File → New → Notebook**. Quando perguntar o kernel, escolha **Python 3 (ipykernel)** e clique em **Select**.
+5. Vai aparecer um documento com uma **célula de código** (uma caixa com cursor).
+6. Digite na célula:
+   ```python
+   2 + 2
+   ```
+   Pressione **Shift + Enter** para executar. Logo abaixo da célula deve aparecer:
+   ```
+   4
+   ```
+7. Em uma nova célula (clique no `+` no topo da janela), digite:
+   ```python
+   import sys
+   print(sys.version)
+   ```
+   Pressione **Shift + Enter**. Deve aparecer algo como:
+   ```
+   3.12.7 | packaged by Anaconda, Inc. | ...
+   ```
+
+Se viu os dois resultados, **o Python está pronto**.
+
+Você pode fechar o JupyterLab por enquanto. Voltaremos a usá-lo no Módulo 2.
+
+## Problemas comuns
+
+::: {.callout-warning collapse="true"}
+## "Baixei a versão errada do R no Mac (Apple Silicon vs. Intel)"
+Sintoma: o R abre, mas trava ao executar comandos, ou apresenta avisos de "arquitetura incompatível".
+
+Solução: desinstale o R (arraste de Aplicativos para a Lixeira), volte ao Passo 1 da instalação no macOS e baixe o arquivo correto para seu chip. Verifique no menu Apple → Sobre Este Mac qual é a sua arquitetura.
+:::
+
+::: {.callout-warning collapse="true"}
+## "O Anaconda está ocupando muito espaço no disco"
+A Anaconda Distribution completa traz centenas de pacotes, alguns dos quais você talvez nunca use. Se isso for um problema:
+
+- **Para esse curso, mantenha a Anaconda completa** — vamos usar várias bibliotecas científicas e a interface gráfica facilita a vida no início.
+- Se o espaço em disco for crítico, existe uma versão mínima chamada **Miniconda** ([docs.conda.io/en/latest/miniconda.html](https://docs.conda.io/en/latest/miniconda.html)), que vem só com o `conda` e o Python — você instala os pacotes conforme precisa. Mais leve, porém exige terminal desde o início.
+:::
+
+::: {.callout-warning collapse="true"}
+## "O Anaconda Navigator não abre / fica travado"
+Tente os passos abaixo, na ordem:
+
+1. Feche o Anaconda Navigator completamente e abra de novo.
+2. Reinicie o computador e tente abrir o Navigator de novo.
+3. Se ainda assim não funcionar, abra o terminal (Mac/Linux) ou o **Anaconda Prompt** (Windows: Menu Iniciar → Anaconda Prompt) e digite:
+   ```bash
+   anaconda-navigator
+   ```
+   Se aparecer alguma mensagem de erro, anote-a — ela vai ajudar a diagnosticar.
+:::
+
+::: {.callout-warning collapse="true"}
+## "Digito `python` no terminal e não acontece nada / dá erro"
+No Windows e em algumas configurações de Mac, o `python` instalado pelo Anaconda **não é adicionado ao terminal padrão do sistema** automaticamente — isso é o comportamento recomendado pelo Anaconda para evitar conflitos com outras instalações de Python.
+
+Por enquanto **não é um problema**: vamos sempre acessar o Python pelo Anaconda Navigator ou pelo **Anaconda Prompt** (Windows). No Módulo 1, ao aprender o terminal, vamos voltar a esse tema e configurar o acesso direto se você quiser.
+:::
+
+## O que vem a seguir
+
+Com R e Python instalados, o próximo capítulo cobre as **IDEs** (*Integrated Development Environments*) — os editores onde de fato escreveremos o código. Você vai conhecer **Positron**, **RStudio** e **VS Code**, e escolher o que se encaixa melhor no seu fluxo.

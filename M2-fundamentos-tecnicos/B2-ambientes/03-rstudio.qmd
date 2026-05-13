@@ -1,0 +1,93 @@
+---
+title: "RStudio"
+---
+
+Antes de 2011, programar em **R** era uma experiência fragmentada. Você abria o R puro num console minimalista (uma janela preta com prompt `>`), escrevia o código num editor de texto qualquer (Notepad++, gedit, TextMate) e ia copiando e colando entre os dois. Cada gráfico que você gerava abria numa janela separada do sistema. Não havia integração entre código, dados e saída. Estatísticos toleravam porque tinham que.
+
+Em 2011 chegou o **RStudio**, e em poucos anos virou padrão absoluto. Por mais de uma década, "fazer R" foi praticamente sinônimo de "usar o RStudio". Este capítulo é sobre essa IDE clássica — o que ela é, de onde veio, e quando ainda faz sentido escolhê-la em vez do Positron.
+
+## A história
+
+Em 2009, o empreendedor **J.J. Allaire** fundou uma startup com a missão específica de criar uma IDE moderna para R. Allaire era veterano em ferramentas de software para programadores — havia cofundado a Allaire Corporation nos anos 1990, criadora do **ColdFusion** (linguagem para desenvolvimento web), vendida para a Macromedia em 2001 (que por sua vez foi comprada pela Adobe). O perfil do empreendedor era de fazer ferramentas de programação consumir bem.
+
+A primeira versão pública do **RStudio IDE** [@rstudio2024ide] saiu em **fevereiro de 2011**, gratuita e open source (sob licença AGPL). A proposta era simples e ambiciosa: juntar tudo que um pesquisador estatístico precisa numa janela só — editor de scripts, console R interativo, painel de variáveis em memória, painel de plots, painel de ajuda, gerenciador de pacotes, controle de versão.
+
+A adesão foi rápida e total. Em poucos anos, virou padrão em departamentos de estatística, biostatística, epidemiologia, e ciências sociais quantitativas. Os cursos universitários migraram para RStudio. Os livros didáticos passaram a assumir RStudio. Conferências como a `useR!` e a `rstudio::conf` reforçaram a centralidade da ferramenta.
+
+A empresa cresceu construindo um portfólio em volta do R. Pacotes essenciais saíram dali ou foram cooptados pela equipe da empresa: **dplyr** e o resto do **tidyverse** (Hadley Wickham foi contratado pela RStudio em 2013), **rmarkdown**, **shiny**, **knitr** (Yihui Xie), **devtools**. Produtos comerciais para servidores e equipes (RStudio Server, RStudio Connect — depois renomeados Posit Workbench, Posit Connect). Tudo orbitando o RStudio Desktop como o ponto de entrada.
+
+Em **agosto de 2022**, a empresa mudou de nome de **RStudio Inc.** para **Posit PBC**. A justificativa: o portfólio havia crescido para muito além de "uma IDE para R". Python tinha entrado oficialmente (a IDE passou a suportar reticulate, ambientes Python integrados); Quarto havia sido lançado pela mesma equipe como sucessor multilíngue do R Markdown; havia produtos para JupyterLab. Manter "RStudio" como nome corporativo confundia — soava como se a empresa fosse só sobre uma ferramenta. O rebranding desacoplou o nome da empresa do nome do produto.
+
+A IDE em si **continua se chamando RStudio**. E continua sendo desenvolvida e mantida pela Posit em paralelo ao Positron. Não foi descontinuada.
+
+## Anatomia do RStudio
+
+Quem nunca abriu o RStudio: a janela é dividida em quatro painéis, em layout 2x2 padrão (configurável):
+
+```
+┌─────────────────────┬─────────────────────┐
+│  Editor de scripts  │  Ambiente / History │
+│  (.R, .Rmd, .qmd)   │  (variáveis e logs) │
+├─────────────────────┼─────────────────────┤
+│  Console R          │  Files / Plots /    │
+│  (REPL persistente) │  Packages / Help    │
+└─────────────────────┴─────────────────────┘
+```
+
+- **Editor de scripts** (canto superior esquerdo): onde você escreve código. Atalho `Cmd+Enter` (Mac) ou `Ctrl+Enter` (Windows/Linux) executa a linha onde está o cursor no console abaixo.
+- **Console R** (canto inferior esquerdo): REPL persistente — mantém o ambiente vivo entre execuções. Você pode interagir direto, ou só ver o output do que foi rodado a partir do editor.
+- **Ambiente** (canto superior direito): lista todas as variáveis e funções carregadas na sessão, com tipo, dimensões e (clicando) estrutura interna.
+- **Files / Plots / Packages / Help** (canto inferior direito): navegador de arquivos do projeto, galeria de plots gerados na sessão, gerenciador de pacotes instalados, e visualizador de páginas de ajuda.
+
+Esse layout 2x2 — editor + console à esquerda, ambiente + auxiliares à direita — virou o **padrão visual implícito** de IDE de ciência de dados. Spyder, Positron, Eclipse com StatET, todos seguem alguma variação dele.
+
+## Recursos que tornaram o RStudio referência
+
+Alguns recursos que o RStudio popularizou e que hoje são padrão em IDEs científicas:
+
+- **Projetos** (`.Rproj`) — abrir uma pasta como "projeto" estabelece automaticamente o diretório de trabalho, a sessão R associada, o histórico, as configurações específicas. Um clique para reabrir um projeto antigo de cinco anos atrás com tudo no mesmo estado.
+
+- **R Markdown** — formato de documento que mistura texto Markdown e código R, antecessor direto do Quarto. Lançado em 2014. O suporte profundo no RStudio (preview ao vivo, knit com um botão) tornou possível pesquisa reprodutível em massa em R.
+
+- **Shiny** — framework para criar aplicações web interativas a partir de R, com painel dedicado no RStudio para rodar e debugar.
+
+- **Visualização de dados** (`View(dados)`) — abre um data frame como tabela interativa com filtros e ordenação. Para um pesquisador habituado ao Excel, foi a ponte que tornou R acessível.
+
+- **Integração com Git** — painel de controle de versão integrado, permitindo commit, push, pull sem sair da IDE. RStudio foi uma das primeiras IDEs científicas a tratar Git como cidadão de primeira classe.
+
+## Quando ainda faz sentido escolher RStudio
+
+Para a maioria dos casos novos, **a recomendação é Positron**. Mas há cenários onde RStudio continua sendo escolha sensata:
+
+- **Você já usa há anos.** Migrar de IDE custa atrito — ajustar memória muscular, reaprender atalhos, descobrir onde ficam as configurações. Se o RStudio funciona pra você, mudar tem custo e benefício discutível. Trocar quando virar empecilho, não antes.
+
+- **Sua instituição padronizou.** Algumas universidades, hospitais e laboratórios têm o **Posit Workbench** (versão corporativa do RStudio Server, que serve a IDE pelo navegador para múltiplos usuários) configurado em servidores institucionais. Material didático e fluxos do laboratório assumem esse ambiente. Aí RStudio é o caminho de menor resistência.
+
+- **Você só vai usar R.** Se Python e Quarto avançado não entram no seu fluxo (você é estatístico que mexe só com R), RStudio cobre 100% do que você precisa, e Positron tem features que você nunca vai usar.
+
+- **Você ensina R para iniciantes em ambiente formal.** RStudio é universalmente conhecido entre instrutores; tutoriais e materiais didáticos online assumem RStudio na maioria; alunos chegam com referências familiares. Para curso introdutório, ainda é a escolha pedagogicamente óbvia (apesar de Positron estar fechando essa lacuna rapidamente).
+
+## O que esperar nos próximos anos
+
+A trajetória provável: **RStudio continuará mantido**, mas o investimento principal da Posit migrou para o Positron. Isso significa que features novas tendem a aparecer primeiro no Positron, e o RStudio recebe principalmente correções e estabilidade. Isso não é descontinuação — é a posição clássica de produto maduro estável recebendo manutenção enquanto o sucessor cresce.
+
+O paralelo histórico mais próximo: o **R Markdown** seguiu existindo após o lançamento do Quarto em 2022, e segue funcionando — mas Quarto recebe todo o investimento de novidades. R Markdown não vai morrer; ele simplesmente parou de evoluir.
+
+::: {.callout-note}
+## RStudio vai virar legacy em quanto tempo?
+Difícil precisar. A Posit não anunciou descontinuação e provavelmente não anunciará tão cedo — a base instalada de estatísticos e instituições é massiva, e o produto continua funcional. Espere um arco longo (cinco a dez anos) onde os dois coexistem, com Positron crescendo e RStudio mantido em modo estável. Em algum momento dessa janela, faz sentido planejar a migração; até lá, escolha o que melhor cabe no seu fluxo atual.
+:::
+
+## Conexão com IA
+
+RStudio aceita integração com agentes de IA via dois caminhos. O primeiro é via **addins** — pequenas extensões em R que aparecem no menu *Addins*. Existem addins de Claude (`chattr`), de OpenAI (`gptstudio`), e outros, que permitem invocar o agente sobre código selecionado.
+
+O segundo, mais flexível, é o mesmo que vale para Positron: **abrir o terminal integrado do RStudio (aba *Terminal*, ao lado do Console) e rodar Claude Code, Codex CLI ou Gemini CLI ali**. Isso funciona em qualquer versão recente do RStudio, sem dependência de extensões específicas.
+
+A integração de IA no RStudio em si tende a ser menos profunda que no Positron daqui pra frente — a Posit está concentrando esse esforço no produto novo. Para uso pesado de IA dentro da IDE, é mais um motivo para considerar a migração para Positron.
+
+## O que vem a seguir
+
+O próximo capítulo é sobre o **VS Code** — a IDE universal da Microsoft, base técnica do Positron, e a IDE mais usada do mundo. Quando faz sentido escolher VS Code para pesquisa científica, e o que esperar dele.
+
+→ [04 · VS Code](04-vscode.qmd)

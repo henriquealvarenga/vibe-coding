@@ -1,0 +1,136 @@
+---
+title: "Versão semântica, dependências e lockfiles"
+---
+
+Você fez uma análise há um ano com R 4.3.2 e o pacote `ggplot2` 3.4.0. Hoje, um colega tenta reproduzir com R 4.5.0 e `ggplot2` 4.0.0. O *script* roda — mas o gráfico sai diferente, ou pior, os números do modelo divergem ligeiramente. Sem nenhuma mudança no código.
+
+A causa quase sempre está em **versões**. R, Python, pacotes e bibliotecas evoluem; uma função muda de comportamento padrão; um valor *default* é alterado; um bug é corrigido (mudando resultado de quem dependia do bug). Para que análise científica seja reprodutível, precisa-se de duas coisas: **entender** o que cada número de versão significa, e **travar** as versões usadas.
+
+## Anatomia de um número de versão
+
+Praticamente todo software usa o padrão **`MAJOR.MINOR.PATCH`** — três números separados por pontos:
+
+``` text
+ggplot2  3.5.1
+         │ │ │
+         │ │ └── PATCH:  correção de bug (3.5.0 → 3.5.1)
+         │ └──── MINOR:  nova funcionalidade compatível (3.4.0 → 3.5.0)
+         └────── MAJOR:  mudança incompatível (3.x → 4.0.0)
+```
+
+Esse esquema chama-se **Semantic Versioning** (ou **SemVer**), formalizado por Tom Preston-Werner em 2013 [@prestonwerner2013semver]. As três regras de incremento:
+
+- **MAJOR** sobe quando há **mudança incompatível** com versões anteriores. Código que rodava na 3.x pode não rodar na 4.0.
+- **MINOR** sobe quando funcionalidade nova é adicionada de forma **compatível**. Código antigo continua funcionando.
+- **PATCH** sobe quando bug é corrigido de forma compatível.
+
+A regra de bolso: ler `3.5.1 → 3.5.2` te diz "consertaram alguma coisa, devo poder atualizar sem dor"; ler `3.5.1 → 4.0.0` te diz "leia o changelog antes de atualizar, alguma coisa quebrou".
+
+::: {.callout-note}
+## Pré-lançamentos
+Versões em desenvolvimento aparecem com sufixo: `4.0.0-rc.1` (*release candidate*), `2.5.0-beta.3`, `1.0.0-alpha`. SemVer 2.0 trata sufixos `-algo` como **versão menor** que a versão "limpa": `4.0.0-rc.1` vem **antes** de `4.0.0`.
+:::
+
+## Operadores de versão em arquivos de dependência
+
+Quando você lista um pacote como dependência num arquivo de configuração (`DESCRIPTION` em R, `pyproject.toml` em Python, `package.json` em Node.js), pode dizer **qual faixa de versão você aceita** usando operadores:
+
+| Operador | Significado | Exemplo |
+|---|---|---|
+| `1.2.3` (sem operador) | Exatamente essa versão (varia por ecossistema) | `ggplot2 1.2.3` |
+| `>=1.2.3` | Essa versão ou qualquer mais nova | `dplyr (>= 1.1.0)` em R |
+| `^1.2.3` | Compatível com 1.x — aceita até < 2.0.0 | `"react": "^18.2.0"` em Node |
+| `~1.2.3` | Compatível com 1.2.x — aceita até < 1.3.0 | `"lodash": "~4.17.20"` |
+| `==1.2.3` | Exatamente essa versão (Python) | `numpy==1.26.4` |
+| `<2` | Qualquer versão menor que 2 | `pandas<2` |
+
+Os operadores **só dizem qual faixa é aceitável** — não "exatamente o que será instalado". Quando você roda `install.packages()` ou `pip install`, o gerenciador escolhe a versão mais nova **dentro da faixa permitida** que existe no momento. Daqui a três meses, o mesmo arquivo de dependências pode resultar em versões diferentes — e é aí que entra o lockfile.
+
+## O problema da reprodutibilidade científica
+
+Para análise científica, faixa de versões não basta. Você precisa de **exatidão**. Compare os dois cenários:
+
+**Cenário 1 — só dependências (faixa).** O `DESCRIPTION` do seu projeto diz `dplyr (>= 1.1.0)`. Você instala em janeiro; pega a versão 1.1.4 (a mais nova na época). Em dezembro, alguém clona o projeto e roda; o gerenciador instala a 1.2.0 (lançada em outubro). Se uma função do `dplyr` mudou comportamento entre 1.1.x e 1.2.x — coisa que **não deveria** acontecer em uma `MINOR`, mas acontece — sua análise quebra ou (pior) silenciosamente produz resultado diferente.
+
+**Cenário 2 — com lockfile.** Você travou as versões: `dplyr 1.1.4`, `ggplot2 3.4.4`, e mais 87 pacotes com versões exatas, no arquivo `renv.lock`. Em dezembro, quem clona instala **exatamente as mesmas versões** que você usou em janeiro. Reprodutibilidade preservada.
+
+Esse é o problema clássico de @baker2016reproducibility: parte significativa da "crise de reprodutibilidade" na ciência computacional vem de divergência silenciosa de ambientes. @peng2011reproducible argumenta que tornar análise científica reprodutível exige que o ambiente de execução seja **arquivado junto com o código**.
+
+## Lockfiles: a solução prática
+
+**Lockfile** é um arquivo gerado automaticamente pelo gerenciador de pacotes que registra **a versão exata** de cada dependência (e das dependências dessas dependências, recursivamente).
+
+| Linguagem | Gerenciador | Arquivo de declaração | Lockfile |
+|---|---|---|---|
+| **R** | `renv` | `DESCRIPTION` | **`renv.lock`** |
+| **Python** | `uv` (moderno) | `pyproject.toml` | **`uv.lock`** |
+| **Python** | `poetry` | `pyproject.toml` | **`poetry.lock`** |
+| **Python** | `pip` (clássico) | `requirements.txt` | (gerado via `pip freeze > requirements.txt`) |
+| **Node.js** | `npm` | `package.json` | `package-lock.json` |
+| **Rust** | `cargo` | `Cargo.toml` | `Cargo.lock` |
+| **Quarto** | (não tem) | — | — (delega para R/Python) |
+
+Para o curso, os dois que importam são **`renv.lock`** (R) e **`uv.lock`** ou **`requirements.txt`** (Python). O capítulo *Ambientes reprodutíveis: renv, venv, uv* (M3-B3-04) cobre o uso prático.
+
+::: {.callout-tip}
+## A regra prática: o que comitar
+- **Comite no Git:** `DESCRIPTION` / `pyproject.toml` / `requirements.txt` (declaração de intenção) **e** o lockfile (`renv.lock`, `uv.lock`).
+- **Não comite:** `.venv/`, `renv/library/`, `node_modules/` — são as bibliotecas em si, podem ter gigabytes, e qualquer pessoa reproduz a partir do lockfile.
+- **Quem clona o projeto** roda `renv::restore()` (R) ou `uv sync` (Python) e ganha o ambiente idêntico ao seu.
+:::
+
+## Versões nas ferramentas do curso
+
+Você vai encontrar números de versão em vários lugares — vale saber onde olhar:
+
+``` r
+# R: versão da própria linguagem
+R.version.string
+# [1] "R version 4.4.2 (2024-10-31)"
+
+# R: versão de um pacote instalado
+packageVersion("ggplot2")
+# [1] '3.5.1'
+```
+
+``` python
+# Python: versão da própria linguagem
+import sys
+sys.version
+# '3.12.5 ...'
+
+# Python: versão de um pacote
+import pandas
+pandas.__version__
+# '2.2.3'
+```
+
+``` bash
+# Quarto:
+quarto --version
+# 1.5.57
+
+# Git:
+git --version
+
+# uv:
+uv --version
+```
+
+Saber a versão exata é o primeiro passo para reportar bug, pedir ajuda ao agente, ou conferir se está usando uma feature que existe na sua versão.
+
+## Conexão com IA
+
+Versões impactam diretamente o quanto você pode confiar na resposta de um agente:
+
+- **O agente pode sugerir API que ainda não existe.** Ex.: pedir código com `ggplot2` 4.0 features quando você está com 3.5. Sempre pergunte ao agente para confirmar a versão mínima da feature sugerida.
+- **O agente pode sugerir API que já não existe.** Ex.: usar `aes_string()` que foi *deprecated* em `ggplot2` 3.0. O modelo foi treinado com código antigo na base; assume disponível o que não está mais.
+- **Para ambos os casos**, mencione no `AGENTS.md` (ou no início da conversa) qual é a sua *stack*: "estou em R 4.4.2 com tidyverse 2.0, ggplot2 3.5.1". O agente passa a calibrar as sugestões.
+
+@wilson2017good lista travar dependências como uma das práticas mínimas para ciência computacional defensável; o lockfile é o instrumento técnico dessa prática.
+
+## O que vem a seguir
+
+Versionamento cuida de "qual versão de cada peça". O próximo capítulo cuida de **onde cada peça mora dentro do projeto** — a estrutura clássica de pastas (`data/`, `R/`, `output/`, `references/`) que separa entrada de saída e facilita reprodução por terceiros.
+
+→ [09 · Estrutura clássica de projeto técnico](09-estrutura-projeto.qmd)

@@ -1,0 +1,168 @@
+---
+title: "Organização de arquivos: raw, processed, output"
+---
+
+Você terminou um artigo dois anos atrás. Coorte de 487 pacientes, regressão multivariada, três figuras, duas tabelas — saiu publicado. Agora o revisor de outro manuscrito que cita o seu pediu pra você confirmar um número específico que aparece no abstract: a sobrevida em 12 meses do grupo intervenção. Você abre a pasta antiga do projeto e encontra:
+
+```
+PROJETO_FINAL/
+├── dados.xlsx
+├── dados_v2.xlsx
+├── dados_FINAL.xlsx
+├── dados_FINAL_corrigido.xlsx
+├── analise.R
+├── analise2.R
+├── analise_revisao.R
+├── analise_FINAL_definitivo.R
+├── grafico1.png
+├── tabela1.xlsx
+├── relatorio.docx
+└── output_30jul.csv
+```
+
+Qual `dados_*.xlsx` foi usado pelo `analise_FINAL_definitivo.R`? O `grafico1.png` corresponde ao código de qual versão? O `output_30jul.csv` é input ou output? Você não consegue refazer a análise — possivelmente nem você mesmo, dois anos depois, descobriria. O artigo já está publicado, mas a reprodutibilidade está perdida.
+
+Esse cenário é o **caso típico de pesquisa sem disciplina de organização**, e ele acontece em prevalência muito maior do que se imagina. Este capítulo fecha o Bloco *Dados* tratando da disciplina que evita essa desordem: como estruturar pastas e arquivos de modo que o seu eu-do-futuro (e qualquer colaborador) consiga refazer a análise sem precisar de você.
+
+## A regra fundamental: separar fluxo de dados
+
+Toda análise de pesquisa percorre o mesmo arco genérico:
+
+```
+Dados brutos → limpeza/transformação → dados processados → análise → resultados
+```
+
+A regra fundamental de organização é: **cada uma dessas etapas deve viver em um lugar próprio, e nenhuma deve ser sobrescrita**. Especificamente, os dados brutos (raw) **nunca** são modificados; tudo o que muda é gerado a partir deles, em outras pastas, por scripts versionados.
+
+A estrutura mínima recomendada de um projeto de pesquisa, espelhando esse arco:
+
+```
+projeto-coorte/
+├── README.md                        ← descreve o projeto
+├── dados/
+│   ├── raw/                         ← intocável: como recebido
+│   │   └── extracao_2026-05-04.xlsx
+│   └── processed/                   ← gerado por scripts/
+│       ├── coorte.parquet
+│       └── coorte_long.parquet
+├── scripts/
+│   ├── 01-limpeza.R
+│   ├── 02-analise.R
+│   └── 03-figuras.R
+├── output/
+│   ├── tabela-1-caracteristicas.docx
+│   ├── tabela-2-desfechos.docx
+│   ├── figura-1-flowchart.png
+│   └── figura-2-sobrevida.png
+└── relatorio.qmd                    ← documento principal
+```
+
+Quatro princípios sustentam essa estrutura:
+
+**1. `dados/raw/` é sagrado.** Nunca edite, nunca reescreva. Se algum erro de origem for detectado, vá fundo até descobrir o que foi recebido e por que; mas não conserte direto no arquivo. Conserto vai num script de `dados/processed/`. Se possível, marque `dados/raw/` como **somente leitura** no sistema de arquivos para forçar a disciplina (`chmod -R u-w dados/raw/` em Mac/Linux).
+
+**2. `dados/processed/` é regenerável.** Pode ser apagado sem dor — um único `Rscript scripts/01-limpeza.R` deve reconstruir tudo. Isso é a razão pela qual o conteúdo de `processed/` **não vai para o Git** (vai no `.gitignore`); só vai o código que o gera.
+
+**3. `scripts/` numerados e ordenados.** Prefixos `01-`, `02-`, `03-` deixam óbvia a ordem de execução. Um colaborador que clona o repositório roda os três em sequência e tem o mesmo resultado.
+
+**4. `output/` é descartável.** Tabelas, figuras, PDFs renderizados. Tudo regerável a partir de `scripts/` + `dados/`. Vai no `.gitignore` também (com exceções para artefatos finais que você quer versionar — figuras finais para o artigo, por exemplo).
+
+::: {.callout-tip}
+## A estrutura é o seu seguro
+A regra "dados raw intocados, scripts numerados, output gerado" é o que separa pesquisa que **pode ser auditada** de pesquisa que **não pode**. No primeiro caso, alguém com o seu repositório consegue refazer cada número do artigo. No segundo (o caso PROJETO_FINAL/ da abertura), nem você consegue depois de 2 anos.
+
+Isso vai virar tema central no Módulo 3 (Reprodutibilidade) e Módulo 4 (Capstone) — mas começa aqui, na disciplina elementar de organização de arquivos.
+:::
+
+## Variações úteis da estrutura básica
+
+A estrutura acima é o **mínimo viável**. Conforme o projeto cresce, alguns acréscimos comuns:
+
+**`config.yml` na raiz.** Parâmetros do projeto fora do código: critérios de inclusão (`idade_min: 18`), seeds de aleatoriedade (`seed: 12345`), caminhos. Detalhado no capítulo M2-B3-07 (YAML).
+
+**`R/` ou `src/` para funções reusáveis.** Quando os scripts ficam grandes, vale separar funções em arquivos próprios (`R/utils-limpeza.R`) e os scripts (`scripts/01-limpeza.R`) só os chamam.
+
+**`docs/` para documentação narrativa.** Notas de reuniões, decisões metodológicas, registro de mudanças. Não confundir com `docs/` do Quarto (pasta de output do site renderizado).
+
+**`renv.lock` (R) ou `pyproject.toml` + `uv.lock` (Python).** Lockfiles de dependências, garantem que quem clona o projeto rode com as mesmas versões de pacotes. Detalhado em M2-B3-08.
+
+**`.gitignore`** lista o que NÃO vai para o Git: `dados/processed/`, `output/`, lockfiles temporários, segredos. Detalhado no Módulo 3 (Git).
+
+**`AGENTS.md`** descreve o projeto para agentes de IA (e para humanos). Convenções, comandos comuns, contexto. Detalhado em M1-B2-05.
+
+A estrutura completa, em projeto maduro de pesquisa:
+
+```
+projeto-coorte/
+├── README.md
+├── AGENTS.md
+├── .gitignore
+├── config.yml
+├── renv.lock                  (ou pyproject.toml + uv.lock)
+├── dados/
+│   ├── raw/                   (gitignored, em backup separado)
+│   └── processed/             (gitignored, regenerável)
+├── R/                         (funções reusáveis)
+├── scripts/                   (sequenciais, executáveis)
+├── output/                    (gitignored salvo exceções)
+├── docs/                      (notas narrativas)
+└── manuscrito.qmd
+```
+
+Não comece com a versão completa em projeto pequeno. Comece com `README` + `dados/raw/` + `scripts/` + `output/`, e cresça conforme a necessidade aparecer.
+
+## Conexão com tidy data
+
+Os dois últimos capítulos do Bloco se complementam: **tidy data** governa a estrutura interna de cada tabela; **organização de arquivos** governa onde as tabelas vivem.
+
+A regra `dados/raw/` intocado + `dados/processed/` regenerável combina perfeitamente com a workflow tidy:
+
+1. Você recebe `dados/raw/extracao_2026-05-04.xlsx` — provavelmente sujo, com colunas mal nomeadas, formato wide, encoding misturado.
+2. Roda `scripts/01-limpeza.R` que lê o raw, aplica transformações tidy, e produz `dados/processed/coorte.parquet` — tabelas limpas, formato long onde apropriado, tipos corretos.
+3. Toda análise (`02-analise.R`, `03-figuras.R`) lê o `processed/`, nunca o `raw/`.
+
+Essa separação é o que torna a análise **reauditável**. Daqui a três anos, você abre o repositório e roda os scripts em ordem — chega no mesmo número.
+
+## Conexão com o Módulo 3 (Reprodutibilidade)
+
+A disciplina de organização de arquivos é **pré-requisito para reprodutibilidade**, mas não é suficiente sozinha. O Módulo 3 vai estender essa base com três camadas adicionais:
+
+- **Versionamento com Git** — rastrear mudanças de código ao longo do tempo, com mensagens descritivas e capacidade de voltar a versões anteriores.
+- **GitHub** — compartilhar o projeto, colaborar com outros pesquisadores, manter histórico público.
+- **Lockfiles e ambientes** — garantir que `renv.lock` ou `uv.lock` permita refazer a análise com as mesmas versões de pacotes em qualquer máquina, em qualquer época.
+
+Estrutura de arquivos é a base. Versionamento é a camada que rastreia mudanças. Lockfiles são a camada que congela o ambiente.
+
+::: {.callout-note}
+## Quando começar a estruturar
+Não espere o projeto crescer pra organizar. **Crie a estrutura antes de pôr os primeiros dados**. Em terminal:
+
+```bash
+mkdir projeto-coorte
+cd projeto-coorte
+mkdir -p dados/raw dados/processed scripts output
+touch README.md .gitignore
+echo "dados/processed/" >> .gitignore
+echo "output/" >> .gitignore
+```
+
+São oito linhas. Sessenta segundos. E elas economizam horas de retrabalho mais à frente.
+:::
+
+## Conexão com IA
+
+Agentes de IA são especialmente úteis em três frentes específicas de organização:
+
+**1. Auditoria de projeto existente.** *"Aqui está a árvore de arquivos do meu projeto. Onde a estrutura está confusa? O que reorganizar?"* — agente lê a árvore, identifica padrões problemáticos (raw e processed misturados, scripts não numerados, output dentro de scripts), propõe reorganização.
+
+**2. Geração inicial de estrutura.** *"Crie a estrutura de pastas para um projeto de coorte clínica em R + Quarto, com Git e renv."* — agente devolve sequência de comandos `mkdir`, conteúdo do `.gitignore`, esqueleto do README, configuração inicial do `renv`.
+
+**3. Migração de projeto sem estrutura.** Você tem um `PROJETO_FINAL/` caótico (como o da abertura) e quer reorganizar sem perder dados. Agente ajuda a categorizar cada arquivo (é raw? é processed? é output? é script?), sugere onde cada um vai, e gera scripts de movimentação. **Sempre revise antes de aplicar `mv`** — agente pode classificar errado e arquivo perdido em pasta errada é difícil de recuperar.
+
+## O que vem a seguir
+
+Você fechou o Bloco *Dados*. Conhece os formatos principais (CSV, Excel, JSON, Parquet, SQLite), entende a disciplina de tidy data, e sabe organizar arquivos em estrutura que o futuro-você consegue auditar. **Falta a peça operacional**: como manipular esses dados em R e Python — limpar, transformar, agrupar, calcular estatísticas, gerar gráficos.
+
+Esse é o tema do próximo Bloco, **Python e R**. Catorze capítulos cobrindo as duas linguagens em paralelo: o que cada uma é, instalação de ambientes reprodutíveis, sintaxe mínima, estruturas de dados, importação, limpeza, visualização, estatística inferencial, modelagem, e o uso de IA para acelerar todo esse fluxo.
+
+→ [Bloco 3 · Python e R](../B3-linguagens/01-python-e-r.qmd)

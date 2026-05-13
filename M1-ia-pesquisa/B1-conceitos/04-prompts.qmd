@@ -1,0 +1,256 @@
+---
+title: "Prompts"
+---
+
+Você já sabe **o que é IA generativa**, **o que são tokens** e **como funcionam app e API**. Falta a habilidade que define a qualidade de tudo o que você vai obter dessas ferramentas: **escrever bons prompts**.
+
+Este capítulo é o mais "transversal" do bloco — o que você aprender aqui vai ressoar no resto do curso, em todo capítulo de análise, escrita e publicação. Como o uso de IA em pesquisa exige prompts mais cuidadosos do que o uso casual, dedicamos boa parte do capítulo a **prompts para pesquisa científica**.
+
+## Por que o prompt importa tanto
+
+Lembre-se do capítulo 01: **o modelo prevê uma palavra de cada vez, com base em tudo o que veio antes**. Isso significa que **cada palavra do seu prompt influencia a previsão das próximas — e, em cascata, toda a resposta**.
+
+Não é magia, é matemática. Um prompt vago produz uma resposta vaga porque há muitas continuações plausíveis e o modelo "escolhe" alguma — geralmente a mais comum, raramente a mais útil para você. Um prompt rico em contexto reduz drasticamente o espaço de continuações plausíveis: a resposta já "começa" na direção certa.
+
+Compare:
+
+> ❌ "Faça uma análise dos dados."
+
+> ✅ "Você é um epidemiologista experiente. Analise o arquivo `dados/raw/coorte.csv`, identifique a variável de desfecho, descreva os grupos e gere uma análise descritiva apropriada para cada tipo de variável (categórica, contínua). Use R com tidyverse."
+
+Os dois pedidos são "tecnicamente válidos". O primeiro vai gerar algo genérico — uma resposta-template que poderia caber em qualquer projeto. O segundo orienta cada token que o modelo gera. **Isso é o que separa um prompt útil de um prompt frustrante**.
+
+## Anatomia de um prompt eficaz
+
+Um bom prompt tem, idealmente, **cinco componentes**. Não precisa estar tudo presente em todo prompt, mas vale conhecer cada um:
+
+### 1. Papel (persona)
+
+Diga ao modelo **quem ele é** ao responder:
+
+> "Você é um bioestatístico com 15 anos de experiência em ensaios clínicos."
+
+Isso não muda **o que** o modelo sabe (ele não "fica mais inteligente"), mas muda **o estilo, profundidade e foco** da resposta. Pedir uma análise estatística "como um bioestatístico" produz uma resposta com vocabulário e prioridades de bioestatística, em vez de uma resposta genérica de "alguém analisando números".
+
+### 2. Contexto
+
+Forneça **as informações que o modelo precisa para responder bem**:
+
+> "Estou analisando uma coorte retrospectiva de 1.247 pacientes com sepse, internados entre 2018 e 2024. O desfecho primário é mortalidade em 30 dias. Os dados estão em formato wide, com uma linha por paciente."
+
+Sem contexto, o modelo "chuta" — e em pesquisa, chute custa caro.
+
+### 3. Tarefa específica
+
+Diga **exatamente o que você quer** que ele faça. Quanto mais específico, melhor:
+
+> ❌ "Me ajude com a análise."
+> ✅ "Gere o código R que produz a Tabela 1 do estudo, com características demográficas e clínicas dos pacientes, estratificada pelo desfecho. Inclua testes estatísticos apropriados (chi-quadrado para categóricas, t-teste ou Mann-Whitney para contínuas, conforme distribuição)."
+
+### 4. Restrições e formato
+
+O que **não** fazer, e em **que formato** entregar:
+
+> "Use exclusivamente pacotes do tidyverse e gtsummary. Não invente nomes de variáveis — leia o arquivo primeiro e confirme as colunas existentes. Apresente o resultado como código R em um único bloco, comentado, pronto para colar em um chunk de Quarto."
+
+### 5. Exemplos (opcional, mas poderoso)
+
+Quando você tem uma referência clara do estilo de resposta que quer, mostrar **um exemplo** ajuda muito mais do que descrever:
+
+> "A tabela final deve seguir o formato abaixo:
+> ```
+> | Variável | Sobreviventes (n=850) | Óbito (n=397) | p-valor |
+> |---|---|---|---|
+> | Idade, anos | 62 (51-74) | 71 (60-81) | <0,001 |
+> ```"
+
+Isso é chamado de *few-shot prompting*: dar **um ou poucos exemplos** orienta a resposta com altíssima precisão.
+
+## System prompt × user prompt
+
+Quando você usa o app (Claude.ai, ChatGPT.com), digita uma mensagem e o modelo responde. Por baixo dos panos, há **dois tipos de mensagens**:
+
+- **System prompt** — instruções "de fundo" definidas pela aplicação ou pelo usuário (em interfaces avançadas). Define personalidade, regras invariantes, formato de saída padrão. **O usuário comum não vê.**
+- **User prompt** — sua mensagem específica naquela conversa.
+
+No app comum, você só interage com o **user prompt** — o system prompt é definido pela empresa (Anthropic, OpenAI). No **Claude Code** e ferramentas similares, você pode definir o system prompt em arquivos como `CLAUDE.md` ou `.claude/instructions.md` no projeto. Isso permite **fixar o contexto do projeto** uma vez, sem repetir em cada conversa: "este é um projeto de pesquisa médica, use sempre R com tidyverse, siga as convenções de nome de arquivo XYZ", etc.
+
+Vamos voltar a esse ponto no Módulo 2.
+
+## Técnicas que melhoram drasticamente o resultado
+
+Algumas práticas que parecem pequenas e fazem grande diferença:
+
+### *Chain of thought*: peça raciocínio passo a passo
+
+Para tarefas que envolvem cálculo, lógica ou múltiplas decisões, peça explicitamente que o modelo **mostre o raciocínio**:
+
+> "Pense passo a passo antes de responder. Liste suas suposições, depois desenvolva a análise, e só ao final dê a recomendação."
+
+Isso reduz erros de raciocínio porque força o modelo a "trabalhar" antes de concluir. Como o modelo prevê uma palavra de cada vez, dar mais tokens de "trabalho intermediário" antes da conclusão melhora a chance de a conclusão estar certa.
+
+### Plan-first: planejar antes de agir
+
+Em uso agêntico (Claude Code, Codex), pedir **planejamento antes da execução** evita ações desnecessárias:
+
+> "Antes de criar qualquer arquivo, apresente o plano completo: que arquivos criar, em que ordem, com que conteúdo geral. Aguarde minha confirmação."
+
+Isso tem dois efeitos: (1) você revisa o plano antes do agente sair editando, e (2) o modelo "pensa" mais cuidadosamente sobre a estrutura, em vez de improvisar.
+
+### Iteração: a primeira resposta raramente é a final
+
+Ao contrário do uso casual ("uma pergunta, uma resposta"), em pesquisa **a primeira resposta é geralmente um ponto de partida, não um produto final**. Refine:
+
+- "Está quase. Mas você usou `t.test`, e os dados não são normais — pode refazer com Mann-Whitney?"
+- "A tabela ficou boa. Pode adicionar uma coluna com o número absoluto além dos percentuais?"
+- "Esse parágrafo está repetitivo com o anterior. Reescreva sem repetir o argumento sobre confounding."
+
+A iteração é tão importante quanto o prompt inicial.
+
+### Pedir ao modelo o que está faltando
+
+Quando você não tem certeza do que pedir, **deixe o próprio modelo identificar lacunas**:
+
+> "Antes de responder, me diga que informações adicionais você precisaria para gerar uma resposta de alta qualidade."
+
+Funciona surpreendentemente bem.
+
+## Prompts para pesquisa científica: o nível de rigor é outro
+
+Em uso casual, prompts curtos e vagos levam a respostas curtas e vagas — sem maior consequência. Em **pesquisa**, vagueza pode produzir:
+
+- Análises tecnicamente erradas (teste estatístico inadequado, transformação aplicada na ordem errada);
+- **Citações fictícias** (vimos no capítulo 01 — IA preenche referência inexistente);
+- Estruturas de projeto que parecem corretas mas não são reprodutíveis;
+- Código que roda mas não faz exatamente o que parece fazer.
+
+Por isso, prompts para pesquisa científica costumam ser **mais longos, mais específicos, com restrições explícitas e critérios de sucesso**. Vamos ver um exemplo concreto.
+
+### Caso de estudo: pedindo a estrutura de um projeto Quarto para pesquisa
+
+Suponha que você está começando um projeto Quarto novo — uma análise de coorte que vai virar artigo. Você quer que a estrutura siga boas práticas de **ciência reprodutível**: separação clara entre dados brutos e processados, scripts modulares, citações via BibTeX, output em PDF e HTML.
+
+Um prompt **excelente** para essa tarefa, em Claude Code, seria parecido com este:
+
+````{.markdown filename="prompt completo"}
+Você é um cientista de dados especializado em pesquisa médica reprodutível,
+com domínio em Quarto, R, Python e práticas FAIR.
+
+Antes de criar qualquer arquivo, planeje e documente a arquitetura completa
+do projeto Quarto voltado para pesquisa médica. Apresente a estrutura de
+diretórios comentada, explique a responsabilidade de cada pasta e o fluxo
+de dados entre elas. Apresente o plano e **aguarde minha aprovação antes
+de criar qualquer arquivo**. Pergunte sobre escolhas que dependem de
+contexto que você não tem (linguagem principal, formato de output, etc.).
+
+O projeto deve seguir estas diretrizes obrigatórias:
+
+Estrutura de diretórios (esqueleto):
+
+project/
+├── README.md
+├── _quarto.yml             ← configuração global
+├── index.qmd               ← página inicial e resumo executivo
+├── .gitignore
+├── renv.lock               ← lockfile de pacotes (R) ou pyproject.toml (Python)
+│
+├── references/
+│   ├── references.bib      ← biblioteca BibTeX única
+│   └── csl/                ← estilos de citação (Vancouver, ABNT, APA)
+│
+├── data/
+│   ├── raw/                ← dados brutos, somente leitura
+│   ├── processed/          ← dados após limpeza
+│   └── codebook/           ← dicionário de variáveis
+│
+├── R/  (ou python/)
+│   ├── functions/          ← funções reutilizáveis
+│   ├── preprocessing/      ← scripts de limpeza
+│   └── analysis/           ← scripts de análise
+│
+├── figures/
+│   ├── raw/                ← imagens externas
+│   ├── generated/          ← figuras criadas por código
+│   └── final/              ← figuras finais
+│
+├── tables/
+│
+├── sections/
+│   ├── 01_introducao.qmd
+│   ├── 02_metodologia.qmd
+│   ├── 03_resultados.qmd
+│   ├── 04_discussao.qmd
+│   └── 05_conclusao.qmd
+│
+├── appendix/
+├── documentation/          ← decisões metodológicas, changelog
+└── _output/                ← artefatos gerados, no .gitignore (não 'docs/'!)
+
+Diretrizes obrigatórias:
+
+- `data/raw/` é estritamente somente leitura. Toda transformação parte
+  daí e vai para `data/processed/`.
+- O fluxo deve ser totalmente reprodutível: clonar o repositório e rodar
+  `quarto render` deve gerar resultados idênticos.
+- Figuras geradas por código vão em `figures/generated/`; `figures/raw/`
+  é reservado a imagens externas.
+- O `_quarto.yml` centraliza idioma, formato de output, CSL e opções
+  globais de código (`echo: false`, `warning: false`).
+- Todas as referências devem estar em `references/references.bib` e ser
+  inseridas via chave (`@Silva2024`), nunca digitadas no texto.
+- O `.gitignore` deve incluir `_output/`, `.Rhistory`, `.DS_Store`,
+  `data/processed/` (opcional, conforme política do projeto).
+- Cada script tem cabeçalho com autor, data, objetivo, pacotes utilizados.
+- Funções reutilizáveis vão em `R/functions/` ou `python/functions/`,
+  importadas explicitamente — nunca dentro dos scripts de análise.
+- Nomes de arquivos: minúsculos, sem espaços, com underscore
+  (`analise_sobrevida.R`, não `Análise Final v3.R`).
+- Lockfile de pacotes presente: `renv.lock` (R) ou `pyproject.toml` +
+  `uv.lock` (Python).
+
+Critério de sucesso: outro pesquisador clona o repositório, instala as
+dependências do lockfile, e reproduz todos os resultados rodando
+`quarto render` — sem instruções adicionais além do README.
+
+Apresente sua proposta agora.
+````
+
+### O que torna esse prompt poderoso
+
+Olhando peça por peça:
+
+1. **Papel** logo na primeira linha (cientista de dados em pesquisa médica reprodutível) — todas as decisões do modelo vão respeitar esse framing.
+2. **Plan-first**: pede planejamento, e ainda **explicitamente** "aguarde minha aprovação antes de criar". Em uso agêntico, isso é decisivo: evita 30 arquivos criados sem revisão.
+3. **Pergunte sobre lacunas** — convida o modelo a fazer perguntas quando faltar contexto. Reduz alucinação.
+4. **Estrutura de referência** já desenhada — o modelo não precisa "imaginar" a estrutura; tem o esqueleto pronto.
+5. **Diretrizes numeradas e testáveis** — cada uma é uma regra que o agente pode seguir e que você pode verificar.
+6. **Critério de sucesso explícito** — funciona como uma "definição de pronto".
+7. **Detalhe importante**: a pasta de documentação se chama `documentation/`, **não `docs/`** — porque `docs/` é o output dir default do Quarto quando se publica em GitHub Pages, e usar o mesmo nome para outra coisa **gera conflito**.
+8. **Lockfile incluído na estrutura** (`renv.lock` ou `pyproject.toml`) — sem isso, "reprodutibilidade" é só palavra bonita.
+
+::: {.callout-tip collapse="true"}
+## Versão minimalista para projetos pequenos
+Nem todo projeto precisa dessa estrutura completa. Para um relatório curto ou uma análise pontual, peça uma versão **mínima**:
+
+> "Estrutura mínima: `_quarto.yml`, `index.qmd`, `data/raw/`, `data/processed/`, `R/`, `references/references.bib`. Aprove antes de criar."
+
+A regra é: **adapte a complexidade da estrutura à complexidade do projeto**. Não há virtude em criar 12 pastas vazias para um relatório de 3 páginas.
+:::
+
+## Princípios que valem para todo prompt em pesquisa
+
+Resumindo o que esse caso ilustra, **cinco princípios** que se aplicam a qualquer prompt de pesquisa:
+
+1. **Defina o papel** — "você é um epidemiologista", "você é um revisor metodológico", "você é um cientista de dados focado em FAIR". Em uma frase, o modelo sai do registro genérico.
+
+2. **Forneça contexto rico** — tipo de estudo, dados, ferramenta, convenções do projeto. Evita que o modelo invente o que falta.
+
+3. **Peça plano antes de execução** — em qualquer tarefa não trivial, "apresente o plano e aguarde minha aprovação" salva tempo e arquivos.
+
+4. **Liste restrições e critério de sucesso** — diga o que **não** fazer, e o que conta como "pronto".
+
+5. **Itere sem culpa** — primeira resposta é rascunho. Refinar não é falha; é parte do método.
+
+## O que vem a seguir
+
+Você sabe agora **conversar de forma produtiva com a IA**. O próximo capítulo trata de uma habilidade complementar e indispensável em pesquisa: **como citar o uso de IA** em trabalhos científicos — desde a sintaxe esperada por revistas até o que registrar em metodologia para garantir reprodutibilidade.

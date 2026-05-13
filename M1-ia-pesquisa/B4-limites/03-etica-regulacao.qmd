@@ -1,0 +1,104 @@
+---
+title: "Considerações éticas e regulatórias"
+---
+
+Os capítulos anteriores deste bloco trataram da **prática interna**: o que você faz para evitar que a IA falhe contra você. Este capítulo trata das **regras externas**: o que LGPD, ICMJE e a comunidade científica internacional esperam de quem usa IA em pesquisa.
+
+A diferença não é menor. A regra interna você define para si mesmo (e pode descumprir sem que ninguém saiba imediatamente). A regra externa é definida por outros — legisladores, conselhos editoriais, revisores — e o descumprimento tem consequências formais: rejeição de manuscrito, retratação de artigo, multa administrativa, dano reputacional.
+
+Quatro tópicos compõem o terreno mínimo: **LGPD revisitada** (proteção de dados), **ICMJE e autoria** (quem assina o quê), **declaração de uso de IA** (transparência), e **equidade de acesso** (quem pode usar IA, quem não pode).
+
+## LGPD revisitada — onde os dados vão quando você usa IA
+
+O capítulo M1-B1-06 cobre LGPD em prompts em detalhe. Aqui o ponto é específico: **toda vez que você cola dado em um chat de IA, esse dado viaja para servidores de terceiros**. Em pesquisa em saúde, isso interage diretamente com a Lei nº 13.709/2018 [@brasil2018lgpd].
+
+### O que pode (e não pode) sair do seu computador
+
+| O que você cola na IA | LGPD diz |
+|---|---|
+| `head()` de dataset com paciente identificado por CPF, prontuário, nome | **Não pode.** Dado pessoal sensível, sem consentimento específico para esse fim |
+| `head()` com IDs anonimizados (hash, sem reversão) e variáveis clínicas | Cinza: depende da chance de reidentificação. Variável rara (ex.: doença de prevalência <1/10.000) + cidade + idade pode ser suficiente para reidentificar |
+| Sumário estatístico agregado (médias, contagens por grupo, sem unidade individual) | Pode, em geral |
+| Trechos de manuscrito sem dado individual | Pode |
+
+A regra prática é: **anonimize antes de colar**. Sempre. Mesmo em base que parece "limpa", confira se a combinação de variáveis não permite reidentificação.
+
+@price2019privacy discute o problema mais amplo da privacidade na era de big data médico, e por que mesmo dados "anonimizados" podem ser reidentificados quando combinados com outras fontes públicas.
+
+### Onde o agente está rodando
+
+Diferente importante: **quem processa o dado depende do agente que você está usando**. Saber isso muda decisão de ferramenta.
+
+- Cowork da Anthropic, Claude Code, Codex, Gemini CLI rodando contra APIs de Anthropic/OpenAI/Google: dados saem do seu computador para servidores nos EUA. Há acordos contratuais corporativos (BAA, DPA), mas a base legal precisa ser verificada por projeto.
+- Modelos rodando localmente (ex.: Llama via Ollama, Mistral local): dados ficam na sua máquina. Privacidade preservada, mas qualidade do modelo é menor.
+- Modelos hospedados em ambiente institucional (universidade que tem acordo específico, hospital com infraestrutura dedicada): meio termo.
+
+Em projetos com PHI (Protected Health Information) sensível, vale optar por modelo local mesmo perdendo qualidade. Para análise estatística rotineira (sem dados individuais saindo), agentes na nuvem são aceitáveis com cuidados de anonimização.
+
+@pham2025ethical e @who2024llm trazem panorama mais completo das questões legais e éticas em uso de IA em saúde, com atenção a jurisdições diferentes (EU, EUA, Brasil).
+
+## ICMJE — chatbot não é autor
+
+O International Committee of Medical Journal Editors mantém recomendações sobre conduta editorial e autoria em manuscritos médicos [@icmje2024recommendations]. Em 2023, o ICMJE explicitou posição clara sobre IA generativa, posição que se consolidou nas atualizações subsequentes:
+
+1. **Chatbots não podem ser listados como autores.** A justificativa é direta: autoria implica responsabilidade pela acurácia, integridade e originalidade do trabalho — e um modelo de linguagem não pode ser responsabilizado por nada disso. O critério de autoria do ICMJE exige que o autor possa ser interpelado e responda; IA não responde.
+
+2. **Uso de IA precisa ser declarado.** Autores que usaram IA na elaboração devem descrever, na carta de submissão **e** no manuscrito, em que parte e como usaram. Não basta menção genérica; ICMJE pede descrição específica.
+
+3. **Responsabilidade humana é integral.** Mesmo com uso de IA declarado, o autor permanece responsável pela íntegra do conteúdo. "A IA escreveu, mas eu revisei" não muda a responsabilidade — quem assina responde.
+
+A maioria dos periódicos médicos seguem ICMJE direta ou indiretamente. Nature, JAMA, NEJM, BMJ e Lancet têm políticas alinhadas, com pequenas variações de redação.
+
+### Como declarar
+
+Uma seção de "Declaração de uso de IA" funcional inclui:
+
+> *"Este manuscrito foi elaborado com assistência de Claude (Anthropic, modelo Sonnet 4.6) para [tarefas específicas: ex. revisão gramatical do texto em inglês, geração inicial de scripts de limpeza de dados em R, formatação de tabelas]. Os autores revisaram, validaram e assumem total responsabilidade por todo o conteúdo do manuscrito, incluindo análise dos dados, interpretação dos resultados e conclusões."*
+
+Quatro elementos: **qual ferramenta**, **qual versão**, **para que tarefa específica**, **quem assume responsabilidade final**. Sem essa quarta cláusula, a declaração é incompleta.
+
+### O que NÃO contar como uso de IA declarável
+
+Há um ruído comum aqui. Ferramentas que usam IA por baixo (corretor ortográfico, tradutor automático para etapa intermediária, autocomplete de IDE) tipicamente **não exigem declaração** — são considerados parte da infraestrutura. Periódicos diferem nessa fronteira; em caso de dúvida, declare a mais.
+
+A linha prática: se a IA gerou conteúdo (texto narrativo, código, análise), declare. Se a IA só formatou ou corrigiu o que você já tinha, em geral não precisa.
+
+## Transparência e reprodutibilidade
+
+@singhal2024fate sintetiza o estado da arte das discussões sobre justiça, accountability e transparência em IA aplicada à saúde. Um ponto que importa para vibe coding em pesquisa:
+
+**Transparência sobre uso de IA em pesquisa não é só ético — é técnico**. Se você não documenta qual versão de qual modelo usou para gerar qual saída, o trabalho não é reproduzível. Daqui a três anos, com modelo atualizado, tentar refazer a mesma análise com o mesmo prompt vai produzir resultado ligeiramente diferente.
+
+Boa prática: registrar no `AGENTS.md` ou em `docs/decisoes-metodologicas.md`:
+
+- Versão exata do agente (ex.: `Claude Sonnet 4.6, 2026-04`).
+- Prompts importantes salvos (idealmente versionados em Git).
+- Decisões em que a IA foi consultada vs. decisões puramente humanas.
+
+Isso aproxima o uso de IA do padrão FAIR — Findable, Accessible, Interoperable, Reusable. É o tema do Módulo 4 do curso.
+
+## Equidade de acesso
+
+Há um tópico ético menos discutido mas que vale mencionar: **quem tem acesso a IA boa?**
+
+Pesquisadores em instituições com licença Anthropic Enterprise, créditos OpenAI institucionais, ou GPUs locais para rodar modelos abertos têm vantagem operacional. Pesquisadores em instituições periféricas (geográfica, financeira ou institucionalmente) frequentemente dependem de versões gratuitas com limitações severas — modelos antigos, janela de contexto pequena, sem capacidades agênticas.
+
+Isso cria um vetor novo de desigualdade na produção científica. @chen2023algorithmic e @tilala2024ethical tratam do problema do ângulo do uso da IA com pacientes; aqui o problema é simétrico: o acesso desigual à IA como **infraestrutura de pesquisa** pode amplificar assimetrias entre centros do Norte e centros do Sul global.
+
+A discussão é nova e ainda não tem resposta de comunidade. Mas vale ter consciência: quando você usa IA em pesquisa, está tendo acesso a uma ferramenta que muitos colegas pelo Brasil afora não conseguem acessar com a mesma qualidade. Esse fato não tira a legitimidade do uso, mas vale lembrar quando o discurso sobre "todo mundo deveria usar IA" aparecer em formato simplista.
+
+## Encerramento do bloco
+
+Os três capítulos do bloco "Limites e armadilhas" formam um conjunto coerente:
+
+- **01 — Quando a IA falha:** os três modos pelos quais ela quebra (alucinação, viés, contexto).
+- **02 — Validação e responsabilidade humana:** as duas regras operacionais (validar tudo, não delegar metodologia).
+- **03 — Considerações éticas e regulatórias:** as regras externas (LGPD, ICMJE, declaração, equidade).
+
+Os módulos seguintes (M2 em diante) ensinam a infraestrutura técnica e o pipeline completo de pesquisa com IA. Mas as regras deste bloco precisam estar sempre em vigor — em todos os módulos, em todos os projetos. Quem aplica vibe coding sem elas faz atalho perigoso. Quem aplica com elas faz ciência séria com ferramentas novas.
+
+## O que vem a seguir
+
+Encerramos o **Módulo 1 — Trabalhando com IA na pesquisa**. Você sabe agora: o que é IA generativa, quais agentes usar, como dialogar com eles via padrões de prompt, e onde recuar. A partir do **Módulo 2 — Fundamentos técnicos**, descemos para a infraestrutura prática: o terminal, ambientes de desenvolvimento, e convenções técnicas. É onde o trabalho com IA realmente acontece.
+
+→ [Módulo 2 · Terminal](../../M2-fundamentos-tecnicos/B1-terminal/01-historia-e-conceitos.qmd)

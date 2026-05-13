@@ -1,0 +1,122 @@
+---
+title: "GitHub Pages"
+---
+
+Em 2008, quando o GitHub foi lançado, a ideia central era hospedar **código**. Repositórios eram para programas, scripts, projetos de software. O texto que vinha junto (READMEs, documentação) era acessório — escrito em Markdown, renderizado pela própria interface do GitHub para leitura na web.
+
+Em **dezembro de 2008**, o GitHub anunciou um experimento: deixar usuários publicarem **sites HTML estáticos** diretamente a partir de qualquer repositório. Bastava criar um branch chamado `gh-pages`, colocar arquivos HTML ali, e o GitHub serviria como site público no endereço `https://usuario.github.io/repositorio/`. Não custava nada extra. Era ferramenta lateral, pensada para programadores publicarem documentação de seus projetos.
+
+Quase duas décadas depois, **GitHub Pages virou uma das infraestruturas editoriais mais importantes da era da web**. Não para sites comerciais (que precisam de mais), mas para **publicação acadêmica, científica e didática** — exatamente o caso deste curso. Este capítulo é sobre o que GitHub Pages é, por que ele se tornou central em ciência aberta, e como ele se conecta com o resto do que vimos.
+
+## O que é GitHub Pages
+
+GitHub Pages é um serviço de **hospedagem de sites estáticos** integrado ao GitHub. Três palavras-chave para desempacotar:
+
+**Site.** Páginas HTML acessíveis por navegador, com URL pública.
+
+**Estático.** Páginas pré-geradas, servidas como arquivos. Sem banco de dados, sem servidor processando requests — quando o navegador pede a página, o GitHub manda o HTML já pronto. A consequência: sites estáticos são **muito rápidos**, **muito baratos** (a hospedagem é gratuita pra GitHub Pages), e **muito duráveis** (o que você publica hoje funciona daqui a dez anos sem manutenção).
+
+**Integrado ao GitHub.** O site é gerado a partir de um repositório Git. Você commita mudanças no repositório → o GitHub detecta a mudança → re-publica o site. Versionamento e publicação ficam unificados.
+
+A URL padrão segue o padrão `https://[usuario].github.io/[repositorio]/`. Por exemplo, se você se chama `henriquealvarenga` e seu repositório é `manual_r`, o site vira `https://henriquealvarenga.github.io/manual_r/` — ou, se você configurou domínio próprio (`henriquealvarenga.com`), pode mapear pra `https://henriquealvarenga.com/manual_r/`. Tanto este curso quanto os dois livros do autor citados em capítulos anteriores ([@alvarenga2024manualr; @alvarenga2025github]) são publicados via GitHub Pages.
+
+## Por que isso importa para pesquisa
+
+Antes de GitHub Pages (e WordPress, Wix, etc.), publicar conteúdo acadêmico próprio na web exigia: contratar hospedagem (US$ 5-50/mês), aprender a configurar servidor, manter atualizações de software, gerenciar backups, lidar com problemas de segurança. Era barreira não-trivial — a maior parte dos pesquisadores não passava dela. Material didático ficava em PDF no email do orientador; análises ficavam em arquivos espalhados; resultados existiam apenas no artigo publicado.
+
+GitHub Pages **eliminou todas essas barreiras**:
+
+- **Custo:** zero. Conta gratuita do GitHub permite Pages ilimitado.
+- **Setup:** vinte minutos para o primeiro site funcionando.
+- **Manutenção:** essencialmente nenhuma — o site fica de pé sozinho, indefinidamente.
+- **Segurança:** o GitHub cuida; sites estáticos não têm vetores de ataque comuns (sem banco, sem login, sem código do lado servidor).
+- **Versionamento:** integrado ao Git — todas as versões anteriores ficam no histórico, sempre recuperáveis.
+
+O resultado prático é uma **mudança de cultura**. Pesquisadores que antes não tinham presença na web hoje publicam: portfólios pessoais, livros didáticos abertos, sites de cursos, blogs científicos, dashboards interativos, materiais de aula, complementares reproduzíveis de artigos com dados e código. Em 2026, **ter um site acadêmico próprio é a norma** entre pesquisadores ativos — e GitHub Pages é a infraestrutura mais usada para isso.
+
+## Casos típicos em ciência aberta
+
+Cinco usos que se repetem constantemente:
+
+### 1. Site institucional/portfólio do pesquisador
+
+Página pessoal com bio, lista de publicações, materiais didáticos, contato. Substitui (ou complementa) páginas pessoais que universidades fornecem mas que costumam ser engessadas e feias. Exemplo: `henriquealvarenga.com` é, na prática, um site Quarto publicado via GitHub Pages.
+
+### 2. Material didático aberto (livros e cursos)
+
+Livros e cursos publicados como sites navegáveis, gratuitos, atualizáveis. Os dois livros do autor — **Manual Básico da Linguagem R** [@alvarenga2024manualr] e **Manual de Git e GitHub** [@alvarenga2025github] — são exemplos. **Este próprio curso (Vibe Coding na Pesquisa Científica)** também é um site Quarto publicado via GitHub Pages.
+
+### 3. Blog acadêmico
+
+Posts curtos com reflexões sobre pesquisa, tutoriais, comentários sobre artigos lidos. Sem necessidade de dependência de WordPress — texto em Markdown, renderização automática.
+
+### 4. Compendium reproduzível de artigo
+
+Quando você publica um artigo, criar um repositório com **dados, scripts, e relatório completo da análise** (renderizado como site Quarto via GitHub Pages) é forma de cumprir requisitos crescentes de revistas e financiadores em torno de ciência aberta. O leitor do artigo encontra link para o site, navega pela análise inteira, baixa os dados, refaz a análise. **Padrão FAIR de dados em ação**.
+
+### 5. Documentação de pacote ou software
+
+Se você desenvolve pacote R/Python, GitHub Pages serve site oficial da documentação. Ferramentas como `pkgdown` (para R) e `Sphinx` (para Python) geram automaticamente o site a partir da documentação inline do código.
+
+## Tipos de site no GitHub Pages
+
+GitHub Pages distingue dois tipos de site:
+
+**Site de usuário ou organização.** Um único site por conta. URL: `https://usuario.github.io/`. Vai num repositório especial chamado `usuario.github.io`.
+
+**Sites de projeto.** Quantos quiser, um por repositório. URL: `https://usuario.github.io/repositorio/`. Cada repositório individual pode ter Pages ativo.
+
+Para a maioria dos casos em pesquisa, **o tipo de projeto é o que você quer** — cada projeto vira seu próprio site, independente. O site de usuário tipicamente serve como portfólio raiz.
+
+## Domínio próprio (`.com`, `.com.br`, etc.)
+
+Se você quer URL própria em vez de `usuario.github.io`, GitHub Pages aceita **custom domains** sem custo adicional. Você compra o domínio em um registrador (NameCheap, Google Domains, Registro.br, etc., custo típico de US$ 10-30/ano) e configura no GitHub.
+
+A configuração envolve dois passos:
+
+1. **No GitHub:** vai em Settings do repositório → Pages → Custom domain → digita `seudominio.com`.
+2. **No registrador do domínio:** configura registros DNS (geralmente CNAME apontando para `usuario.github.io` ou A records apontando para IPs do GitHub).
+
+Em algumas horas (até 48h pelo cache de DNS), o site responde no novo domínio. HTTPS é configurado automaticamente pelo GitHub via Let's Encrypt — você não precisa mexer com certificados.
+
+## Limitações que vale conhecer
+
+GitHub Pages é generoso, mas tem limites técnicos e legais:
+
+| Limite | Valor |
+|---|---|
+| **Tamanho do repositório** | 1 GB recomendado (limite hard ~10 GB) |
+| **Tamanho do site publicado** | 1 GB recomendado |
+| **Banda mensal** | 100 GB (suficiente para a maioria dos casos acadêmicos) |
+| **Builds por hora** | 10 (caso atinja, builds extras esperam na fila) |
+| **HTTPS** | Automático para `*.github.io`; configurável para domínios próprios |
+| **Sites estáticos apenas** | Não roda PHP, banco de dados, ou código do lado servidor |
+| **Repositórios privados** | Pages é **público** por padrão; para Pages privado, requer plano pago |
+
+Para curso, livro, blog acadêmico, portfólio, dashboard estático — todos esses limites são folgados. Para projeto comercial com tráfego alto, você sairia do GitHub Pages.
+
+::: {.callout-warning}
+## GitHub Pages é público — pense no que você publica
+A regra default é que tudo no repositório que vira site **fica publicamente acessível**. Não publique nada contendo:
+
+- Dados de pacientes (mesmo anonimizados em alguns contextos).
+- Tokens de API, senhas, chaves SSH, secrets de qualquer natureza.
+- Documentos institucionais confidenciais.
+- Conteúdo protegido por copyright que você não tem direito de redistribuir.
+
+Para projetos com material sensível, use repositório privado e gerencia diferente — ou hospedagem institucional. Para pesquisa com dados sensíveis especificamente, **veja a política de LGPD/IRB da sua instituição** sobre o que pode ir para serviço externo.
+:::
+
+## Para a parte operacional
+
+Este capítulo cobre o "o que é, por que importa". A **parte operacional** — como ativar Pages num repositório, configurar branch de origem, mapear domínio próprio — está coberta no **Manual de Git e GitHub** do autor [@alvarenga2025github], capítulo 11:
+
+> [henriquealvarenga.com/github_manual/10-github-pages.html](https://henriquealvarenga.com/github_manual/10-github-pages.html)
+
+Esse capítulo do livro é puramente operacional, com screenshots e passos numerados. Ele cobre o caminho clássico, em que você publica HTML pronto. Mas para o caso central deste curso — **publicar site Quarto via GitHub Pages** — há ferramentas específicas que automatizam tudo (`quarto publish gh-pages`, GitHub Actions). Esse fluxo Quarto-específico é o tema do próximo capítulo.
+
+## O que vem a seguir
+
+Você sabe o que é GitHub Pages e por que ele virou central em ciência aberta. O capítulo final do Bloco fecha o ciclo do Módulo 3 mostrando o fluxo específico para **publicar um site Quarto** (como o próprio curso) **via GitHub Pages**, automaticamente, com versionamento integrado e re-render contínuo a cada commit.
+
+→ [06 · Quarto + GitHub Pages](06-quarto-github-pages.qmd)

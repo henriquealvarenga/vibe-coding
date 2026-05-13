@@ -1,0 +1,239 @@
+---
+title: "LaTeX"
+---
+
+Você está terminando uma tese sobre prevalência de hipertensão num grupo populacional. O orientador quer ver a fórmula da regressão logística completa, com índices subscritos, somatório, e o erro padrão entre parênteses. Você abre o Word, ativa o Microsoft Equation Editor, escolhe sigma do menu, ajusta tamanho de fonte da exponencial, descobre que o subscrito caiu fora do lugar quando exportou pra PDF, refaz, salva, abre de novo. Quinze minutos depois, a fórmula está quase certa.
+
+A mesma fórmula em LaTeX:
+
+``` latex
+$$P(Y=1|X) = \frac{1}{1 + e^{-(\beta_0 + \sum_{i=1}^{n} \beta_i X_i)}}$$
+```
+
+Trinta segundos. Sai impressa em qualidade tipográfica. E se daqui a um ano você quiser mudar uma variável, é trocar uma letra no texto.
+
+Esse é o argumento por trás do LaTeX em pesquisa científica: para fórmulas matemáticas, símbolos especializados, e qualquer documento onde tipografia importa, ele resolve com elegância e reprodutibilidade um problema que processadores de texto WYSIWYG nunca resolveram bem. O capítulo é sobre **quando** esse trade-off vale a pena no contexto Quarto, e **quanto** de LaTeX você de fato precisa aprender.
+
+## O que é o LaTeX
+
+A linhagem é antiga e vale conhecer. Nos anos 1970, **Donald Knuth** estava escrevendo *The Art of Computer Programming* e ficou tão insatisfeito com a qualidade tipográfica do que sua editora produzia que decidiu construir um sistema de tipografia digital próprio. O resultado, lançado em 1978, foi o **TeX** (lê-se "tek", do grego *τέχνη* — arte/ofício), um sistema de baixo nível para compor texto e fórmulas com qualidade profissional. TeX era poderoso mas verboso — escrever um documento exigia muito código de baixo nível.
+
+Em 1985, **Leslie Lamport** publicou o **LaTeX** ("la-tek"), uma camada de macros sobre o TeX que oferecia uma interface mais alta para autores: comandos como `\section`, `\maketitle`, `\bibliography` substituíam centenas de linhas de TeX puro. LaTeX tornou-se o padrão de fato em matemática, física, ciência da computação, engenharia, e — gradualmente, com adaptações — em medicina e ciências da vida para teses, livros e artigos com componente matemático pesado.
+
+A especificação atual em uso é a **LaTeX2e** (1994), e o projeto é mantido pelo The LaTeX Project ([latex-project.org](https://www.latex-project.org)). Há um esforço de modernização chamado **LaTeX3** em desenvolvimento desde os anos 1990 que já está parcialmente disponível, mas o trabalho cotidiano ainda é em LaTeX2e.
+
+## Quando LaTeX importa pra você
+
+Em pesquisa médica, três cenários justificam atenção especial ao LaTeX:
+
+| Cenário | Por que LaTeX |
+|---|---|
+| **Tese / dissertação ABNT em PDF** | A formatação rígida da ABNT (margens exatas, fontes, espaçamentos, sumários, listas de figuras) é exatamente o que LaTeX faz bem. Templates ABNT existem prontos. |
+| **Artigo com fórmulas, equações, símbolos especializados** | Notação matemática e científica complexa fica tipograficamente impecável e reprodutível. |
+| **Submissão a revista que exige (ou prefere) `.tex`** | Em estatística, física e matemática aplicada é comum. Em medicina é minoria, mas várias revistas estatísticas/bioestatísticas disponibilizam template `.tex` próprio e o aceitam ao lado do Word. |
+
+Se nenhum dos três se aplica, você pode passar o curso inteiro sem aprender LaTeX e renderizar tudo para HTML ou Word. **Esta é a mensagem principal deste capítulo:** LaTeX é poderoso e está disponível, mas não é obrigatório.
+
+## LaTeX no Quarto: três níveis de uso
+
+A boa notícia é que o Quarto integra LaTeX em três níveis crescentes de comprometimento. Você adota o nível que fizer sentido para o que está escrevendo, sem precisar dominar tudo.
+
+### Nível 1: equações em qualquer documento
+
+Mesmo que você renderize para HTML ou Word, você pode escrever equações em sintaxe LaTeX no meio do texto. O Quarto reconhece e renderiza:
+
+``` markdown
+A média foi $\bar{x} = 75{,}3$ anos.
+
+A regressão logística:
+
+$$
+P(Y=1|X) = \frac{1}{1 + e^{-(\beta_0 + \sum_{i=1}^{n} \beta_i X_i)}}
+$$
+```
+
+`$...$` é equação **inline** (dentro do parágrafo). `$$...$$` é equação **display** (centralizada, em linha própria). No HTML, o Quarto usa MathJax ou KaTeX (bibliotecas JavaScript que renderizam LaTeX no navegador) para mostrar as fórmulas. No PDF, o Quarto compila usando LaTeX de verdade. No Word, converte para Office Math.
+
+Para cobrir noventa por cento das fórmulas em medicina, **só este nível basta**. Você não precisa saber nada de LaTeX além da sintaxe matemática.
+
+### Nível 2: opções LaTeX no PDF
+
+Se você renderiza para PDF (`format: pdf` no YAML do `.qmd`), o Quarto usa LaTeX por baixo. Você pode passar opções, carregar pacotes, ajustar margens — sem precisar escrever um documento LaTeX completo:
+
+``` yaml
+---
+title: "Análise de coorte"
+format:
+  pdf:
+    documentclass: article
+    geometry: [margin=2.5cm]
+    fontsize: 11pt
+    linestretch: 1.5
+    include-in-header:
+      text: |
+        \usepackage{siunitx}
+        \usepackage{booktabs}
+---
+```
+
+Aqui você está dizendo: "use o template `article`, margem de 2,5 cm, fonte 11pt, espaçamento 1,5, e carregue dois pacotes LaTeX adicionais (`siunitx` para unidades SI, `booktabs` para tabelas com filetes profissionais)". O texto do `.qmd` continua em Markdown puro — só o YAML conversa com o LaTeX.
+
+### Nível 3: documento LaTeX completo
+
+Para teses e submissões em `.tex`, você pode escrever LaTeX direto dentro do `.qmd` (entre `\begin{...}` e `\end{...}`) ou gerar um `.tex` final que vai para o orientador / a revista. O fluxo:
+
+``` yaml
+---
+title: "Tese"
+format: latex
+---
+```
+
+Isso instrui o Quarto a gerar `.tex` em vez de PDF. O arquivo `.tex` resultante pode ser editado, compilado independentemente, ou submetido. Esse é o caminho típico para quem precisa de controle fino do output ou para revistas que exigem a fonte LaTeX.
+
+::: {.callout-tip}
+## A grande maioria fica no nível 1
+Para um pesquisador médico típico, o nível 1 (escrever fórmulas com `$...$`) cobre tudo. Nível 2 entra quando você quer um PDF com cara de artigo. Nível 3 é específico para teses ABNT e submissões a revistas LaTeX-only.
+:::
+
+## Instalando o LaTeX (a parte chata)
+
+LaTeX precisa de uma **distribuição TeX** instalada na máquina — um conjunto de programas, fontes e pacotes. Distribuições tradicionais (TeX Live, MiKTeX) ocupam de **3 a 7 GB**, demoram para baixar, e são desnecessariamente grandes para o uso médio.
+
+A solução elegante que o Quarto adotou é o **TinyTeX**, distribuição minimalista mantida por Yihui Xie:
+
+``` bash
+quarto install tinytex
+```
+
+Esse comando instala TinyTeX com cerca de 100 MB e configura tudo automaticamente. Quando você renderizar um `.qmd` para PDF e o TinyTeX precisar de algum pacote LaTeX que não está instalado, o Quarto baixa o pacote automaticamente, sem você precisar pensar.
+
+Para a esmagadora maioria do uso, **TinyTeX basta**. Se você descobrir alguma dependência exótica que ele não cobre, é instalar manualmente o pacote (`tlmgr install nome-do-pacote`) ou migrar para uma distribuição completa.
+
+## Sintaxe LaTeX mínima útil para fórmulas
+
+Esse é o subset de LaTeX que aparece com mais frequência em pesquisa médica. Não é exaustivo — é o suficiente para fazer noventa por cento do trabalho:
+
+### Subscritos e sobrescritos
+
+``` latex
+$x_i$           sub: x com índice i
+$x^2$           sup: x ao quadrado
+$x_i^{2}$       ambos (note as chaves para múltiplos caracteres)
+$\beta_0$       beta zero (subscrito numérico)
+```
+
+### Frações, raízes, potências
+
+``` latex
+$\frac{a}{b}$              fração
+$\sqrt{x}$                 raiz quadrada
+$\sqrt[3]{x}$              raiz cúbica
+$e^{-x}$                   exponencial negativa
+$\log_{10}(x)$             logaritmo base 10
+```
+
+### Letras gregas
+
+``` latex
+$\alpha, \beta, \gamma, \delta, \epsilon, \theta, \mu, \sigma, \pi, \omega$
+$\Sigma, \Omega, \Phi, \Psi, \Gamma, \Delta$  (maiúsculas)
+```
+
+### Somatórios, integrais, produtos
+
+``` latex
+$\sum_{i=1}^{n} x_i$              somatório de i=1 até n
+$\int_{a}^{b} f(x) \, dx$         integral de a a b
+$\prod_{i=1}^{n} x_i$             produtório
+$\lim_{n \to \infty}$             limite
+```
+
+### Operadores e relações
+
+``` latex
+$\leq, \geq, \neq, \approx, \equiv, \pm, \times, \cdot, \div, \infty$
+$x \in A, A \subset B, A \cup B, A \cap B$
+```
+
+### Matrizes (precisa do pacote `amsmath`)
+
+``` latex
+$$
+\begin{pmatrix}
+a & b \\
+c & d
+\end{pmatrix}
+$$
+```
+
+::: {.callout-note}
+## Vírgula decimal em PT-BR
+Em LaTeX padrão, `$3.14$` renderiza com ponto. Para usar vírgula como separador decimal (convenção brasileira), envolva o número em chaves: `$3{,}14$`. As chaves preservam o espaçamento em torno da vírgula como se fosse parte do número, em vez de tratá-la como separador de lista. Outra alternativa é o pacote `icomma`, que faz isso automaticamente quando carregado.
+:::
+
+## Estrutura mínima de um documento `.tex` (nível 3)
+
+Se você precisa entregar um `.tex` para o orientador ou a revista, o esqueleto mínimo de um documento LaTeX é:
+
+``` latex
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[brazilian]{babel}
+\usepackage{amsmath}
+
+\title{Análise de prevalência}
+\author{Henrique Alvarenga}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Introdução}
+
+Texto da introdução com uma fórmula inline $\bar{x}$ e display:
+
+\[
+\bar{x} = \frac{1}{n} \sum_{i=1}^{n} x_i
+\]
+
+\section{Métodos}
+
+Texto.
+
+\end{document}
+```
+
+A maior parte desse esqueleto é gerada pelo Quarto automaticamente quando você renderiza pra PDF. Você raramente vai escrever isso à mão — a menos que esteja editando o `.tex` gerado para fazer ajuste fino.
+
+## ABNT no LaTeX
+
+Para teses brasileiras em ABNT, a comunidade brasileira mantém duas classes principais:
+
+- **abnTeX2** ([abntex2.googlecode.com](https://abntex2.github.io)) — classe LaTeX completa para teses, dissertações, monografias, artigos e relatórios em ABNT. Distribuição em portuguêsa, comunidade ativa, templates prontos para várias universidades.
+- **`abntex2-cite`** — pacote auxiliar do mesmo projeto que aplica regras de citação ABNT.
+
+A abordagem prática para tese ABNT em Quarto: usar abnTeX2 como `documentclass` no YAML, deixar o conteúdo em Markdown, e o Quarto compila para PDF formatado segundo as normas. Há templates Quarto + abnTeX2 disponíveis no GitHub para clonar e adaptar — vale procurar pelo nome da sua universidade antes de configurar do zero.
+
+## Conexão com IA
+
+LaTeX é um dos terrenos onde modelos de IA agregam mais valor real, por três motivos:
+
+**1. Fórmulas a partir de descrição em português.** Em vez de decorar a sintaxe de cada operador, você descreve: *"escreva em LaTeX a fórmula da regressão logística com intercepto, somatório de coeficientes vezes preditores"* — o modelo entrega a fórmula pronta. Isso transforma LaTeX de barreira em ferramenta acessível, mesmo para quem nunca aprendeu a sintaxe de cor.
+
+**2. Diagnosticar erros de compilação.** Os erros do LaTeX são notoriamente crípticos (`! Undefined control sequence`, `! Missing $ inserted`, *"runaway argument"*). Cole o erro junto com o trecho do `.tex` e o agente diagnostica em segundos. Quem aprendeu LaTeX nos anos 2000 lembra de horas perdidas decifrando esses erros.
+
+**3. Converter entre formatos.** Word para LaTeX, LaTeX para Markdown, Markdown para LaTeX — operações tediosas e sujeitas a erro quando feitas a mão. O Pandoc faz a maior parte automaticamente, mas quando há ajuste fino (preservar referências cruzadas, manter formatação específica), o agente complementa o que o Pandoc não cobre.
+
+::: {.callout-warning}
+## Verifique fórmulas geradas por IA antes de incluir em manuscrito
+Modelos podem gerar fórmulas LaTeX **sintaticamente corretas mas matematicamente erradas** — coeficientes trocados, índices mal posicionados, sinais invertidos. Para qualquer fórmula que vai entrar em artigo ou tese, renderize, compare com a fonte original, valide variável por variável. Especialmente atenção a fórmulas de teste estatístico — um sinal trocado em chi-quadrado é o tipo de erro que passa em revisão e detona credibilidade.
+:::
+
+## O que vem a seguir
+
+Este Bloco fechou o ciclo da escrita técnica: Markdown como base, Quarto como motor de execução, BibTeX e CSL como engrenagem de citação, LaTeX como recurso para tipografia matemática e formatos exigentes. Tudo que você precisa para transformar análise em documento publicável.
+
+O próximo Bloco trata da matéria-prima dessa análise: os **dados**. Que formatos existem (CSV, Excel, JSON, Parquet, SQLite), por que cada um existe, quando usar cada um, como organizar arquivos num projeto de pesquisa de forma que o futuro-você (e seus colaboradores) entendam a estrutura sem precisar de explicação.
+
+→ [Bloco 2 · Dados](../B2-dados/01-formatos.qmd)

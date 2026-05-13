@@ -1,0 +1,147 @@
+---
+title: "De chatbot a agente: o que mudou e por que importa"
+sidebar: bloco-agentes
+---
+
+Você terminou o Bloco anterior conhecendo **o que é IA generativa**, **como ela funciona por dentro**, **o que são tokens**, **como acessar por app ou por API** e **como escrever bons prompts**. Tudo isso continua valendo daqui em diante.
+
+Mas existe um salto qualitativo entre aquilo que você usou até agora — o **chatbot** — e o que vamos usar de fato no resto do curso: o **agente**. Esse salto é o que dá nome a *Vibe Coding* e o que torna IA, em 2026, qualitativamente diferente do que era há dois anos. Este capítulo é sobre essa diferença.
+
+## Recap rápido: o que é um chatbot
+
+Você já interagiu com chatbots: ChatGPT no navegador, Claude.ai, Gemini. O padrão é simples:
+
+- Você digita uma mensagem.
+- O modelo lê e devolve uma resposta em texto.
+- Para **fazer alguma coisa** com a resposta — rodar o código, salvar o arquivo, abrir a planilha — **você** precisa agir.
+
+O chatbot fala. Não tem braços nem mãos. Não enxerga seu computador. Não pode ler nem alterar nada no sistema. O que sai dali é texto, e o texto só vira ação quando você executa.
+
+Isso gera um **fluxo de cópia-cola** que é familiar para qualquer pessoa que usa IA hoje:
+
+> Você pergunta → modelo responde → você copia → cola no R / Word / Excel → vê o resultado → encontra um erro → volta para o chat com a mensagem de erro → modelo corrige → você cola de novo → roda de novo → ...
+
+Esse loop é o estado da arte do uso "padrão" de IA. Funciona. Mas é caro em fricção, e cada cópia/cola é uma chance de erro de transcrição.
+
+## O que é um agente
+
+Um **agente de IA** é um LLM com três coisas a mais:
+
+1. **Ferramentas** — funções que ele pode invocar para interagir com o mundo: ler um arquivo, escrever um arquivo, rodar um comando de terminal, fazer uma requisição HTTP, consultar uma base de dados, abrir uma página na web.
+2. **Autonomia para iterar** — pode chamar várias ferramentas em sequência, observar o resultado de cada uma, ajustar a próxima ação, sem aguardar que você digite algo entre os passos.
+3. **Loop de execução** — um ciclo `pensar → agir → observar → pensar` que continua até a tarefa ficar pronta ou até ele decidir pedir confirmação.
+
+Em uma frase: **um agente é um LLM com permissão para mexer em coisas, autonomia para iterar, e a responsabilidade de te entregar uma tarefa pronta — não apenas uma resposta**.
+
+## Anatomia de uma interação agêntica
+
+Vamos abrir o capô. Imagine que você diz ao Claude:
+
+> *"Calcule a idade média e o desvio padrão dos pacientes em `data/raw/coorte.csv`."*
+
+No **chatbot**, a resposta seria algo como:
+
+```r
+library(readr)
+dados <- read_csv("data/raw/coorte.csv")
+mean(dados$idade, na.rm = TRUE)
+sd(dados$idade, na.rm = TRUE)
+```
+
+Você copia, cola, roda, lê o output. Se der erro, copia o erro de volta para o chat.
+
+No **agente**, o que acontece é diferente — em vez de devolver código para você executar, ele **executa**:
+
+1. **Pensa**: *"preciso ler o arquivo primeiro para saber o que tem dentro."*
+2. **Age**: chama a ferramenta de leitura — `read_file("data/raw/coorte.csv")`.
+3. **Observa**: vê que são 1.247 linhas, com colunas `idade`, `sexo`, `desfecho`, e que `idade` tem alguns valores faltantes.
+4. **Pensa**: *"preciso usar `na.rm = TRUE` por causa dos faltantes."*
+5. **Age**: escreve um script `R/analise/01-descritiva.R` e chama a ferramenta de execução.
+6. **Observa**: lê o output. Média = 64,3 anos, DP = 14,2.
+7. **Responde**: *"A idade média foi 64,3 anos (DP 14,2). Salvei o script em `R/analise/01-descritiva.R` e o resultado bruto em `output/descritiva-idade.txt`. Quer que eu inclua também mediana e quartis?"*
+
+Você não vê o código nem o output diretamente — vê o **resultado curado**, com os artefatos já organizados no projeto, prontos para a próxima etapa.
+
+## Mesma tarefa, dois mundos
+
+Para tornar a diferença concreta, vamos comparar chatbot e agente em uma tarefa real de pesquisa: **gerar a Tabela 1 de um estudo de coorte**.
+
+| Etapa | Chatbot | Agente |
+|---|---|---|
+| Você pede | "Gere o código da Tabela 1." | "Gere a Tabela 1 do meu estudo." |
+| Ele descobre o que tem nos dados | Não pode — supõe nomes de variáveis. | Lê o CSV, identifica colunas, tipos e faltantes. |
+| Você executa o código | Você copia, cola no R, roda. | Ele roda. |
+| Erro de sintaxe ou pacote ausente | Você copia o erro de volta para o chat, espera correção, roda de novo. | Ele lê o erro, corrige, roda de novo. |
+| Resultado final | Tabela renderizada na tela. Você precisa salvar, transformar em imagem, colar no Word. | Tabela salva em `tables/tabela1.docx` e referenciada num *chunk* Quarto, pronta para o relatório. |
+| Risco de erro de transcrição | Alto (cada cópia/cola é uma chance). | Baixo (não há cópia/cola). |
+
+A diferença não está só em velocidade. **A unidade de trabalho mudou**: deixou de ser *mensagem* e passou a ser *tarefa*.
+
+## O que isso muda para a pesquisa científica
+
+Quatro mudanças práticas vale registrar:
+
+### 1. A fricção entre ideia e teste despenca
+
+No fluxo do chatbot, testar uma hipótese custa esforço: pedir o código, configurar o ambiente, rodar, depurar, interpretar. Cada passo cobra atenção. Com agente, **testar uma ideia volta a custar quase o mesmo que ter a ideia**. Você diz *"ajuste o modelo logístico controlando por idade e sexo"* e em segundos vê o resultado. Isso muda o ritmo do trabalho intelectual: você explora mais alternativas, porque cada alternativa custa pouco.
+
+### 2. A qualidade do prompt importa ainda mais
+
+No chatbot, um prompt ruim gera uma resposta ruim — você nota, refaz e segue. No agente, um prompt ruim pode gerar **arquivos ruins de verdade no seu projeto, antes de você ter chance de revisar**. Tudo o que vimos no capítulo de **Prompts** (M1-B1-04) — papel, contexto, *plan-first*, restrições explícitas — vale dobrado em uso agêntico.
+
+### 3. Documentar o uso fica mais difícil e mais importante
+
+Como vimos em *Documentar uso de IA* (M1-B1-05), registrar modelo, versão, prompt, output e edição humana é parte do método. Em uso agêntico, a "interação" não é uma única troca de mensagens — pode ser dezenas de chamadas de ferramentas, mudanças incrementais em vários arquivos, ao longo de uma sessão de horas. **O Git, que vamos ver no Módulo 3, passa a ser o seu log primário**: cada *commit* é uma "rodada" do agente, com mensagem descrevendo o que foi feito.
+
+### 4. A reprodutibilidade ganha um asterisco
+
+Mesmo com prompt idêntico, duas sessões agênticas em momentos diferentes podem tomar caminhos ligeiramente diferentes — escolher um nome de variável distinto, decidir por uma estrutura de pastas alternativa, ordenar os passos de outra forma. Isso significa que **o produto final** (os arquivos, os números, as figuras) é o que conta como reprodutível, **não o processo agêntico em si**. A boa notícia: se o produto final está versionado no Git, com lockfile de pacotes, qualquer pessoa consegue regenerar os números a partir dali — independentemente de como o agente chegou neles.
+
+## O humano no *loop*
+
+Embora o agente "atue", você continua sendo o responsável. Os agentes desenhados para uso profissional sério — Claude Code, Cowork, Codex, Gemini CLI — implementam **portões de aprovação**:
+
+- Antes de **editar um arquivo que já existe**, o agente mostra o *diff* e pergunta *"posso aplicar?"*.
+- Antes de **rodar um comando potencialmente destrutivo** (`rm`, `git push --force`, `DROP TABLE`), o agente pede confirmação explícita.
+- Antes de **criar arquivos em massa**, o agente apresenta o plano completo (a técnica de *plan-first* do capítulo de Prompts).
+
+::: {.callout-tip}
+## Aprovação por reflexo é o oposto de controle
+Clicar *"aprovar"* sem olhar o que vai ser feito anula a proteção. Cada portão de aprovação existe porque aquela ação merece um momento de revisão. Mesmo que demore três segundos a mais por ação, esse hábito é o que separa "agente como assistente" de "agente como descontrole".
+:::
+
+Há também um cuidado específico para pesquisa, ligado ao capítulo de **LGPD** (M1-B1-06): ao trabalhar com dados de pacientes, você precisa entender que **o agente lê o que você der acesso**. Se sua pasta `data/raw/` contém prontuários identificados, e o agente tem acesso a essa pasta, esses dados podem ser enviados para os servidores do modelo. Tratamento de dados sensíveis exige decisões deliberadas — não *default*.
+
+## Limites honestos
+
+Para fechar a parte conceitual com honestidade — agentes não são mágica. Quatro limites a manter em mente:
+
+- **Ainda alucinam.** A diferença é que agora alucinam **agindo**: inventam o nome de um pacote inexistente e tentam instalar; supõem uma coluna que não está no CSV e usam mesmo assim. Você precisa **conferir o trabalho**, não delegar cegamente.
+- **Quanto maior a tarefa, maior o desvio.** Tarefas curtas e bem delimitadas dão excelente resultado. Tarefas longas e abertas tendem a derivar — o agente "perde o fio" depois de muitas iterações. A boa prática é dividir tarefas grandes em pedaços testáveis.
+- **A janela de contexto é finita.** Mesmo modelos com janelas enormes (Claude Opus 4.7 tem 1M de tokens) não enxergam tudo de uma vez em projetos grandes. Estruturar bem o projeto (Módulo 2) e usar arquivos de configuração como `CLAUDE.md` ajuda a manter o contexto certo na memória do agente.
+- **Não substituem julgamento metodológico.** Um agente não decide se *p* < 0,05 é apropriado para o seu desenho, não escolhe entre regressão de Cox ou Poisson sem orientação, não te avisa que o desfecho composto não faz sentido clínico. **Essas decisões continuam suas.**
+
+::: {.callout-warning}
+## Sobre-confiança é o erro mais caro
+A armadilha mais comum em quem começa a usar agentes é tratar o output como verdade pelo simples fato de ter sido escrito com fluência. Texto bem escrito não garante código correto, e código que roda não garante análise correta. **Revisão é parte do método.**
+:::
+
+## *Vibe Coding*: o nome do método
+
+O termo *vibe coding* foi popularizado em 2025 para descrever esse modelo de trabalho: você descreve o que quer em linguagem natural, o agente faz, você revisa e itera. Não é "programar sem saber programar" — é trabalhar em outro nível de abstração, com a IA cuidando da tradução entre intenção e código.
+
+Para um pesquisador, o ganho é direto: você consegue produzir scripts, tabelas, análises, relatórios e até sites inteiros sem dominar a sintaxe de R ou Python. O custo é desenvolver duas habilidades novas — **saber pedir** (prompts cuidadosos) e **saber avaliar** (revisão crítica do output) — que são exatamente as habilidades que este curso prioriza.
+
+::: {.callout-note}
+## Curiosidade: o próprio site que você está lendo
+Este site, do título à página de créditos, foi construído em colaboração com agentes de IA — Claude Cowork e Claude Code. Os detalhes de modelos, período, e divisão de trabalho entre humano e agente estão na [página de Créditos](/creditos.qmd), seguindo o protocolo de declaração que você acabou de ver no capítulo *Documentar uso de IA*. É o exemplo do método aplicado a si mesmo.
+:::
+
+## O que vem a seguir
+
+Os próximos dois capítulos descem do conceitual para o concreto:
+
+- **02 · Claude** — o agente recomendado do curso. Cowork e Claude Code em detalhes, e o caso *SaaSpocalypse* que ilustra o impacto do salto agêntico no mercado em 2026.
+- **03 · Codex** — a alternativa da OpenAI, em CLI, útil para quem quer comparar agentes ou já vive no ecossistema OpenAI.
+
+Depois disso, o curso volta para a infraestrutura prática (Terminal, no Bloco 3, e Ambientes de trabalho, no Bloco 4) — agora com a moldura conceitual completa para entender o que você está fazendo, e por quê.

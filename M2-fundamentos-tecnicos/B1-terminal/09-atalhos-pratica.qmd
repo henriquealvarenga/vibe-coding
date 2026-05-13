@@ -1,0 +1,165 @@
+---
+title: "Atalhos, prática e o que vem depois"
+---
+
+Para fechar o Bloco do Terminal: atalhos de teclado que economizam tempo real, um exercício prático que integra tudo o que vimos, um cartão-resumo dos comandos para consulta rápida, e um mapa de onde o terminal reaparece no resto do curso.
+
+## Atalhos de teclado
+
+Estes atalhos funcionam na maioria dos terminais (Mac, Linux, e — com algumas exceções — Windows com PowerShell, Windows Terminal e Git Bash):
+
+| Atalho | Função |
+|--------|--------|
+| `Tab` | Autocompleta nomes de arquivos e pastas (e comandos) |
+| `↑` / `↓` | Navega pelo histórico de comandos digitados |
+| `Ctrl + C` | Cancela o comando em execução |
+| `Ctrl + L` | Limpa a tela (equivalente a `clear`) |
+| `Ctrl + A` | Move o cursor para o início da linha |
+| `Ctrl + E` | Move o cursor para o fim da linha |
+| `Ctrl + U` | Apaga do cursor até o início da linha |
+| `Ctrl + K` | Apaga do cursor até o fim da linha |
+| `Ctrl + R` | Busca interativa no histórico (digite parte do comando antigo) |
+| `Ctrl + W` | Apaga a palavra anterior ao cursor |
+| `Ctrl + D` | Sair do shell (equivalente a `exit`) |
+
+O `Tab` é especialmente útil — a essa altura do Bloco você já viu ele aparecer várias vezes. Comece a digitar o nome de um arquivo ou pasta, pressione `Tab`, e o terminal completa. Se houver múltiplas opções, pressione `Tab` duas vezes para ver todas.
+
+O `Ctrl + R` é o segundo mais transformador depois do `Tab`. Aperte `Ctrl + R`, comece a digitar parte de um comando antigo (ex.: `git`), e o shell vai completando com o último `git ...` que você usou. Aperte `Ctrl + R` de novo para ir para o anterior. Aperte Enter para executar.
+
+::: {.callout-note}
+No **Prompt de Comando do Windows** (`cmd`), alguns desses atalhos não funcionam — `cmd` tem suporte limitado a atalhos no estilo Unix. Em **PowerShell**, **Windows Terminal** e **Git Bash**, a maioria funciona normalmente.
+:::
+
+## Prática: criando uma estrutura de projeto
+
+Vamos praticar criando do zero a estrutura de um projeto de pesquisa — colocando em uso quase todos os comandos do Bloco:
+
+```bash
+# Onde estou? (orientação inicial)
+pwd
+
+# Vai para a Documents (use Tab para autocompletar)
+cd ~/Documents
+
+# Cria a pasta do projeto e entra
+mkdir projeto-coorte
+cd projeto-coorte
+
+# Cria as três subpastas padrão de uma vez
+mkdir -p dados scripts output
+
+# Cria placeholders dos arquivos principais
+touch README.md
+touch scripts/analise.R
+touch scripts/limpeza.R
+touch dados/.gitkeep
+
+# Confere a estrutura
+ls -la
+ls -la scripts
+ls -la dados
+
+# Volta um nível para ver a árvore inteira
+cd ..
+ls projeto-coorte
+```
+
+No Windows (cmd):
+
+```cmd
+cd %USERPROFILE%\Documents
+mkdir projeto-coorte
+cd projeto-coorte
+mkdir dados scripts output
+type nul > README.md
+type nul > scripts\analise.R
+type nul > scripts\limpeza.R
+dir
+```
+
+Cinco minutos. Estrutura pronta. Reproduzível em qualquer máquina.
+
+## Resumo dos comandos
+
+### Mac/Linux
+
+| Comando | Função |
+|---------|--------|
+| `pwd` | Mostra a pasta atual |
+| `ls` | Lista arquivos |
+| `ls -la` | Lista detalhada incluindo arquivos ocultos |
+| `cd pasta` | Muda de pasta |
+| `cd ..` / `cd ~` / `cd -` | Sobe / vai para home / volta para a anterior |
+| `mkdir pasta` | Cria pasta |
+| `mkdir -p pasta/subpasta` | Cria pasta e subpastas |
+| `touch arquivo` | Cria arquivo vazio |
+| `cp origem destino` | Copia |
+| `cp -r pasta destino` | Copia pasta inteira |
+| `mv origem destino` | Move ou renomeia |
+| `rm arquivo` | Remove arquivo |
+| `rm -r pasta` | Remove pasta e conteúdo |
+| `cat arquivo` | Mostra todo o conteúdo |
+| `less arquivo` | Mostra paginado (saia com `q`) |
+| `head arquivo` / `tail arquivo` | Primeiras / últimas 10 linhas |
+| `find . -name "*.csv"` | Busca arquivos por nome |
+| `grep -rn "texto" .` | Busca texto em arquivos (recursivo) |
+| `clear` | Limpa a tela |
+| `history` | Lista comandos anteriores |
+| `man comando` | Manual completo |
+
+### Windows (cmd)
+
+| Comando | Função |
+|---------|--------|
+| `cd` (sem argumento) | Mostra a pasta atual |
+| `dir` | Lista arquivos |
+| `dir /a` | Inclui arquivos ocultos |
+| `cd pasta` | Muda de pasta |
+| `mkdir pasta` | Cria pasta |
+| `type nul > arquivo` | Cria arquivo vazio |
+| `copy origem destino` | Copia |
+| `xcopy pasta destino /E` | Copia pasta inteira |
+| `move origem destino` | Move ou renomeia |
+| `del arquivo` | Remove arquivo |
+| `rmdir /S pasta` | Remove pasta e conteúdo |
+| `type arquivo` | Mostra conteúdo |
+| `findstr "texto" arquivo` | Busca texto |
+| `cls` | Limpa a tela |
+| `doskey /history` | Lista comandos anteriores |
+| `help comando` | Ajuda |
+
+::: {.callout-tip}
+## Para usuários Windows: considere o Git Bash
+Se você pretende usar Git regularmente (e em algum momento vai usar — Módulo 3), considere instalar o **Git Bash**. Ele vem junto com o Git para Windows e permite usar os mesmos comandos do Mac/Linux. Isso elimina a necessidade de traduzir cada comando entre as duas tabelas acima e facilita seguir tutoriais e documentações.
+:::
+
+## O Terminal no resto do curso
+
+Você vai encontrar o terminal de novo várias vezes ao longo deste curso, em contextos diferentes. Vale registrar agora, ainda no Módulo 1, onde ele reaparece.
+
+**Agentes de IA na linha de comando.** Vários dos agentes mais poderosos hoje rodam direto no terminal: Claude Code, Codex e Gemini CLI são os exemplos vistos no Bloco anterior (M1-B2 Agentes de IA). Você invoca o agente ali, descreve o que quer, e ele opera no seu sistema. Sem terminal, sem agente CLI.
+
+**Gerenciadores de pacote** (Módulo 2). Para instalar bibliotecas Python (`uv`, `pip`, `conda`) e R (`renv`), o terminal é o caminho. As IDEs têm botões para fazer isso, mas você ainda vai precisar entender o que está acontecendo por baixo — especialmente quando algo não funcionar.
+
+**Git e GitHub** (Módulo 3). O Git nasceu em 2005, criado por Linus Torvalds para gerenciar o código do Linux [@torvalds2025git]. Como Linus e os outros desenvolvedores do Linux trabalham predominantemente no terminal, o Git foi projetado como ferramenta de linha de comando — todas as interfaces gráficas vieram depois e são, no fundo, "capas" sobre o mesmo motor.
+
+Todos os comandos Git seguem a estrutura `comando [opções] [argumentos]` que você aprendeu no capítulo 04:
+
+```bash
+git status              # sem opções nem argumentos
+git add .               # com argumento (o ponto)
+git commit -m "msg"     # com opção (-m) e argumento
+git log --oneline       # com opção longa
+```
+
+**Quarto.** Renderizar um documento `.qmd` é `quarto render arquivo.qmd`. Subir um servidor local de preview é `quarto preview`. As IDEs têm botões para isso — mas o comando subjacente é o mesmo.
+
+**Scripts.** Sequências de comandos salvas num arquivo, executáveis no terminal. É como você automatiza tarefas repetitivas — preparar um conjunto de dados, rodar uma análise em lote, publicar um site. O Módulo 4 (Capstone) mostra um pipeline completo orquestrado por scripts.
+
+## O que vem a seguir
+
+Você sai deste Bloco com o conforto básico que ele prometeu: sabe abrir um terminal, navegar, criar e organizar arquivos, espiar conteúdo, e buscar coisas. Não é especialista em terminal — e não precisa ser. O próximo Bloco trata dos **ambientes gráficos de trabalho** (Positron, RStudio, VS Code), que combinam essa fluência básica de terminal com editor de código, visualização de gráficos e controle de versão em uma única janela.
+
+Antes de seguir, pratique um pouco. Crie pastas, navegue entre elas, crie arquivos, liste conteúdos, busque com `grep`. Quanto mais natural for o terminal pra você, mais leve será todo o resto do curso.
+
+→ [Bloco 2 · Ambientes de trabalho](../B2-ambientes/01-introducao.qmd)

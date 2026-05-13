@@ -1,0 +1,181 @@
+---
+title: "Git assistido por IA"
+---
+
+Você terminou uma sessão de análise. Modificou três scripts, refez duas figuras, atualizou o `_quarto.yml`. Hora de commitar. Roda `git status`: doze arquivos modificados. Hora de pensar na **mensagem de commit**. Você fica olhando para o cursor por trinta segundos. *"Atualização"* não diz nada. *"Várias mudanças"* também. *"Refatoração de scripts e ajustes"* — melhor, mas vago. Cinco minutos depois, você desistiu de pensar e digitou *"updates"*.
+
+Esse vácuo de motivação é onde a IA mais ajuda em Git. Não nas operações conceituais (essas você precisa entender — é o tema dos capítulos 01 e 02 deste Bloco), mas no **trabalho cognitivo de descrever bem o que mudou**. Mensagens de commit, descrições de pull request, comentários em revisão de código, resolução de conflitos — tudo isso vira muito menos doloroso quando um agente faz o primeiro draft.
+
+Este capítulo é sobre como integrar IA ao fluxo de Git de forma útil — e, igualmente importante, **onde NÃO deixar a IA operar sozinha**, porque alguns comandos Git são destrutivos e a margem de erro é zero.
+
+## Onde IA ajuda
+
+A IA é especialmente útil em três pontos do fluxo Git que combinam: (1) trabalho repetitivo, (2) baixo custo se errar, (3) alto custo de "ficar travado pensando".
+
+### 1. Mensagens de commit
+
+Em vez de escrever a mensagem manualmente, peça ao agente para examinar o `git diff` e propor uma mensagem que descreva claramente o que mudou.
+
+Em Claude Code, Codex CLI ou Gemini CLI, isso é literalmente uma frase:
+
+> *"Olha o diff staged e me sugere mensagem de commit clara, em português, no estilo Conventional Commits."*
+
+O agente lê o diff, identifica o tipo de mudança (refator, fix, feat, docs), resume e propõe algo como:
+
+```
+fix(analise): corrige cálculo de IC 95% que ignorava NAs
+
+A função `calcular_intervalo()` em scripts/02-analise.R não filtrava
+valores faltantes antes de chamar `quantile()`, gerando ICs com
+limites NaN quando havia missingness. Adicionada limpeza explícita
+antes do cálculo. Resultados de Tabela 2 (caracterização baseline)
+permanecem inalterados; Tabela 4 (desfechos secundários) ganha
+2 linhas de pacientes que estavam sendo descartadas silenciosamente.
+```
+
+A diferença entre essa mensagem e *"updates"* não é cosmética. **Daqui a um ano, quando o revisor pedir explicação, você abre o histórico e entende o que aquele commit fez sem precisar reler o código**. É o registro mútuo entre o eu-de-hoje e o eu-do-futuro.
+
+### 2. Descrição de Pull Requests
+
+Mesmo princípio escalado. PR tipicamente reúne vários commits relacionados; descrição precisa contextualizar a mudança como um todo. Agente lê todos os commits, gera descrição estruturada:
+
+> *"Resumo, motivação, mudanças por arquivo, como testar, breaking changes (se houver). Faça em português, formato Markdown."*
+
+Resultado vira excelente PR description — algo que humanos quase nunca escrevem com qualidade quando estão cansados ou apressados.
+
+### 3. Resolução de conflitos de merge
+
+Conflitos acontecem quando duas pessoas mexem na mesma região do mesmo arquivo. Git marca o conflito assim:
+
+```
+<<<<<<< HEAD
+mean_age <- mean(dados$idade, na.rm = TRUE)
+=======
+mean_age <- median(dados$idade, na.rm = TRUE)
+>>>>>>> branch-orientador
+```
+
+Resolver à mão exige entender as duas versões e decidir. Agente faz isso bem em conflitos pequenos: você cola o trecho com os marcadores e o contexto, e ele explica o que cada lado pretendia, propõe resolução, e justifica.
+
+### 4. Code review
+
+Antes de commitar mudanças importantes, peça revisão ao agente:
+
+> *"Olha o diff dessas mudanças no script de análise. Há erros lógicos? Variáveis não usadas? Inconsistência com o resto do projeto?"*
+
+Agente faz papel de "primeira revisão" — pega coisas óbvias que humano cansado deixaria passar. Não substitui revisão por colega humano em código crítico, mas pega o trivial.
+
+### 5. Estratégia de branches
+
+Para projetos pequenos, basta `main`. Para projetos com várias frentes simultâneas, faz sentido organizar branches. Agente ajuda a desenhar a estratégia adequada ao tipo de projeto:
+
+> *"Estou começando projeto de coorte com três análises principais que vão acontecer em paralelo (sobrevida, regressão multivariada, sensibilidade). Como organizar branches no Git?"*
+
+Resposta típica: `main` para versão estável; `analise-sobrevida`, `analise-regressao`, `analise-sensibilidade` para cada frente; mescla pra `main` quando cada análise estiver pronta. Ou outras variantes dependendo do tamanho do time.
+
+## Onde IA NÃO deve operar sozinha
+
+Aqui está o ponto que vale destacar com clareza. Algumas operações Git são **destrutivas** — uma vez executadas, recuperar o estado anterior é difícil ou impossível. Para esses casos, **agentes podem propor o comando, mas você executa**, depois de entender o que vai fazer:
+
+| Comando | Por que perigoso |
+|---|---|
+| `git push --force` (ou `-f`) | Sobrescreve o histórico no remote. Se o colega já tinha puxado o branch, ele perde mudanças locais. |
+| `git reset --hard` | Descarta TODAS as mudanças não commitadas. Sem aviso, sem lixeira. |
+| `git rebase` em branch compartilhado | Reescreve histórico que outras pessoas têm; quebra o fluxo de todo mundo. |
+| `git branch -D` | Apaga branch local sem checar se foi merged. |
+| `git clean -fd` | Apaga arquivos não-rastreados e diretórios. Inclui dados/saídas que você esqueceu de commitar. |
+| `git filter-branch` ou `git filter-repo` | Reescrita histórica em massa. Pode arruinar o repositório se mal usado. |
+
+A regra prática: **comandos com `--force`, `--hard` ou que reescrevem histórico devem ser executados manualmente por humano que entende o que vai acontecer**. Agentes às vezes propõem esses comandos como "solução rápida" para um problema que tinha solução não-destrutiva. Sempre questione.
+
+::: {.callout-warning}
+## O caso clássico: o agente "consertando" um conflito de push
+Cenário comum: você dá `git push`, o GitHub recusa porque tem commits que você não puxou ainda. O agente, "ajudando", sugere `git push --force`. **Não faça**. A solução correta é `git pull --rebase` (puxa as mudanças remotas, reaplica suas em cima), e depois `git push`. `--force` resolve sintomaticamente mas pode apagar trabalho de outras pessoas no remote.
+
+Essa armadilha é tão comum que vale repetir: **`git push --force` quase nunca é a resposta certa em colaboração**. Se o agente sugere, peça alternativa não-destrutiva primeiro.
+:::
+
+## Convencionando agentes via AGENTS.md
+
+Como vimos no capítulo M1-B2-05, o arquivo `AGENTS.md` na raiz do projeto serve de "contrato persistente" com agentes — convenções, contexto e restrições que valem para toda interação. Para Git especificamente, vale incluir uma seção:
+
+```markdown
+## Convenções Git
+
+- Mensagens de commit: estilo Conventional Commits, em português.
+  Tipos: feat, fix, docs, refactor, test, chore.
+  Exemplo: "fix(analise): corrige cálculo de IC quando há NAs"
+
+- NUNCA execute `git push --force`, `git reset --hard`, `git rebase`
+  em branch compartilhado, ou `git clean -f` sem aprovação explícita.
+
+- Antes de cada commit, rode `quarto render` para verificar que o
+  site ainda renderiza sem erro.
+
+- Não commite arquivos da pasta `dados/raw/` (versionados em
+  storage separado por causa de PHI).
+
+- Branch principal: `main`. Branches de feature seguem padrão
+  `analise-{tema}` (ex.: `analise-sobrevida`).
+```
+
+Com isso fixado, o agente passa a respeitar essas regras automaticamente em qualquer operação Git que você peça. Sem repetir.
+
+## Fluxo recomendado de Git assistido
+
+A combinação dos princípios anteriores produz um workflow específico:
+
+**Trabalho normal (você dirige):**
+
+1. Você modifica arquivos no projeto.
+2. Você decide o que vai entrar no próximo commit (`git add` dos arquivos relevantes).
+3. **Pede ao agente para sugerir mensagem de commit** com base no diff staged.
+4. Você revisa, ajusta se necessário, e executa o `git commit`.
+5. `git push` para sincronizar com o remote.
+
+**Operações mais complexas (você consulta o agente, mas executa pessoalmente):**
+
+1. Conflito de merge → cola o trecho conflitante com contexto, agente propõe resolução, você aplica e revisa.
+2. Branch travado → descreve o estado, agente sugere comandos, você examina cada um antes de rodar.
+3. Reorganização do histórico → agente desenha estratégia, você executa em ambiente de teste primeiro.
+
+**Operações destrutivas (você executa, agente só consulta):**
+
+1. `--force`, `--hard`, `rebase` em compartilhado, `clean`, `filter-branch` — sempre humano.
+2. Quando agente sugere algo destrutivo, **pergunte alternativa não-destrutiva**.
+
+## Documentação de uso de IA em commits
+
+Vimos no capítulo M1-B1-05 sobre documentar uso de IA em pesquisa. Para commits especificamente, há convenção emergente: incluir trailer no final da mensagem indicando que a IA participou:
+
+```
+fix(analise): corrige cálculo de IC quando há NAs
+
+A função calcular_intervalo() agora filtra NAs antes de quantile().
+
+Co-authored-by: Claude <noreply@anthropic.com>
+```
+
+A linha `Co-authored-by` é convenção do GitHub que aparece como crédito de colaboração na interface web. Útil para deixar transparente onde IA atuou. Não é obrigatório, mas alguns projetos open source pedem. Vale estabelecer convenção no `AGENTS.md` se você quer aplicar.
+
+## Limites práticos em pesquisa
+
+Em pesquisa específica de saúde, três cuidados extras:
+
+**1. Dados sensíveis no prompt.** Quando você pede ao agente para revisar um diff que envolve dados de pacientes (até mesmo dados anonimizados), está enviando informação para um servidor externo. **Verifique a política da sua instituição** sobre LGPD e ferramentas de IA. Em muitos hospitais universitários, isso simplesmente não é permitido com dados reais. Fluxos com dados sintéticos ou anonimizados são alternativa.
+
+**2. Reprodutibilidade do que a IA gerou.** Mensagens de commit não afetam reprodutibilidade. Mas se o agente alterar **código** durante uma sessão, esse código entrou no histórico e precisa ser auditável. **Sempre revise diff antes de commitar** código gerado por agente.
+
+**3. Atribuição em publicação científica.** Quando o repositório vai junto do artigo (DOI no Zenodo, link no Métodos), o histórico do Git fica público. Se você usou agentes substancialmente, vale documentar conforme orientações ICMJE no manuscrito — não nos commits.
+
+## Para a parte operacional
+
+Este capítulo focou no "Git + IA" — uso de agentes em fluxo Git. Para a parte operacional **sem IA** (instalação, configuração, comandos básicos, GitHub Desktop, integração no Positron), o **Manual de Git e GitHub** do autor [@alvarenga2025github] continua sendo a referência: [henriquealvarenga.com/github_manual/](https://henriquealvarenga.com/github_manual/).
+
+A combinação livro + IA tende a ser o fluxo mais produtivo: livro estabelece base conceitual e operacional; IA acelera o trabalho repetitivo (mensagens, descrições, resolução de conflitos triviais).
+
+## O que vem a seguir
+
+Você sabe usar Git e GitHub, com ou sem IA. Falta o lado **publicação** — como transformar o repositório no GitHub em um site público, navegável, citável, que serve como portfólio acadêmico, blog, material didático, ou complementar reproduzível de artigo. O próximo capítulo é sobre o **GitHub Pages** como infraestrutura editorial gratuita para pesquisa científica.
+
+→ [05 · GitHub Pages](05-github-pages.qmd)

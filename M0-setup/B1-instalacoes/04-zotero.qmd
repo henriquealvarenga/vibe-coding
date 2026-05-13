@@ -1,0 +1,212 @@
+---
+title: "Instalando o Zotero"
+---
+
+Toda pesquisa científica passa por **gerenciar referências bibliográficas**: artigos lidos, citações no texto, lista final de referências. O Zotero é a ferramenta que vai cuidar desse trabalho durante todo o curso — e, mais importante, vai conversar diretamente com o Quarto, transformando citação em referência formatada de forma totalmente automática.
+
+::: {.callout-tip}
+## O que o Zotero alimenta, em uma linha
+O Zotero exporta sua biblioteca como um arquivo `.bib` (formato **BibTeX** — a base de referências) que o Quarto lê em conjunto com um arquivo `.csl` (formato **CSL** — o estilo de formatação, ex.: Vancouver, ABNT). O capítulo [Citação: BibTeX e CSL](../../M3-analise/B1-markdown/03-citacao.qmd) (M3-B1-03) explica esses dois formatos em profundidade. Para instalar o Zotero, não é necessário entender tudo agora; basta saber que estes são os dois ingredientes que o Zotero vai alimentar.
+:::
+
+## O que é o Zotero
+
+O **Zotero** é um **gerenciador de referências bibliográficas gratuito e de código aberto**. Ele é desenvolvido por uma organização sem fins lucrativos ([Corporation for Digital Scholarship](https://digitalscholar.org)) e é usado por pesquisadores, professores e estudantes em todo o mundo. As funções principais são:
+
+- **Coletar** referências e PDFs de artigos diretamente do navegador, com um clique;
+- **Organizar** sua biblioteca em pastas, com tags, anotações e PDFs anexados;
+- **Sincronizar** sua biblioteca entre vários computadores e a nuvem;
+- **Citar** automaticamente em documentos do Word, LibreOffice e — através do que vamos configurar neste capítulo — também no **Quarto**;
+- **Formatar** as referências em mais de 10 mil estilos de citação (ABNT, Vancouver, APA, JAMA, NEJM, etc.).
+
+::: {.callout-note}
+## Já uso EndNote (ou Mendeley). Vale trocar?
+Se você já usa **EndNote** (pago) ou **Mendeley** (gratuito), Zotero é uma alternativa madura, totalmente livre e mais bem integrada com ferramentas modernas de ciência aberta. Para o que vamos fazer no curso (citações em Quarto), Zotero oferece uma experiência substancialmente melhor. Você não precisa abandonar a ferramenta atual: pode importar sua biblioteca para o Zotero e manter o Zotero apenas para o trabalho com Quarto, se preferir.
+:::
+
+## Por que Zotero neste curso
+
+Três motivos:
+
+1. **Integração nativa com Quarto.** Zotero exporta arquivos no formato **BibTeX (`.bib`)** — exatamente o formato que o Quarto usa para gerenciar citações. Com a configuração que vamos fazer, **toda alteração na sua biblioteca Zotero é refletida automaticamente** no `.bib` que o Quarto lê.
+
+2. **Citation keys legíveis.** Em vez de citar como `[1]` e depender da ordem do texto, você cita como `@Silva2024` no Quarto — onde `Silva2024` é uma chave gerada pelo Zotero a partir do autor e ano do artigo. O texto fica legível e o autor é reconhecível mesmo sem renderizar.
+
+3. **PDFs viajam junto.** Você pode anexar o PDF do artigo à referência no Zotero. Quando precisar reler, abre direto da biblioteca, com suas próprias anotações destacadas.
+
+## O que vamos instalar
+
+Três peças, todas gratuitas:
+
+| Componente | Para que serve | Onde se instala |
+|---|---|---|
+| **Zotero 9** (app desktop) | Núcleo do sistema. Guarda referências, PDFs, anotações. | Computador (este capítulo) |
+| **Zotero Connector** (extensão do navegador) | Botão no navegador que captura referências de artigos com um clique. | Chrome / Firefox / Edge / Safari |
+| **Better BibTeX** (extensão do Zotero) | Gera arquivos `.bib` consistentes para uso com Quarto e LaTeX. | Dentro do próprio Zotero |
+
+## Instalando o Zotero
+
+::: {.panel-tabset group="os"}
+
+### macOS
+
+**Passo 1. Baixe o instalador.**
+
+1. Acesse [zotero.org/download](https://www.zotero.org/download/).
+2. Clique no botão **Download** na seção **macOS**.
+3. O arquivo é um `.dmg` (ex.: `Zotero-9.0.1.dmg`). É um único pacote universal — funciona em Apple Silicon e Intel.
+
+**Passo 2. Instale.**
+
+1. Na pasta Downloads, dê duplo-clique no arquivo `.dmg`.
+2. Abre uma janela com o ícone do Zotero e um atalho para a pasta **Applications**.
+3. **Arraste o ícone do Zotero** para cima do ícone da pasta Applications.
+4. Feche a janela e ejete o `.dmg`.
+
+**Passo 3. Abra o Zotero pela primeira vez.**
+
+1. Vá em **Aplicativos → Zotero**.
+2. No primeiro aviso de segurança ("Zotero foi baixado da internet"), clique em **Abrir**.
+3. O Zotero abre com a biblioteca vazia. **Não feche** — vamos configurar a seguir.
+
+### Windows
+
+**Passo 1. Baixe o instalador.**
+
+1. Acesse [zotero.org/download](https://www.zotero.org/download/).
+2. Na seção **Windows**, baixe o **Installer 64-bit** (versão padrão).
+3. Se você tem um Surface Pro X ou outro Windows ARM, baixe a versão **ARM64**.
+
+**Passo 2. Instale.**
+
+1. Na pasta Downloads, dê duplo-clique no `.exe`.
+2. Se o Windows mostrar um aviso de segurança, clique em **Sim** ou **Executar mesmo assim**.
+3. Avance pelo assistente mantendo as opções padrão.
+4. Clique em **Concluir** ao final.
+
+**Passo 3. Abra o Zotero.**
+
+Vá em **Menu Iniciar → Zotero**. O programa abre com a biblioteca vazia.
+
+### Linux
+
+**Passo 1. Baixe o tarball.**
+
+1. Acesse [zotero.org/download](https://www.zotero.org/download/).
+2. Na seção **Linux**, baixe o arquivo **64-bit** (`Zotero-9.0.1_linux-x86_64.tar.bz2`) ou **ARM64** se for o caso.
+
+**Passo 2. Extraia e instale.**
+
+Abra o terminal:
+
+```bash
+cd ~/Downloads
+tar -xjf Zotero-9.0.1_linux-x86_64.tar.bz2
+sudo mv Zotero_linux-x86_64 /opt/zotero
+sudo /opt/zotero/set_launcher_icon
+ln -s /opt/zotero/zotero.desktop ~/.local/share/applications/zotero.desktop
+```
+
+(Ajuste o número da versão conforme o que você baixou.)
+
+**Passo 3. Abra o Zotero.**
+
+Procure por **Zotero** no menu de aplicativos. Na primeira execução, o atalho pode demorar alguns segundos para aparecer — se não vir imediatamente, deslogue e logue de volta na sua sessão.
+
+:::
+
+## Primeira configuração: criar conta (opcional, mas recomendado)
+
+O Zotero funciona sem conta — sua biblioteca fica salva localmente no computador. Mas criar uma conta gratuita em **zotero.org** traz dois benefícios importantes:
+
+- **Sincronização entre máquinas.** Sua biblioteca fica disponível em todos os computadores onde você instalar o Zotero (casa, laboratório, notebook).
+- **Acesso à biblioteca pelo navegador.** Pode consultar suas referências de qualquer lugar.
+
+**Para criar a conta:**
+
+1. Acesse [zotero.org/user/register](https://www.zotero.org/user/register/).
+2. Preencha usuário, e-mail e senha. **Use o e-mail institucional** se quiser ter acesso a recursos extras de organização (a maior parte das universidades brasileiras está cadastrada).
+3. Confirme o e-mail clicando no link enviado.
+
+**Para conectar a conta ao Zotero desktop:**
+
+1. No Zotero (no seu computador), vá em **Edit → Settings** (ou **Zotero → Settings** no Mac).
+2. Na aba **Sync**, faça login com seu usuário e senha.
+3. Marque **Sync automatically** se quiser sincronização contínua. Pronto.
+
+::: {.callout-tip}
+## Quanto de armazenamento vem grátis?
+A conta gratuita inclui **300 MB de armazenamento na nuvem** para anexos (PDFs). É suficiente para algumas centenas de artigos. Para bibliotecas maiores, há planos pagos a partir de USD 20/ano. **Para o curso, 300 MB é mais do que o necessário.**
+:::
+
+## Zotero Connector (extensão do navegador)
+
+O **Connector** é o que torna o Zotero realmente prático: um botão no navegador que, **com um clique**, captura toda a referência de um artigo (autor, título, revista, ano, DOI...) e baixa o PDF junto. Sem Connector, você teria que digitar tudo manualmente — algo impensável em pesquisa.
+
+**Para instalar:**
+
+1. No navegador que você usa (Chrome, Firefox, Edge ou Safari), acesse [zotero.org/download](https://www.zotero.org/download/).
+2. Role até a seção **Zotero Connector**. A página detecta seu navegador e mostra o botão de instalação correto.
+3. Clique no botão e autorize a instalação da extensão na loja oficial do navegador.
+4. Após instalada, um pequeno ícone do Zotero aparece na barra de extensões do navegador.
+
+**Para testar:**
+
+1. **Mantenha o aplicativo Zotero desktop aberto** (o Connector se comunica com ele).
+2. Acesse uma página de artigo científico — por exemplo, qualquer artigo no [PubMed](https://pubmed.ncbi.nlm.nih.gov) ou no [Google Scholar](https://scholar.google.com).
+3. Clique no ícone do Zotero na barra do navegador.
+4. Em segundos, o artigo deve aparecer na sua biblioteca Zotero — geralmente com o PDF anexo, se houver acesso.
+
+Se funcionou, **sua infraestrutura de coleta de referências está completa**.
+
+## Better BibTeX (extensão essencial)
+
+A última peça é o **Better BibTeX (BBT)**, uma extensão do próprio Zotero que melhora drasticamente a integração com Quarto e LaTeX. Sem o BBT, exportar referências do Zotero para `.bib` é um processo manual e propenso a inconsistências; com o BBT, vira automático e estável.
+
+### O que o Better BibTeX faz
+
+- **Gera *citation keys* legíveis e estáveis.** Você decide o padrão (ex.: `Silva2024`) e o BBT garante que cada referência ganhe uma chave única, automaticamente, e que essa chave **nunca mude** sem sua autorização. Isso é crítico: se a chave mudar, suas citações no texto quebram.
+- **Auto-export.** Permite manter um arquivo `.bib` sempre sincronizado com a sua biblioteca Zotero. Você adiciona uma referência nova no Zotero, e o `.bib` é atualizado em segundos — sem você precisar exportar manualmente.
+
+### Instalando o Better BibTeX
+
+**Passo 1. Baixe o arquivo `.xpi`.**
+
+1. Acesse [retorque.l-l.org/zotero-better-bibtex/installation](https://retorque.l-l.org/zotero-better-bibtex/installation/) (página oficial do Better BibTeX).
+2. Clique no link de download da versão estável mais recente. O arquivo termina em `.xpi`.
+3. **Importante**: dependendo do navegador, o arquivo `.xpi` pode tentar abrir como instalação de extensão do navegador, em vez de baixar. Se isso acontecer, clique com **botão direito** no link e escolha **Salvar link como…** (ou **Save link as…**) para forçar o download do arquivo.
+
+**Passo 2. Instale dentro do Zotero.**
+
+1. Com o Zotero desktop aberto, vá em **Tools → Add-ons** (ou **Ferramentas → Extensões**).
+2. Clique no ícone de engrenagem ⚙ no canto superior direito da janela de Add-ons.
+3. Escolha **Install Add-on From File…**.
+4. Localize e selecione o arquivo `.xpi` que você baixou.
+5. Confirme a instalação. O Zotero pode pedir para reiniciar — confirme.
+
+**Passo 3. Configure as citation keys.**
+
+Depois da reinicialização, vá em **Edit → Settings → Better BibTeX** (ou **Zotero → Settings → Better BibTeX** no Mac).
+
+Na aba **Citation keys**, verifique que o **Citation key formula** está como o padrão:
+
+```
+auth.lower + year
+```
+
+Esse padrão gera chaves no formato `silva2024`. Se você prefere chaves com inicial maiúscula (`Silva2024`, mais comum em Quarto), pode ajustar para:
+
+```
+auth + year
+```
+
+Clique em **Save**. Você não precisa mexer em mais nada por agora — vamos voltar a esta configuração de forma detalhada no Módulo 2.
+
+::: {.callout-note}
+## Detalhes da configuração ficam para o Módulo 2
+A configuração avançada do Better BibTeX (auto-export, formato customizado de citation key, integração específica com Quarto) é tema do capítulo **BibTeX & Zotero** do Módulo 2. Aqui no Módulo 0, basta deixar instalado e em funcionamento.
+:::
+
+## O que vem a seguir
+
+Você instalou e configurou o coração do seu fluxo de citações. Falta uma última camada antes de sair instalando: os **Agentes de IA** — Claude e Codex — que serão seus parceiros de trabalho ao longo de todo o curso. É o que veremos no próximo capítulo.

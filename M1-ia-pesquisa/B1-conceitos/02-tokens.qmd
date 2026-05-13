@@ -1,0 +1,198 @@
+---
+title: "Tokens"
+---
+
+No capítulo anterior aparecemos com a palavra **token** algumas vezes, e prometemos voltar a ela. Aqui ela ganha capítulo próprio — porque entender tokens é entender três coisas práticas que vão acompanhar todo o seu uso de IA: **a memória do modelo, a velocidade da resposta e quanto custa cada interação**.
+
+## O que é um token
+
+Um **token** é a **unidade básica** com que um modelo de linguagem trabalha. Não é exatamente uma palavra, nem uma letra — é um **pedaço** de texto. O tamanho desse pedaço depende de como o modelo foi treinado.
+
+Para entender intuitivamente: quando você digita uma frase, o modelo a quebra em pedaços antes de processar. Por exemplo, a frase:
+
+> A paciente apresentou febre.
+
+Pode ser quebrada (em um modelo típico, em português) como:
+
+```
+[A] [ paciente] [ apresentou] [ febre] [.]
+```
+
+Cinco tokens. Note que:
+
+- O **espaço** geralmente vem **junto** com a palavra que ele antecede.
+- A **pontuação** conta como token separado.
+- A primeira palavra ("A") não tem espaço na frente.
+
+Já uma frase com palavras técnicas pode ser quebrada de forma diferente:
+
+> O hemograma mostrou leucocitose.
+
+```
+[O] [ hem] [ograma] [ mostrou] [ leuco] [cit] [ose] [.]
+```
+
+Oito tokens — porque "hemograma" e "leucocitose" são palavras menos frequentes em texto comum, e o modelo as decompõe em pedaços mais comuns.
+
+::: {.callout-note}
+## Por que não usar palavras inteiras?
+Tratar todas as palavras como tokens inteiros seria custoso (precisaria de vocabulário gigantesco) e ineficiente para palavras raras. Tokenizar em pedaços resolve dois problemas ao mesmo tempo: permite ao modelo lidar com **qualquer palavra** (mesmo que ele nunca tenha visto antes, basta combinar pedaços) e mantém o vocabulário interno em tamanho razoável (geralmente 50 mil a 200 mil tokens distintos).
+:::
+
+### Português consome mais tokens que inglês
+
+Um detalhe importante de quem trabalha em português: **o mesmo conteúdo, em PT, gasta mais tokens do que em EN**. Modelos modernos foram treinados majoritariamente em inglês, então palavras em inglês receberam tokens próprios mais frequentemente; em português, há mais decomposição.
+
+Em média:
+
+- **Inglês**: 1 palavra ≈ 1,3 tokens
+- **Português**: 1 palavra ≈ 1,7 tokens (cerca de 30% a mais)
+
+Isso significa que, ao trabalhar em PT, todos os limites de janela de contexto e custos de API são, na prática, **um pouco menores e um pouco maiores** do que sugerem as documentações em inglês.
+
+## Como contar (ou estimar) tokens
+
+Para a maior parte dos casos, você não precisa contar tokens exatamente. Mas vale ter uma noção de ordem de grandeza.
+
+### Estimativa rápida (regra de bolso)
+
+Para textos em **português**:
+
+> **1 token ≈ 4 caracteres** (incluindo espaços)
+>
+> **1 token ≈ 0,6 palavras** (ou 1 palavra ≈ 1,7 tokens)
+
+Algumas conversões úteis:
+
+| Conteúdo | Tokens aproximados |
+|---|---|
+| Uma frase média (10–15 palavras) | ~20 tokens |
+| Um parágrafo (80–100 palavras) | ~150 tokens |
+| Uma página A4 de texto (≈ 500 palavras) | ~850 tokens |
+| Um artigo científico de 6 mil palavras | ~10 mil tokens |
+| Um capítulo de tese de 20 mil palavras | ~35 mil tokens |
+| Esta página inteira que você está lendo | ~3 mil tokens |
+
+### Ferramentas para contar exatamente
+
+Quando o número exato importa (por exemplo, ao decidir se um documento cabe na janela de contexto), há ferramentas:
+
+- **[tiktokenizer.vercel.app](https://tiktokenizer.vercel.app)** — site gratuito que cola um texto e mostra a tokenização visualmente, em vários modelos diferentes (Claude, GPT, Gemini). É o mais didático.
+- **[platform.openai.com/tokenizer](https://platform.openai.com/tokenizer)** — tokenizer oficial da OpenAI (só GPT).
+- **API de contagem** — tanto Anthropic quanto OpenAI oferecem um endpoint específico só para contar tokens em um texto, sem precisar gerar resposta.
+
+Para o que vamos fazer no curso, **a estimativa de bolso já resolve 95% dos casos**. Só recorra a tokenizers exatos se precisar caber em um limite específico ou estiver investigando um custo inesperado.
+
+## Janela de contexto: a "memória" do modelo
+
+A **janela de contexto** (em inglês, *context window*) é a quantidade **máxima de tokens** que o modelo consegue "ver de uma vez". Inclui:
+
+- Sua mensagem atual;
+- Todo o histórico anterior da conversa;
+- Documentos ou arquivos anexados;
+- Eventuais instruções de sistema (*system prompt*).
+
+Quando a soma de tudo isso ultrapassa o limite, **algo precisa ser removido** — geralmente as mensagens mais antigas. É como uma mesa com tamanho fixo: se você empilhar muitos papéis, os de baixo somem.
+
+### Tamanhos atuais (maio de 2026)
+
+Para dar sentido aos números, vale comparar com algo concreto:
+
+| Janela | Equivale a... |
+|---|---|
+| **8 mil tokens** | Um artigo curto (~5 páginas) |
+| **128 mil tokens** | Um livro de 200 páginas |
+| **200 mil tokens** | Dois livros médios, ou ~80 artigos científicos |
+| **1 milhão de tokens** | Coleção de uma tese inteira + 30 artigos relacionados |
+| **2 milhões de tokens** | Bibliografia completa de uma revisão sistemática grande |
+
+Modelos atuais (atualizados conforme evoluem):
+
+- **Claude Opus 4.7** — 1 milhão de tokens
+- **Claude Sonnet 4.6** — 200 mil ou 1 milhão (dependendo da configuração)
+- **GPT-5** — 200 mil tokens (com extensão para 1 milhão em alguns planos)
+- **Gemini 2.5 Pro** — 2 milhões de tokens
+
+Esses números **mudam frequentemente** — a tendência tem sido aumentar a cada nova versão. Para um valor atualizado, consulte sempre a página oficial do modelo.
+
+::: {.callout-warning}
+## Janela grande não é janela bem-usada
+Um modelo com 1 milhão de tokens de contexto consegue **receber** 1 milhão de tokens, mas **não usa todos com a mesma qualidade**. Há um fenômeno bem documentado chamado *"lost in the middle"*: informações no **começo** e no **fim** do contexto são tipicamente recuperadas com qualidade muito melhor do que informações no **meio**.
+
+Implicação prática: ao colocar muitos documentos em um prompt, o que importa mais deve estar **no início** ou **no fim**, não enterrado no miolo. Vamos voltar a esse ponto no capítulo de Prompts.
+:::
+
+## Tokens de entrada e tokens de saída
+
+Há uma distinção importante:
+
+- **Tokens de entrada** (*input tokens*) — tudo o que você **envia** para o modelo: seu prompt, histórico da conversa, arquivos anexados.
+- **Tokens de saída** (*output tokens*) — tudo o que o modelo **responde**.
+
+A cobrança (veremos abaixo) trata os dois de forma diferente: **tokens de saída custam consideravelmente mais que tokens de entrada** — em geral, **3 a 5 vezes mais**. Faz sentido: gerar texto novo é o "trabalho duro" do modelo; ler um texto existente é mais barato.
+
+Implicação prática: em uma conversa onde você manda 50 mil tokens (um documento longo) e recebe 2 mil tokens de resposta, a maior parte do custo pode estar na **resposta**, não na entrada.
+
+## Custo por token: como funciona a cobrança na API
+
+Quando você usa o **app/chat** (Claude.ai, Claude Desktop, ChatGPT.com, Gemini), paga uma **assinatura mensal fixa** ou usa o plano gratuito com limites — não há cobrança por token. Quando você usa a **API** (programaticamente, via Claude Code, Codex CLI, Gemini CLI, ou suas próprias chamadas), a cobrança é **por token**.
+
+A unidade padrão é **dólares por milhão de tokens** (USD / 1M tokens), separados em **input** e **output**. Por exemplo, um modelo pode custar:
+
+```
+Input:  $3.00 por milhão de tokens
+Output: $15.00 por milhão de tokens
+```
+
+Os preços variam **muito** por modelo. Em ordem de grandeza, em maio de 2026:
+
+| Tipo de modelo | Input (USD/1M) | Output (USD/1M) |
+|---|---|---|
+| Modelos *flagship* (Opus, GPT-5, Pro) | $10–$20 | $50–$100 |
+| Modelos médios (Sonnet, GPT-5 mini, Flash) | $1–$5 | $5–$25 |
+| Modelos rápidos/baratos (Haiku, GPT-5 nano) | $0,20–$1 | $1–$5 |
+
+Os preços oficiais estão sempre nas páginas:
+
+- **Anthropic:** [anthropic.com/pricing](https://www.anthropic.com/pricing)
+- **OpenAI:** [openai.com/api/pricing](https://openai.com/api/pricing)
+- **Google:** [ai.google.dev/pricing](https://ai.google.dev/pricing)
+
+::: {.callout-tip collapse="true"}
+## Caso prático: quanto custa uma análise típica?
+Imagine que você pede ao Claude Code (modelo Sonnet) para analisar três artigos científicos (cerca de 30 mil tokens de entrada) e gerar um sumário comparativo de 2 mil tokens de saída.
+
+- Entrada: 30.000 tokens × $3 / 1.000.000 = **$0,09**
+- Saída: 2.000 tokens × $15 / 1.000.000 = **$0,03**
+- **Total: ~$0,12** (cerca de 60 centavos de real)
+
+Operações maiores (análise de 50 PDFs, processamento de uma tese inteira) podem chegar a alguns dólares por execução. Para uso de pesquisa típico de um aluno ou professor, **gastos mensais ficam tipicamente entre $5 e $30** — comparáveis ou inferiores a uma assinatura mensal de chat.
+:::
+
+## App ou API: qual sai mais barato?
+
+Depende do volume:
+
+- **Usuário leve** (algumas conversas por semana): plano gratuito do app já basta. Custo: zero.
+- **Usuário médio** (várias conversas por dia, escrita técnica regular): assinatura mensal do app (Claude Pro / ChatGPT Plus / Gemini Advanced, ~$20/mês) é mais previsível e geralmente sai mais barato que API.
+- **Usuário pesado** (rodando agentes, processando muitos documentos, automações): API costuma sair mais econômica em termos de "custo por trabalho útil", **mas** com risco de variação imprevisível.
+
+Vamos aprofundar essa decisão no **capítulo seguinte (API × app)**.
+
+## Implicações práticas
+
+Cinco coisas para levar deste capítulo:
+
+1. **Em PT, tudo gasta ~30% mais tokens que em EN.** Considere isso ao calcular limites e custos.
+
+2. **Prompts longos custam mais e nem sempre rendem mais.** Janela grande não significa que o modelo usa bem todo o contexto.
+
+3. **Resposta longa custa mais que prompt longo** (3-5×). Ao pedir uma análise, peça **só o que você precisa** — uma resposta de 10 mil tokens, em modelo *flagship*, custa $0,50-$1.
+
+4. **Anexar PDFs e imagens consome muitos tokens.** Um PDF de 30 páginas pode virar 25 mil tokens facilmente. Em conversas longas com vários PDFs anexos, o custo cresce rápido.
+
+5. **A escolha do modelo afeta o custo em ~50×.** Claude Haiku é cerca de 50× mais barato que Claude Opus. Para tarefas simples (resumir, traduzir, formatar), modelos pequenos resolvem com excelência e a economia é enorme.
+
+## O que vem a seguir
+
+O próximo capítulo aprofunda a **diferença entre API e app**, e ajuda a decidir, com base no que você aprendeu aqui sobre tokens e custos, qual modo de uso faz mais sentido para o seu trabalho.

@@ -1,0 +1,121 @@
+---
+title: "Princípios FAIR"
+sidebar: bloco-reprodutibilidade
+---
+
+Em 2014, um grupo internacional de pesquisadores se reuniu em Leiden, Holanda, para discutir um problema sério: dados científicos espalhados pelo mundo, mas inaplicáveis. Pesquisadores publicavam dados como "material suplementar" de artigos — tabelas em PDFs, planilhas em sites institucionais, *zips* em servidores de laboratório. Outros pesquisadores que quisessem usar esses dados frequentemente não conseguiam: links quebrados, formatos proprietários, ausência de metadados explicativos, licenças não-claras. Os dados existiam mas eram **inacessíveis na prática**.
+
+A conclusão do grupo foi que faltava um conjunto de princípios mínimos que dados científicos deveriam respeitar para serem genuinamente reutilizáveis. Em **março de 2016**, esse trabalho foi publicado no *Scientific Data* como *"The FAIR Guiding Principles for scientific data management and stewardship"* [@wilkinson2016fair]. Os quatro princípios — **Findable, Accessible, Interoperable, Reusable** — viraram o vocabulário padrão de ciência aberta em poucos anos. Hoje, agências financiadoras (NIH, União Europeia, CNPq, FAPESP), revistas científicas e instituições internacionais exigem ou recomendam que pesquisa financiada produza dados FAIR.
+
+Este capítulo explica os quatro princípios em detalhe e mostra como aplicá-los em pesquisa em saúde — com cuidados específicos para dados sensíveis, que **podem ser FAIR com restrições**.
+
+## A sigla, desempacotada
+
+FAIR é acrônimo em inglês:
+
+| Letra | Em inglês | Em português |
+|---|---|---|
+| **F** | Findable | Encontrável |
+| **A** | Accessible | Acessível |
+| **I** | Interoperable | Interoperável |
+| **R** | Reusable | Reutilizável |
+
+Cada letra desempacota em **subprincípios** específicos, que detalham como cumprir o princípio na prática.
+
+### F — Findable (encontrável)
+
+Para que dados sejam usados, eles precisam ser **descobríveis por quem não sabe que eles existem**. Isso exige:
+
+- **F1. Identificador persistente único.** Cada dataset tem um identificador globalmente único e estável ao longo do tempo. Na prática, tipicamente um **DOI** (assunto do capítulo `05-doi`).
+- **F2. Metadados ricos.** O dataset é descrito por metadados que dão contexto: o que é, quando foi gerado, por quem, com que método, em que escala temporal/espacial, com que limitações. Sem metadados adequados, mesmo dados encontrados são inúteis.
+- **F3. Metadados explicitamente referenciam o identificador.** O metadado contém o identificador do dataset, criando ligação bidirecional.
+- **F4. Indexação em recurso pesquisável.** Metadados ficam num índice consultável (Google Dataset Search, OpenAIRE, repositórios indexados).
+
+**Em pesquisa médica:** quando você publica um artigo, depositar os dados (anonimizados, com metadados) em repositório indexado torna a pesquisa encontrável por meta-analistas, replicadores e revisores sistemáticos. **Sem indexação, o dado existe mas não é descoberto**.
+
+### A — Accessible (acessível)
+
+Encontrar não basta — é preciso conseguir **acessar** o dado uma vez encontrado.
+
+- **A1. Recuperável por protocolo padronizado.** Idealmente HTTP/HTTPS — link clicável, sem necessidade de software exótico.
+- **A1.1. Protocolo aberto, gratuito e universalmente implementado.** Sem barreiras como pagar para acessar via API proprietária.
+- **A1.2. Quando aplicável, autenticação e autorização.** Para dados sensíveis (PHI, dados clínicos identificáveis), o acesso pode requerer cadastro, comitê de ética, ou DUA (*Data Use Agreement*) — mas o **mecanismo** de acesso é claro e padronizado.
+- **A2. Metadados permanecem acessíveis mesmo se os dados forem removidos.** Princípio crítico: mesmo que dados sejam apagados (por LGPD, privacidade, decisão institucional), **metadados continuam públicos** para que outros saibam que aquele estudo existiu.
+
+::: {.callout-note}
+## "Acessível" não significa "público"
+Ponto central que evita confusão: **dados sensíveis podem ser FAIR mesmo sendo restritos**. Um dataset clínico identificado pode estar listado num catálogo público (Findable + metadados), com acesso restrito mediante DUA assinado e aprovação ética. Isso ainda é FAIR. O contrário disso seria dado oculto, sem registro nenhum em catálogo — que não seria FAIR e impediria peer review e meta-análise.
+:::
+
+### I — Interoperable (interoperável)
+
+Os dados precisam ser **combináveis com outros dados**, em pipelines automáticos ou manuais.
+
+- **I1. Formato aberto, formal, acessível, compartilhado, e amplamente aplicável.** Exemplos: CSV, Parquet, JSON, RDF (princípios discutidos no Bloco *Dados* do Módulo 2). Não-exemplos: SPSS `.sav`, Stata `.dta`, Excel binário antigo.
+- **I2. Vocabulários padronizados.** Termos clínicos seguem ontologias estabelecidas — **SNOMED CT** para diagnósticos, **LOINC** para exames laboratoriais, **CID-10/CID-11** para classificação de doenças, **ICD-O** para neoplasias. Em vez de "diabetes" (ambíguo), usa-se um código padronizado.
+- **I3. Metadados incluem referências qualificadas a outros (meta)dados.** O dataset cita explicitamente outros datasets, ontologias, ou estudos relacionados.
+
+**Em pesquisa médica:** seguir SNOMED, LOINC, CID-10 é o que torna possível meta-análises e estudos federados. Códigos institucionais próprios (cada hospital com sua codificação interna de diagnósticos) violam I2 e impedem agregação de dados entre estudos.
+
+### R — Reusable (reutilizável)
+
+Por fim, os dados precisam ser **reutilizáveis** — não só legíveis, mas usáveis para finalidade diferente da original.
+
+- **R1. Metadados ricos descrevendo limitações, contexto, proveniência.** Quanto mais um pesquisador externo souber sobre **como o dado foi produzido**, mais condições ele tem de decidir se aquele dado serve para a pergunta dele.
+- **R1.1. Licença clara e acessível.** Sem licença explícita, o leitor não sabe se pode citar, redistribuir, modificar. Licenças padrão para dados: **CC BY** (atribuição), **CC0** (domínio público), **CC BY-NC** (não-comercial). Para código: **MIT**, **Apache 2.0**, **GPL**.
+- **R1.2. Metadados detalhados de proveniência.** De onde veio cada coluna, como foi medida, em que precisão, com que possíveis vieses. Para coorte clínica: protocolo de inclusão/exclusão, instrumentos validados, contexto institucional.
+- **R1.3. Conformidade com padrões de comunidade.** Em pesquisa clínica: **CONSORT** para RCTs, **STROBE** para observacionais, **PRISMA** para revisões. Datasets que acompanham estudos seguem padrões equivalentes (e.g., **CDISC** para ensaios clínicos).
+
+## FAIR e ciência aberta — relação, não identidade
+
+FAIR e *Open Science* são frequentemente confundidos. **Não são a mesma coisa**:
+
+- **Open Science** propõe que dados de pesquisa sejam **abertos** — livremente acessíveis e reutilizáveis por qualquer pessoa, sem barreiras econômicas ou legais.
+- **FAIR** propõe que dados sejam **bem geridos**, encontráveis, acessíveis (mesmo que com restrições), interoperáveis e reutilizáveis. Não exige que sejam abertos.
+
+Um dataset pode ser FAIR sem ser aberto (típico em pesquisa clínica com PHI: catalogado, descrito, com mecanismo de acesso, mas restrito a pesquisadores aprovados). E um dataset pode ser nominalmente "aberto" sem ser FAIR (se está num PDF impossível de extrair, sem metadados, em formato proprietário).
+
+Em pesquisa médica, **FAIR é compatível com LGPD e ética em pesquisa**; *fully open* nem sempre é. A distinção importa.
+
+## Como aplicar em pesquisa em saúde
+
+Aplicação prática dos quatro princípios em projeto de pesquisa típico:
+
+| Princípio | O que fazer |
+|---|---|
+| **F (Findable)** | Depositar metadados (e dados, se possível) em repositório com DOI — **Zenodo** (cap. 04), **OSF**, **Figshare**, ou repositório institucional. Documentar dataset numa página com identificador citável. |
+| **A (Accessible)** | Disponibilizar via HTTP. Para dados sensíveis: descrever processo de acesso (cadastro, DUA, comitê de ética). Manter metadados públicos mesmo se acesso aos dados for restrito. |
+| **I (Interoperable)** | Usar formato aberto (CSV, Parquet, JSON). Codificar diagnósticos com **CID-10/CID-11**, exames com **LOINC**, drogas com **ATC**. Documentar relações com outros datasets. |
+| **R (Reusable)** | Licença explícita (CC BY ou CC0 quando possível; CC BY-NC para alguns contextos clínicos). Metadados detalhados de proveniência. Conformidade com padrões CONSORT/STROBE/PRISMA. |
+
+::: {.callout-tip}
+## A regra prática mínima
+Se você só tiver tempo/recursos para uma coisa: **deposite seus dados (e/ou seu código) num repositório que emita DOI** quando publicar o artigo. Zenodo é gratuito, automático via integração com GitHub (cap. 04), e cumpre a maior parte dos princípios FAIR de uma vez. Sem nenhum esforço institucional adicional.
+:::
+
+## O contexto institucional
+
+FAIR não é só recomendação acadêmica. É crescentemente **exigência institucional**:
+
+- **NIH** (EUA) — desde 2023, a *NIH Data Management and Sharing Policy* exige que pesquisas financiadas tenham plano de gestão de dados FAIR.
+- **União Europeia** — através do programa Horizon Europe, exige princípios FAIR como condição para financiamento.
+- **CNPq, CAPES e FAPESP (Brasil)** — em fase de adoção crescente; agências cobram crescentemente plano de gestão de dados.
+- **Revistas científicas** — *Nature*, *Science*, *Cell*, *PLoS ONE* e a maioria das revistas de alto impacto exigem deposição de dados em repositório citável.
+
+Para pesquisador médico em 2026, **fazer FAIR não é mais opcional para projetos com financiamento**. É menos esforço aprender uma vez e aplicar consistentemente que improvisar caso a caso.
+
+## Conexão com IA
+
+Agentes ajudam com FAIR em três frentes específicas:
+
+**1. Geração de metadados.** Você descreve seu dataset em PT-BR; o agente gera um arquivo de metadados em formato padrão (JSON-LD, schema.org, DataCite). Operação tediosa para humano, trivial para agente.
+
+**2. Tradução de codificação clínica.** *"Mapeie esses códigos institucionais para CID-10."* — agente identifica equivalências, sugere conversão. Requer revisão humana (códigos podem ter ambiguidade), mas economiza horas.
+
+**3. Auditoria de aderência a FAIR.** *"Aqui está a estrutura do meu repositório de dados. Em que pontos não está aderente aos princípios FAIR?"* — agente identifica lacunas (falta DOI, formato proprietário, sem licença, etc.) e propõe ajustes.
+
+## O que vem a seguir
+
+FAIR cobre o lado dos **dados**. Mas reprodutibilidade exige também que o **ambiente computacional** seja preservado — a versão exata de R, Python, pacotes e bibliotecas que produziram um resultado específico precisa ser recuperável anos depois. O próximo capítulo trata dessa camada — *lockfiles*, contêineres e Binder como mecanismos progressivamente mais robustos de garantir que análise feita hoje rode igual amanhã.
+
+→ [02 · Ambientes reproduzíveis](02-ambientes.qmd)

@@ -1,0 +1,124 @@
+---
+title: "Escolha do tema e do dataset"
+---
+
+A primeira decisão do Capstone é também a mais consequente. **Tema mal escolhido** = projeto que custa o dobro pra terminar e vira exemplo morno em sala de aula. **Tema bem escolhido** = trabalho que flui, que você tem genuíno interesse em conduzir, e que vira material durável para sua docência. Esse capítulo dá critérios para acertar de primeira.
+
+## Critérios de bom tema
+
+Tema adequado para o Capstone passa por três filtros simultâneos:
+
+**1. Relevância docente.** O tema dá exemplo concreto de algo que você já ensina (ou quer começar a ensinar). Se você dá aula de epidemiologia clínica, o tema bate em desenho de estudo. Se você dá residência de psiquiatria, bate em depressão pós-AVC, em estudo de coorte com escalas validadas, em algo que aparece na sua prática didática.
+
+**2. Disponibilidade de dados.** Você consegue dados — públicos ou próprios — sem barreiras burocráticas grandes. Capstone com aprovação de comitê de ética em curso geralmente é Capstone que não fecha em tempo razoável. Prefira **dados públicos ou sintéticos** para o exercício.
+
+**3. Escopo realista.** Análise concluível em 6-12 horas de trabalho concentrado. Coortes complexas com modelagem multinível, análise de sobrevida ajustada por *propensity score*, e comparação multivariada de mais de cinco grupos são tentações que adiam a entrega indefinidamente. **Comece simples**.
+
+A regra: se você precisar de mais de 3 minutos para descrever o tema em voz alta para um colega, está complexo demais para um Capstone.
+
+## Padrões que costumam funcionar
+
+Alguns formatos que historicamente fluem bem em projetos integradores curtos:
+
+- **Caracterização epidemiológica** de uma condição num conjunto de dados público. Ex.: prevalência de hipertensão em adultos brasileiros segundo a PNS 2019; mortalidade por suicídio em adolescentes 15-19 anos na última década.
+- **Comparação simples** entre dois ou três grupos. Ex.: tempo de internação por porte de hospital (pequeno/médio/grande); idade de diagnóstico de transtornos por sexo.
+- **Análise temporal** de séries temporais públicas. Ex.: evolução da taxa de cesarianas no SUS entre 2010 e 2024; curva pandêmica de COVID-19 em municípios mineiros.
+- **Validação descritiva** de um instrumento ou escala em um subgrupo. Ex.: distribuição de PHQ-9 numa coorte hipotética; característica psicométrica do GAD-7.
+
+Padrões que **frequentemente travam**:
+
+- Análise causal sofisticada exigindo *propensity score matching* ou *difference-in-differences*.
+- Coorte longitudinal com missing complicado.
+- *Machine learning* aplicado a imagem médica.
+- Meta-análise (boa em si, mas exige busca sistemática que não cabe no prazo).
+
+Os complexos podem virar Capstone *depois* — por agora, prefira algo manejável.
+
+## Onde achar dados públicos brasileiros
+
+Brasil tem **excelente infraestrutura de dados abertos em saúde**, e usar dados públicos no Capstone tem vantagem dupla: viabilidade técnica + reproducibilidade que o aluno pode replicar.
+
+**DataSUS** — o repositório central:
+
+- **TabNet** ([datasus.gov.br/informacoes-de-saude](https://datasus.gov.br/informacoes-de-saude/)) — interface web para gerar tabulações.
+- **DATASUS FTP** — arquivos brutos das principais bases nacionais (SIM, SINAN, SINASC, SIH, SIA).
+- **microdatasus** — pacote R que automatiza download e leitura. Excelente para Capstone.
+
+**Bases específicas de DataSUS importantes:**
+
+| Base | O que tem |
+|---|---|
+| **SIM** (Sistema de Informações sobre Mortalidade) | Causa de morte, idade, local — desde 1979 |
+| **SINASC** (Sistema de Informações sobre Nascidos Vivos) | Nascimentos, peso, prematuridade |
+| **SIH** (Sistema de Informações Hospitalares) | Internações no SUS, com diagnóstico CID, procedimentos |
+| **SIA** (Sistema de Informações Ambulatoriais) | Consultas e procedimentos ambulatoriais |
+| **SINAN** (Sistema de Informação de Agravos de Notificação) | Doenças de notificação compulsória (dengue, sífilis, COVID) |
+
+**Outras fontes brasileiras úteis:**
+
+- **PNS** (Pesquisa Nacional de Saúde) — IBGE, dados individuais sobre saúde da população. Última edição completa: 2019.
+- **PNAD Contínua** — IBGE, com módulo trimestral de saúde.
+- **SISVAN** — Vigilância alimentar e nutricional, dados antropométricos populacionais.
+- **Portal da Transparência** — gastos federais, incluindo saúde.
+- **OpenDataSUS** — portal moderno com APIs ([opendatasus.saude.gov.br](https://opendatasus.saude.gov.br/)).
+
+**Internacionais que valem para Capstone:**
+
+- **WHO Global Health Observatory** — indicadores de saúde global.
+- **WHO Mortality Database** — comparação Brasil vs. outros países.
+- **OECD Health Statistics** — sistemas de saúde comparados.
+- **MIMIC-IV** ([physionet.org/content/mimiciv](https://physionet.org/content/mimiciv/)) — UTI desidentificada Beth Israel Deaconess, exige cadastro mas é gratuita. Excelente para Capstone em medicina intensiva.
+
+## Quando dados públicos não bastam: dados sintéticos
+
+Se seu tema didático específico requer dados clínicos com estrutura precisa (e dados públicos não cobrem), considere **gerar dados sintéticos** que reproduzem padrões realistas sem identificar pessoas reais.
+
+Vibe coding facilita isso enormemente:
+
+> *"Gere dados sintéticos de uma coorte de 487 pacientes hipertensivos. Idade entre 35 e 80 anos (distribuição realista). Sexo F/M ~60/40. Pressão arterial sistólica baseline com média 152 mmHg, DP 18 mmHg. Após tratamento (12 semanas e 24 meses), redução média de 12 mmHg com IC realista. Inclua comorbidades comuns (DM2, dislipidemia, obesidade) com prevalências realistas. Salve em CSV em `dados/raw/coorte_sintetica.csv` e documente o gerador num script reproduzível."*
+
+O agente entrega script R/Python que gera dados realistas. Como saída é gerada por código, você inclui o gerador no compêndio — qualquer pessoa pode reproduzir os mesmos dados sintéticos.
+
+::: {.callout-warning}
+## Seja explícito que são dados sintéticos
+Em todo lugar do compêndio que mencione os dados, deixe explícito: "**dados sintéticos gerados para fins didáticos**, sem correspondência com pacientes reais". Estudante eventualmente confunde dados sintéticos com reais; a comunicação clara evita esse problema.
+
+Em manuscrito ou apresentação derivada, **nunca chame dados sintéticos de "amostra real"** ou faça inferência clínica como se fossem dados de pesquisa. São pedagógicos, não evidência.
+:::
+
+## Dados próprios anonimizados — caminho válido com cuidados
+
+Se você tem dados próprios de pesquisa já aprovados por comitê de ética e quer usar no Capstone, é viável — com cuidados:
+
+- **Anonimização robusta** — sem identificadores diretos (CPF, prontuário, nome) e sem combinações que permitam reidentificação (idade exata + sexo + município pequeno).
+- **Verificar termos do TCLE** — alguns TCLEs antigos não autorizam compartilhamento público. Releia.
+- **Conformidade com LGPD** — capítulo M1-B1-06 cobre. Em caso de dúvida, consulte o DPO da sua instituição.
+- **Consentimento dos coautores** — se a coorte foi gerada em colaboração, todos precisam concordar com publicação como material didático.
+
+A vantagem dos dados próprios é o realismo. A desvantagem é o risco. Para Capstone *primeiro*, dados públicos ou sintéticos costumam ser caminho mais leve.
+
+## A pergunta de pesquisa
+
+Definido o tema e o dataset disponível, formule **uma pergunta de pesquisa específica** que guia toda a análise. Ela tem três características:
+
+1. **Específica.** Não "estudar hipertensão" — *"qual a prevalência de hipertensão arterial estágio 2 em adultos brasileiros 40-64 anos segundo a PNS 2019, estratificada por região e sexo?"*.
+2. **Respondível com os dados disponíveis.** Verifique se as variáveis necessárias estão no dataset.
+3. **Relevante didaticamente.** Você consegue imaginar a aula em que esse resultado entra? Se sim, vai bem.
+
+Anote a pergunta numa única frase e fixe num arquivo `pergunta.md` no projeto. Volte a ela sempre que se perder no meio da análise.
+
+## Conexão com IA
+
+Agentes podem ajudar nas três decisões deste capítulo:
+
+**1. Brainstorming de temas.** *"Sou professor de cardiologia, dou aula de hipertensão. Quero um Capstone usando PNS 2019 que sirva de exemplo na minha disciplina. Sugira 5 perguntas de pesquisa viáveis com esse dataset."* — agente devolve cinco opções com pré-análise de viabilidade.
+
+**2. Inspeção rápida de dataset desconhecido.** *"Aqui está o cabeçalho do arquivo SIM 2023. Quais variáveis são úteis para análise de mortalidade por suicídio em adolescentes?"* — agente identifica colunas-chave e propõe limpeza inicial.
+
+**3. Geração de dados sintéticos realistas.** Especialmente útil quando dados públicos não cobrem exatamente o que você precisa.
+
+## O que vem a seguir
+
+Tema escolhido, dataset identificado (ou plano de geração definido), pergunta formulada. Próximo passo: **planejar a análise antes de começar a executar**. Estrutura de pastas, plano estatístico pré-especificado, AGENTS.md, SAP — para que o Capstone não vire improviso.
+
+→ [03 · Planejamento do projeto](03-planejamento.qmd)

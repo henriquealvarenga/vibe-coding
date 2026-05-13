@@ -1,0 +1,145 @@
+---
+title: "LGPD e dados sensíveis em prompts"
+---
+
+Quando você manda um arquivo, uma planilha ou um pedaço de prontuário para a IA, **esses dados saem da sua máquina** e vão parar nos servidores da empresa que provê o modelo. Em pesquisa médica, isso levanta uma pergunta direta: **eu posso mandar esses dados?** A resposta envolve a **LGPD** — e este capítulo é o guia prático para responder.
+
+## O que é a LGPD em uma página
+
+A **Lei Geral de Proteção de Dados** (Lei 13.709/2018), em vigor desde 2020 com fiscalização ativa pela ANPD desde 2021, regula o tratamento de **dados pessoais** no Brasil. Conceitos centrais:
+
+| Conceito | O que é |
+|---|---|
+| **Dado pessoal** | Qualquer informação que identifica ou pode identificar uma pessoa: nome, CPF, e-mail, foto, endereço, prontuário, exame de imagem, IP, dados de geolocalização. |
+| **Dado pessoal sensível** | Subcategoria especial: dados de **saúde**, biometria, vida sexual, etnia, religião, opinião política, dados genéticos, dados de menores. **Pesquisa médica trabalha quase sempre com dados sensíveis.** |
+| **Titular** | A pessoa a quem o dado se refere — em pesquisa, geralmente o paciente. |
+| **Controlador** | Quem decide sobre o tratamento dos dados. Em pesquisa, **você** (o pesquisador) ou sua **instituição**. |
+| **Operador** | Quem trata os dados em nome do controlador. **Quando você manda dados para a IA, a empresa que oferece o modelo (Anthropic, OpenAI, Google) é operadora.** |
+| **Bases legais** | A LGPD exige uma justificativa legal para tratar dados. As mais relevantes em pesquisa: **consentimento livre e informado**, **realização de pesquisa por órgão público** (Art. 7º, IV), **proteção da vida e saúde** (Art. 7º, VII), e **legítimo interesse** (Art. 7º, IX). |
+
+::: {.callout-warning}
+## Pesquisa médica = quase sempre dados sensíveis
+Praticamente toda pesquisa em saúde trabalha com **dados pessoais sensíveis** — o nível mais protegido pela LGPD. Isso não impede a pesquisa, mas **eleva drasticamente as exigências de cuidado**: bases legais mais restritas, consentimento explícito, registro detalhado, segurança reforçada.
+:::
+
+## Por que LGPD importa quando você manda dados para IA
+
+Três fatos que se combinam:
+
+1. **Dados de paciente são quase sempre sensíveis.** Idade, diagnóstico, medicação, exames, evolução clínica — todos caem na categoria sensível.
+2. **Quando você cola algo no prompt ou anexa um arquivo, esse conteúdo é processado nos servidores da empresa.** Anthropic (EUA), OpenAI (EUA), Google (EUA + outros países) — então também há **transferência internacional de dados**, com regra própria na LGPD (Art. 33).
+3. **Essas empresas são operadoras de dados em nome de quem usa.** O que elas fazem com seu input — armazenam? usam para treinamento? por quanto tempo? — está nos termos de uso, e varia por **plano** e **modo de uso**.
+
+A combinação significa: **mandar dados de paciente para IA na nuvem é um ato regulado pela LGPD, e exige cuidados específicos**.
+
+## O que NÃO mandar para a IA na nuvem (sem cuidado)
+
+Sem anonimização adequada, **não envie**:
+
+- **Identificadores diretos:** nome, CPF, RG, número de prontuário, e-mail, telefone, endereço, número do convênio.
+- **Identificadores indiretos:** data de nascimento exata, CEP completo, profissão específica, número exato de filhos — sozinhos parecem inofensivos, **combinados podem reidentificar uma pessoa**.
+- **Informações sensíveis textuais:** trechos de prontuário com nome do paciente, registros de evolução clínica não-anonimizados, transcrições de consulta com nomes próprios.
+- **Imagens:** fotografias clínicas, exames de imagem com cabeçalho contendo nome/data, vídeos de procedimentos.
+- **Áudio:** gravações de consulta com voz reconhecível.
+
+::: {.callout-tip}
+## Caso típico que vira problema
+Você recebe uma planilha de pacientes da pesquisa. As colunas são: `Nome`, `Data_Nascimento`, `CID`, `Data_Internacao`, `Desfecho`. Você cola isso no Claude para gerar uma análise descritiva.
+
+**Você acabou de violar a LGPD.** Mesmo que a coluna `Nome` esteja "embaralhada" ou seja só primeiro nome, a combinação com data de nascimento exata e CID é **fortemente identificável**.
+
+A correção: ver as próximas seções.
+:::
+
+## O que pode ir para IA na nuvem
+
+Três caminhos seguros:
+
+### 1. Dados anonimizados (de verdade)
+
+Anonimização **adequada** significa que a chance de reidentificação é praticamente nula:
+
+- **Remover** todos os identificadores diretos.
+- **Substituir** identificadores indiretos por valores menos específicos: ano em vez de data exata, faixa etária em vez de idade, primeiro dígito do CEP em vez de CEP completo.
+- **Cuidar de variáveis raras:** se há apenas 1 paciente com determinada combinação rara (ex: idade > 90 + diagnóstico raríssimo + cidade pequena), essa pessoa é identificável mesmo sem nome.
+
+A LGPD reconhece dados anonimizados como **fora do seu escopo** (Art. 12). **Mas a anonimização precisa ser real** — pseudo-anonimização (substituir nome por código) **não basta** se for possível reverter.
+
+### 2. Dados agregados
+
+Estatísticas e tabelas sumárias sobre a coorte são, em geral, seguras: "média de idade 62 anos, 53% mulheres, mortalidade de 23%". Não há dado pessoal nesse formato.
+
+### 3. Dados sintéticos
+
+Em alguns cenários, vale gerar **dados fictícios** com a mesma estrutura dos seus dados reais para discutir/testar análise com a IA. Em R/Python isso é uma linha de código (`rnorm`, `sample`, `numpy.random`). É a forma mais segura de explorar uma análise sem expor a coorte verdadeira.
+
+## Modelos locais como saída quando não pode mandar para a nuvem
+
+Para dados que **não podem sair da máquina** — prontuários completos, imagens médicas com identificadores, áudio de consulta — há uma alternativa: **rodar o modelo localmente** no seu próprio computador.
+
+Modelos open-source modernos (Llama 3.3, Mistral, Qwen) podem ser executados em laptops com GPU razoável usando ferramentas como:
+
+- **[Ollama](https://ollama.com)** — instala-se em minutos no Mac/Win/Linux. Comando único: `ollama run llama3.3`.
+- **[LM Studio](https://lmstudio.ai)** — interface gráfica para o mesmo objetivo.
+- **Anaconda Desktop** (mencionado no Módulo 0) — descoberta e execução local de modelos integrada ao Anaconda.
+
+**Vantagens:** dados nunca saem do seu computador. Zero risco de transferência. Zero violação de LGPD por uso de IA externa.
+
+**Desvantagens:** modelos locais (até 2026) são tipicamente **menos capazes** que Claude Opus, GPT-5 ou Gemini 2.5 Pro. Para tarefas simples (sumarizar, extrair dado estruturado), funcionam muito bem. Para raciocínio complexo, ainda há perda perceptível de qualidade.
+
+A regra prática: **se os dados não podem sair, use modelo local — mesmo que perca um pouco de qualidade**. Privacidade não é negociável.
+
+## O que Anthropic, OpenAI e Google fazem com seus dados?
+
+As três empresas têm políticas semelhantes em termos gerais, mas com **diferenças por plano**. Em alta voltagem (verificar sempre na política atual da ferramenta):
+
+| Plano | O que fazem com seu input |
+|---|---|
+| **Free / Plus / Pro do app** (chat) | Em geral, **podem usar** suas conversas para treinar modelos futuros, **a menos que** você desabilite explicitamente a opção em "Configurações → Dados". |
+| **Team / Business / Enterprise** | Em geral, **não usam** seus dados para treinamento. Modo "zero data retention" frequentemente disponível. |
+| **API** | Em geral, **não usam** dados de API para treinamento por padrão. Detalhes nos termos de cada empresa. |
+
+::: {.callout-warning}
+## Antes de mandar dados de paciente, faça duas coisas
+1. **Verifique a política atual** da ferramenta que vai usar (Anthropic, OpenAI, Google) — busque "data privacy" ou "training" no painel de configurações.
+2. **Desabilite o uso para treinamento** (em planos Free/Pro do app, é uma opção que precisa ser ativada manualmente).
+
+Mesmo após esses dois passos, **dados sensíveis sem anonimização** continuam fora dos limites da LGPD em pesquisa médica.
+:::
+
+## CEP/CONEP e protocolo de pesquisa
+
+Por fim, em **pesquisa formalmente registrada em CEP/CONEP**, há uma exigência adicional: **declarar o uso de IA no protocolo**. Em 2025-2026, comitês de ética começaram a pedir, em itens específicos do TCLE e do protocolo:
+
+- **Que ferramentas de IA serão utilizadas** na pesquisa;
+- **Como os dados serão tratados** ao serem enviados a essas ferramentas (anonimização, modo local, contrato com fornecedor);
+- **Quem terá acesso** a esses dados em todas as etapas.
+
+Ainda não há um modelo padrão consolidado, mas a tendência é clara. **Inclua essa seção no seu protocolo** mesmo se o CEP local ainda não pediu — você antecipa a exigência e demonstra rigor metodológico.
+
+## Checklist prático: antes de mandar dados para a IA
+
+Para qualquer interação com IA na nuvem em pesquisa médica:
+
+- [ ] **Os dados estão anonimizados** (sem identificadores diretos nem combinações reidentificáveis)?
+- [ ] **Se não estão**, eles foram **agregados** (estatísticas, tabelas)?
+- [ ] **Se não estão e não podem ser**, você está usando **modelo local** (Ollama, LM Studio)?
+- [ ] **Você verificou a política de privacidade** da ferramenta hoje (não há mais de 3 meses)?
+- [ ] **Você desabilitou** o uso para treinamento, se for plano Free/Pro do app?
+- [ ] **Há base legal** explícita para o tratamento (consentimento, pesquisa, etc.)?
+- [ ] **O protocolo do CEP/CONEP menciona** que IA será usada e como?
+
+Se a resposta for "não" para qualquer item crítico, **não mande os dados**.
+
+## Fechamento do bloco
+
+Este foi o último capítulo do **Bloco 1 — Conceitos Fundamentais**. Você sabe agora:
+
+- **O que é IA generativa** e como funciona por dentro;
+- **Como tokens funcionam** e como o uso é cobrado;
+- **Que dois modos** principais (app e API) existem para usar IA, e quando cada um faz sentido;
+- **Como conversar bem com a IA** através de prompts cuidadosos;
+- **Como documentar** o uso de IA em projetos científicos;
+- **Que cuidados de LGPD** se aplicam ao mandar dados sensíveis para IA.
+
+O próximo bloco — **B2 · Agentes de IA** — entra na prática: começa explicando a diferença entre **chatbot e agente**, depois aprofunda os dois agentes principais do curso (Claude e Codex) com cenários típicos de uso em pesquisa.

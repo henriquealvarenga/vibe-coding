@@ -1,0 +1,148 @@
+---
+title: "O que é IA generativa"
+sidebar: bloco-conceitos
+---
+
+Você instalou Claude Desktop, talvez Codex ou Gemini CLI, no capítulo final do Módulo 0. Antes de começar a usá-los para análise de dados e escrita científica, vale uma parada conceitual: **o que de fato são essas ferramentas, como funcionam por dentro, e por que se comportam do jeito que se comportam**? Este capítulo abre o Módulo 1 com o panorama. Os capítulos seguintes vão aprofundar limitações, integridade acadêmica e privacidade.
+
+## O que é "IA generativa"
+
+**IA generativa** é o subcampo da inteligência artificial que **cria conteúdo novo** a partir de uma instrução em linguagem natural — texto, código, imagens, áudio, vídeo. Quando você pede ao Claude para escrever a introdução de um artigo, ao ChatGPT para redigir um e-mail, ou ao DALL·E para gerar uma imagem, está usando IA generativa.
+
+A distinção importante é com a **IA "tradicional"**, focada em **classificar ou prever** sobre dados existentes. Em pesquisa médica, exemplos de IA tradicional incluem:
+
+- **Diagnosticar** pneumonia a partir de uma radiografia (classificação binária);
+- **Prever** risco cardiovascular em 10 anos (regressão);
+- **Identificar** pacientes em risco de readmissão hospitalar (classificação).
+
+Esses sistemas analisam algo que **já existe** e produzem rótulos, números ou probabilidades. **IA generativa, por contraste, produz coisas novas que não existiam antes**: um texto, um pedaço de código, uma imagem.
+
+Para os fins deste curso, ao falar em "IA" estaremos falando, na maior parte do tempo, em **IA generativa de texto e código** — ChatGPT, Claude, Gemini e similares.
+
+## Uma história curta
+
+Vale entender que tudo isso é **muito recente**. Algumas datas-chave:
+
+- **Junho de 2017** — Pesquisadores do Google publicam o artigo "*Attention is All You Need*", introduzindo a arquitetura **Transformer**. É a base técnica de tudo o que veio depois.
+- **2018-2020** — A OpenAI lança a série GPT (*Generative Pre-trained Transformer*). O **GPT-3**, em 2020, é o primeiro modelo a mostrar capacidades inesperadas: traduzir, resumir, escrever código simples — sem ter sido especificamente treinado para nenhuma dessas tarefas.
+- **30 de novembro de 2022** — OpenAI lança o **ChatGPT**, uma interface de chat sobre o modelo GPT-3.5. Em **5 dias** atinge 1 milhão de usuários. Vira o produto digital de crescimento mais rápido da história até então. É o momento em que IA generativa entra no vocabulário das pessoas.
+- **2023-2025** — Anthropic lança o **Claude**. Google lança o **Gemini**. Múltiplas empresas competem com modelos cada vez maiores e mais capazes.
+- **2024-2026** — Modelos passam de **chatbots** para **agentes**. Em vez de só conversar, os modelos passam a **agir**: ler arquivos no seu computador, executar comandos, navegar na web, escrever e modificar código. Foi o que você instalou no Módulo 0 (Claude Code, Codex, Gemini CLI).
+
+A primeira coisa importante: **a explosão pública de IA generativa tem menos de quatro anos**. Quando este curso foi escrito, em 2026, o ChatGPT tinha sido lançado há três anos e meio. A velocidade do campo é vertiginosa, e parte do trabalho de quem usa IA na pesquisa é se manter mais ou menos atualizado.
+
+## Como funciona, sem matemática
+
+A categoria de modelo por trás de Claude, ChatGPT e Gemini chama-se **modelo de linguagem grande** (em inglês, **LLM** — *Large Language Model*). Vamos destrinchar o nome:
+
+- **Modelo:** um programa de computador que aprendeu padrões a partir de exemplos.
+- **Linguagem:** que trabalha com texto em linguagem natural.
+- **Grande:** com bilhões — em alguns casos trilhões — de parâmetros internos ajustáveis. Para fins de comparação, GPT-3 (2020) tinha 175 bilhões de parâmetros; modelos atuais são significativamente maiores.
+
+### O coração: prever a próxima palavra
+
+A função básica de um LLM é absurdamente simples de descrever: **dada uma sequência de texto, prever qual deve ser a próxima palavra**.
+
+Por exemplo, considere a frase:
+
+```
+"O paciente apresentou febre de 39°C e ___"
+```
+
+Treinado em bilhões de textos, o modelo "calcula" qual é a palavra mais provável de vir a seguir. Pode ser "calafrios", "cefaleia", "tosse", "mialgia". Cada uma dessas tem uma probabilidade. O modelo escolhe uma — geralmente a mais provável, ou uma das mais prováveis, com algum elemento de variação.
+
+Esse é, **literalmente**, o trabalho do modelo. Tudo o mais — capacidade de raciocinar, escrever um artigo, traduzir, resumir, programar — **emerge dessa tarefa simples**, repetida bilhões de vezes durante o treinamento e milhões de vezes durante uma única conversa com você.
+
+::: {.callout-note}
+## Tecnicamente, "tokens", não "palavras"
+Os modelos não trabalham exatamente com palavras, mas com **tokens** — pedaços que podem ser uma palavra inteira (`paciente`), parte de uma palavra (`epi`, `demia` separadas), ou um sinal de pontuação. Em português, uma palavra média é geralmente um token; palavras compostas ou termos técnicos podem virar dois ou três. Para os fins deste curso, pensar em "palavra" é uma simplificação aceitável.
+:::
+
+### Como o modelo aprende
+
+O modelo é treinado em um corpus gigantesco de textos: livros digitalizados, artigos científicos, sites, fóruns, código-fonte aberto, conversas. O processo é, em essência, simples:
+
+1. Pega-se um trecho de texto: *"O paciente apresentou febre de 39°C e calafrios."*
+2. Esconde-se a última palavra: *"O paciente apresentou febre de 39°C e ___."*
+3. Pede-se ao modelo para prever a palavra escondida.
+4. Compara-se a resposta com a palavra real (`calafrios`) e ajustam-se os parâmetros internos do modelo para que, da próxima vez, ele acerte um pouco mais.
+5. Repete-se **bilhões de vezes**, com bilhões de trechos diferentes.
+
+Depois desse processo, o modelo "aprendeu" — em um sentido estritamente estatístico — gramática, vocabulário, fatos comuns, padrões de raciocínio, padrões de código, e muito mais.
+
+A **analogia útil** é a de aprender uma língua estrangeira **lendo absurdamente muito texto nessa língua**. Você não precisa decorar tabelas de conjugação verbal — depois de ler o suficiente, completar uma frase em alemão fica natural. O LLM faz algo parecido, em escala industrial.
+
+### Geração: uma palavra de cada vez
+
+Quando você dá um prompt para o Claude ou ChatGPT, o modelo:
+
+1. Lê seu prompt;
+2. Prevê o **próximo token** mais provável;
+3. Adiciona esse token ao texto;
+4. Prevê o **próximo token** com base no texto até agora (incluindo o que ele acabou de gerar);
+5. Repete até completar a resposta (ou bater no limite máximo).
+
+Isso significa que o modelo **não tem um plano completo** quando começa a responder — ele constrói a resposta um pedaço de cada vez. Em respostas longas, é uma cadeia de centenas ou milhares de previsões consecutivas, cada uma influenciada pelas anteriores.
+
+Daí algumas **consequências práticas**:
+
+- Quando o modelo começa a responder com uma afirmação errada, é difícil ele "voltar atrás" — ele tende a continuar de forma coerente com o que já disse, mesmo que o ponto inicial estivesse equivocado.
+- Por isso, **dar um bom começo no prompt importa muito**: incluir um exemplo bem feito, definir um papel ("você é um epidemiologista..."), ou começar a resposta para o modelo são técnicas que melhoram bastante a qualidade.
+- Em respostas muito longas, há risco de "deriva" — o modelo pode mudar levemente de tom ou foco ao longo do texto.
+
+### Alinhamento: o último passo do treinamento
+
+Um LLM treinado **apenas** em "prever a próxima palavra" não responde de forma útil em uma conversa. Ele só aprendeu padrões estatísticos da linguagem; não foi ensinado *como ser útil*.
+
+Por isso, depois do treinamento principal vem uma fase chamada **alinhamento** (ou **fine-tuning** com **RLHF** — *Reinforcement Learning from Human Feedback*), onde o modelo é treinado adicionalmente a:
+
+- Seguir instruções de forma direta;
+- Ser educado e claro;
+- Recusar pedidos potencialmente prejudiciais;
+- Manter coerência em conversas longas;
+- Reconhecer quando não sabe algo (com sucesso parcial — voltaremos a isso).
+
+Empresas diferentes alinham seus modelos com critérios diferentes. **Por isso o Claude tem uma "personalidade" perceptivelmente diferente do ChatGPT**, mesmo ambos sendo LLMs treinados em estruturas similares. Cada empresa toma decisões sobre o que o modelo deve enfatizar, evitar, e como deve se posicionar em situações ambíguas.
+
+## Modelo, aplicação e versão: três coisas que se confundem
+
+Uma distinção que normalmente gera confusão:
+
+| O que é | Exemplos |
+|---|---|
+| **Modelo** | A inteligência em si, treinada por uma empresa | GPT-5, Claude Opus 4.7, Gemini 2.5 Pro |
+| **Aplicação** | A interface por onde você acessa o modelo | ChatGPT, Claude.ai, Claude Desktop, Codex CLI |
+| **Versão** | A geração específica do modelo | Claude Opus 4.6 → 4.7 → próxima... |
+
+Quando você instalou o **Claude Desktop** no Módulo 0, instalou uma **aplicação**. Por trás dela, há um **modelo** (Claude Opus, Sonnet ou Haiku, dependendo da configuração) rodando nos servidores da Anthropic. A aplicação é a janela; o modelo é a inteligência.
+
+Isso explica por que o "mesmo Claude" aparece em tantos lugares: no site, no app desktop, no terminal (Claude Code), em integrações com outras ferramentas. Todos conectam ao mesmo modelo por baixo dos panos.
+
+E por que importa? Porque quando uma nova versão do modelo é lançada, **todas** as aplicações que usam aquele modelo ganham os novos recursos automaticamente — você não precisa reinstalar nada. Foi o que aconteceu, por exemplo, em outubro de 2025, quando a Anthropic lançou Claude Opus 4.7: o app Desktop, o Claude Code, e o Claude.ai passaram todos a usar a nova versão sem qualquer ação dos usuários.
+
+## Por que isso importa para a pesquisa
+
+Três tomadas práticas, considerando o que vamos fazer no curso:
+
+1. **Modelos "alucinam" porque foram treinados para sempre completar a frase.** Se você perguntar "qual é a referência do estudo X de 2018?" e o modelo nunca viu esse estudo no treinamento, ele não diz "não sei". Ele **completa a frase** com algo plausível — uma referência fictícia que parece real. Não é "mentira" no sentido humano: é o comportamento natural de um sistema treinado em prever texto. Voltaremos a esse ponto ao longo do curso — especialmente quando aprendermos boas práticas de **prompt** e a **citar o uso de IA** em trabalhos científicos.
+
+2. **Contexto rico no prompt melhora drasticamente a resposta.** Não é mágica: cada palavra do seu prompt influencia as previsões seguintes. Dar contexto, exemplos e papéis ao modelo orienta toda a sequência de previsões na direção certa. Por isso "boas práticas de prompt" não são truques estilísticos — são manipulações precisas da matemática que está por trás.
+
+3. **Modelos diferentes têm pontos fortes diferentes.** Não há "o melhor" universal. Para os fins deste curso:
+   - **Claude** tende a ser forte em escrita longa, raciocínio passo a passo, código complexo e leitura de documentos.
+   - **ChatGPT (GPT-5)** tem cobertura factual ampla e boa integração com ferramentas externas.
+   - **Gemini** integra-se naturalmente ao Google Workspace e tem janela de contexto muito grande para documentos longos.
+
+   Quando estiver inseguro qual usar, **comece pelo Claude** (a recomendação do curso) e mude se sentir necessidade.
+
+## O que vem a seguir
+
+Este capítulo deu o panorama. Os próximos capítulos do bloco vão aprofundar pontos específicos:
+
+- **02 · Tokens** — a unidade básica do que IA generativa lê e produz; como contar, o que isso tem a ver com janela de contexto e com a fatura de quem usa API.
+- **03 · API × app** — os dois grandes modos de uso da IA: chat (com login e plano mensal) e API (com chave e cobrança por token); quando cada um faz sentido em pesquisa.
+- **04 · Prompts** — anatomia de um bom prompt, técnicas e iteração; é a habilidade central que define a qualidade de tudo o que se faz com IA.
+- **05 · Citar IA** — como mencionar o uso de IA em trabalhos científicos.
+- **06 · LGPD** — dados pessoais e ferramentas de IA.
+
+A partir do próximo bloco, voltamos para a parte prática — agora com base conceitual para entender o que você está fazendo, e por quê.

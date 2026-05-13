@@ -1,0 +1,123 @@
+---
+title: "Claude"
+---
+
+No capítulo anterior você viu **o que é um agente** e **como ele difere de um chatbot**. Agora vamos olhar para o agente que este curso recomenda — o **Claude**, da Anthropic — em detalhes: quem é a empresa, como o produto se organiza em três modos diferentes, e o que cada modo entrega para um pesquisador.
+
+## Anthropic em poucas palavras
+
+A **Anthropic** é uma empresa de pesquisa em IA fundada em 2021 por Dario e Daniela Amodei, junto com outros pesquisadores que vinham da OpenAI. O foco declarado da empresa é **segurança em IA** (*AI safety*) — desenvolver modelos cujo comportamento seja confiável, interpretável e auditável, especialmente conforme as capacidades crescem. O produto principal é o **Claude**, lançado em 2023 e hoje na quarta geração (linha Claude 4.x).
+
+A escolha do Claude como agente principal deste curso reflete duas coisas: (1) a qualidade técnica do modelo para escrita longa, raciocínio passo a passo e código complexo — perfis típicos do trabalho de pesquisa; e (2) o foco da empresa em explicabilidade e controle, valores que se alinham bem ao rigor científico.
+
+## A família de modelos Claude
+
+Vimos no capítulo *O que é IA generativa* (M1-B1-01) que **modelo**, **aplicação** e **versão** são coisas distintas. A Anthropic mantém uma família de modelos com foco diferente, organizados em três camadas:
+
+| Modelo | Foco | Quando usar |
+|---|---|---|
+| **Claude Opus** | Raciocínio profundo, tarefas longas e complexas | Escrita de artigo, análise estatística, refatoração grande de projeto |
+| **Claude Sonnet** | Equilíbrio entre velocidade e qualidade | Uso diário em pesquisa, edição de texto, análises rápidas |
+| **Claude Haiku** | Resposta muito rápida, tarefas simples | Buscas no projeto, perguntas pontuais, classificação leve |
+
+A escolha entre Opus, Sonnet e Haiku às vezes é feita por você (escolhendo no menu da aplicação) e às vezes é feita pelo agente automaticamente — em Claude Code, por exemplo, tarefas leves podem ser delegadas a Haiku enquanto Opus cuida do trabalho pesado, otimizando custo e velocidade.
+
+::: {.callout-note}
+## Versão e geração
+A geração atual no momento de escrita deste curso é **Claude 4.x** (Opus 4.7, Sonnet 4.6, Haiku 4.5). A Anthropic costuma lançar versões novas a cada poucos meses, e o app Claude Desktop e o Claude Code passam a usar a versão mais nova automaticamente, sem que você precise reinstalar nada (lembre a discussão de modelo × aplicação × versão em M1-B1-01).
+:::
+
+## Os três modos do Claude Desktop
+
+No Módulo 0 você instalou o **Claude Desktop**, o aplicativo que reúne os três modos de uso do Claude em uma única interface:
+
+```
+                ┌──────────────────────────────┐
+                │      Claude Desktop          │
+                │   (um único aplicativo)      │
+                ├──────────────────────────────┤
+                │  Chat    │  Cowork  │  Code  │
+                └──────────────────────────────┘
+                   conversa   pesquisa  programação
+```
+
+Cada modo corresponde a um perfil de tarefa diferente. Vale entender o que faz sentido em cada um — porque a escolha entre eles muda completamente como o trabalho flui.
+
+### Chat — o modo conversacional clássico
+
+O modo **Chat** é o equivalente desktop do que você usa em [claude.ai](https://claude.ai): uma conversa baseada em texto, sem agência sobre o seu computador. É o **chatbot** que descrevemos no capítulo anterior.
+
+Em pesquisa, Chat é útil para:
+
+- Tirar dúvidas conceituais ("o que é regressão de Cox e quando aplicar?");
+- Brainstorm inicial ("estou pensando em estudar X — que desenhos viáveis?");
+- Revisão de texto curto ("revise este parágrafo do método para clareza");
+- Tradução, resumo, paráfrase — tarefas onde o output cabe na própria janela.
+
+Limite: para qualquer coisa que precise interagir com arquivos do seu projeto, o Chat **não vai poder ajudar diretamente** — você teria que copiar e colar de volta.
+
+### Cowork — agente para trabalho de conhecimento
+
+O **Cowork** é o agente do Claude para **trabalho de escritório/pesquisa que não envolve código diretamente**: ler documentos, organizar referências, redigir manuscritos, manipular planilhas, conectar-se a serviços como Google Drive, Slack, Outlook.
+
+Diferente de um chatbot convencional, o Cowork opera diretamente no computador do usuário — criando arquivos, executando código, navegando na web e interagindo com aplicativos — tudo a partir de instruções em linguagem natural. Para um pesquisador, isso significa poder descrever o que deseja (uma análise exploratória de uma planilha, um resumo organizado de uma pasta de PDFs, um manuscrito reformatado para outra revista) e ver o resultado sendo construído em tempo real.
+
+O Cowork brilha especialmente em:
+
+- **Revisão de literatura** — entregar 30 PDFs e pedir um resumo organizado por tema, com tabela comparativa de métodos.
+- **Bibliografia** — puxar referências do Zotero, normalizar formato, exportar BibTeX.
+- **Análise exploratória em planilha** — abrir um Excel, gerar gráficos descritivos, identificar *outliers*, sem você precisar escrever fórmula.
+- **Escrita de seções de manuscrito** — a partir do seu rascunho de Métodos, gerar a versão para a revista X seguindo o *style guide*.
+- **Comunicação** — esboços de e-mail para coautores, slides para uma reunião, resumo executivo de progresso.
+
+::: {.callout-warning}
+## Cowork exige plano pago
+Como vimos no capítulo de instalação, **Cowork está disponível somente nos planos pagos** do Claude (Pro, Max, Team, Enterprise). Se você não tem assinatura, ainda assim instale o Claude Desktop — Chat e Code já cobrem boa parte do que faremos. Cowork será opcional ao longo do curso, com alternativas indicadas onde necessário.
+:::
+
+### Claude Code — agente para trabalho com código
+
+O **Claude Code** é o agente do Claude para **trabalho com código e arquivos de projeto**: editar scripts, rodar análises, mexer em Quarto, fazer *commits* no Git. Está disponível tanto como **modo dentro do Claude Desktop** (que você instalou no Módulo 0) quanto como **ferramenta de linha de comando independente** — caminho oficial para quem está no Linux ou prefere ficar no terminal.
+
+Em pesquisa, Claude Code brilha em:
+
+- **Estruturar o projeto** — gerar a árvore de pastas e o `_quarto.yml` do zero (lembre o exemplo do capítulo de Prompts, M1-B1-04).
+- **Análises em R ou Python** — escrever o script, rodar, ler o output, ajustar.
+- **Edição de capítulos do Quarto** — manter consistência entre arquivos, refatorar nome de variável em todo o projeto.
+- **Operações de Git** — *commit* organizado, mensagens descritivas, resolução de conflitos.
+- **Refatoração grande** — "renomeia esta variável em todos os scripts", "mova este código repetido para uma função".
+
+::: {.callout-tip}
+## Cowork ou Claude Code: como decidir
+A regra prática é simples:
+
+- **Texto, planilha, PDF, documento externo** → Cowork.
+- **Arquivos do seu projeto Quarto, R, Python, Git** → Claude Code.
+
+Quando ambos servem (escrever a discussão de um artigo, por exemplo), use o que estiver mais à mão. Como compartilham seu histórico de conversa e seus arquivos pelo Claude Desktop, não há "perda" em alternar.
+:::
+
+## O caso *SaaSpocalypse*: por que isso importa
+
+A magnitude do impacto agêntico do Claude ficou particularmente visível no mercado financeiro. Conforme reportado pela newsletter *The Batch* do DeepLearning.AI [@thebatch2026saaspocalypse], o lançamento do Cowork em janeiro de 2026, seguido de plugins *open-source* voltados a funções corporativas (gestão de calendário, análise financeira, revisão jurídica, marketing, entre outros), provocou uma queda de 25% no S&P Software & Services Index — um evento que analistas do mercado apelidaram de **"SaaSpocalypse"**.
+
+![Queda do S&P Software & Services Select Industry Index entre 19 e 24 de fevereiro de 2026, período que reflete o impacto do lançamento do Claude Cowork e seus plugins no mercado de software. Fonte: The Batch / DeepLearning.AI [@thebatch2026saaspocalypse].](../../images/SeP_Softwaree_Services_Select_Industri_Index.png){#fig-sp-index fig-alt="Gráfico do S&P Software & Services Select Industry Index mostrando queda de aproximadamente 13.200 para 12.400 pontos entre 19 e 24 de fevereiro de 2026."}
+
+A leitura por trás do número é simples: investidores avaliaram que muito do que empresas de software cobravam por mês — gestão de tarefas, edição colaborativa, automação de fluxos — passou a ser executável diretamente por um agente como o Cowork, com alguns plugins. Equipes pequenas, ou mesmo indivíduos, passam a produzir o que antes exigia uma assinatura SaaS recorrente ou um time técnico inteiro.
+
+::: {.callout-tip}
+## O que isso significa para a pesquisa
+Se o Cowork foi capaz de abalar o mercado de software corporativo, o impacto na pesquisa científica vai na mesma direção: tarefas que antes exigiam **conhecimento técnico especializado** (programação, manipulação de dados, design de site, edição de documento técnico) ficaram **acessíveis por descrição em linguagem natural**. A barreira técnica de entrada caiu drasticamente — e quem aprende a operar bem com agentes ganha autonomia para fazer mais sozinho do que era possível há dois anos.
+:::
+
+## Limites específicos do Claude
+
+Para fechar com honestidade — três pontos onde o Claude, mesmo sendo a recomendação do curso, tem limites a conhecer:
+
+- **Cutoff de conhecimento.** O modelo é treinado com dados até uma data específica (no momento de escrita deste curso, fim de 2025 / início de 2026 para a linha Opus 4.x). Eventos posteriores ele só conhece se você fornecer no prompt ou se o agente buscar na web (Cowork tem essa capacidade nativa; Claude Code precisa de configuração).
+- **Plano e cota.** Mesmo no plano Pro, há limite de mensagens por janela de tempo. Em sessões longas de Claude Code é comum bater o teto e precisar aguardar. Quem usa intensivamente em projetos grandes costuma migrar para o plano Max.
+- **Cautela em domínios sensíveis.** Por priorizar segurança, o Claude às vezes recusa ou suaviza demais respostas em temas clínicos delicados. Em pesquisa médica isso aparece, por exemplo, em discussões sobre dosagem de medicamentos, suicídio, ou desfechos terminais — o modelo pode ser excessivamente cauteloso. A solução costuma ser dar **contexto explícito** no prompt: "sou médico psiquiatra escrevendo para um artigo científico em revista revisada por pares".
+
+## O que vem a seguir
+
+O próximo capítulo trata da alternativa principal ao Claude no espaço dos agentes profissionais: **Codex**, da OpenAI — um agente em CLI que ocupa um espaço parecido ao do Claude Code, mas com filosofia e ergonomia diferentes. Se você não pretende comparar agentes, pode pular direto para o Bloco 3 (*Terminal*); se quer entender o cenário, vale a leitura.

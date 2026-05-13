@@ -1,0 +1,121 @@
+---
+title: "Apresentação do projeto integrador"
+sidebar: bloco-aplicacao
+---
+
+Você chegou ao último Módulo. Os três anteriores construíram conhecimento em camadas — fundamentos (Módulo 1), análise e escrita técnica (Módulo 2), publicação e reprodutibilidade (Módulo 3). Cada Módulo deu uma peça. **Este Módulo final pede que você una as peças num único projeto concreto** — algo que você possa usar com seus alunos, mostrar a colegas, ou apresentar como exemplo do que aprendeu.
+
+O nome técnico para esse tipo de exercício terminal de curso é **Capstone**. A palavra vem da arquitetura medieval: a *capstone* é a pedra final colocada no topo de um arco, a peça que "fecha" a estrutura e dá ao arco sua estabilidade. Sem a capstone, o arco continua de pé enquanto há suporte; com a capstone, sustenta-se sozinho. **A metáfora é apropriada**: você produziu várias pedras durante o curso (entendeu Quarto, dominou vibe coding, configurou Git, depositou no Zenodo). O Capstone é a pedra que une tudo num arco que sustenta seu próprio trabalho.
+
+Este capítulo apresenta o que será feito nos próximos cinco capítulos. **Não é um tutorial passo-a-passo** — é um plano de projeto que você executa no seu próprio ritmo, com seus próprios dados ou tema, ao longo das semanas que precisar.
+
+## O objetivo
+
+Produzir um **compêndio reprodutível em Quarto + GitHub Pages + Zenodo** que documente uma análise de dados em saúde — usando vibe coding em todo o caminho — e que sirva como **material didático** para você usar com seus alunos.
+
+Os dois propósitos são deliberadamente combinados:
+
+1. **Para você:** prática integradora de tudo o que aprendeu. Sair do "li sobre" para "fiz".
+2. **Para sua docência:** material concreto, reaproveitável, que demonstra ao aluno o fluxo completo de pesquisa reproduzível em saúde.
+
+A consequência é que o **tema do projeto importa**. Não é exercício abstrato — é peça que vai entrar na sua disciplina, residência, grupo de pesquisa, ou apresentação. Escolha algo que você de fato vai usar.
+
+## O que será produzido
+
+Ao fim do Capstone, você terá:
+
+- **Um repositório GitHub público** com estrutura de compêndio (vimos em M4-B2-03).
+- **Um site Quarto navegável publicado via GitHub Pages** que serve como portal do projeto.
+- **Um relatório técnico em formato de artigo** (`.qmd` que renderiza em PDF) com Métodos, Resultados e Discussão.
+- **Um snapshot do compêndio depositado no Zenodo com DOI** permanente.
+- **Um plano didático** descrevendo como você vai usar o material com alunos.
+
+Total estimado de tempo: **15-25 horas** distribuídas em duas a quatro semanas, dependendo da complexidade do tema escolhido e da fluência adquirida no curso.
+
+## Estrutura do projeto
+
+O Capstone segue cinco etapas, uma por capítulo deste Bloco:
+
+| Capítulo | Etapa | Tempo aproximado |
+|---|---|---|
+| `02-tema-dataset` | **Escolha do tema e do dataset** | 2-4 horas |
+| `03-planejamento` | **Planejamento da análise** (pergunta, SAP, estrutura) | 2-4 horas |
+| `04-execucao` | **Execução via vibe coding** | 6-12 horas |
+| `05-publicacao` | **Publicação reprodutível** (Git, Pages, Zenodo) | 3-5 horas |
+| `06-retrospectiva` | **Retrospectiva e plano didático** | 2 horas |
+
+A divisão é **sugestiva, não rígida**. Em projeto pequeno (dataset simples, análise direta), você passa mais rápido por algumas etapas. Em projeto ambicioso (cohort grande, análise complexa), passa mais devagar.
+
+## Como o Capstone integra os módulos anteriores
+
+Para clarificar a "capstone" como pedra final que une o arco — em qual fase do projeto você invoca o que aprendeu:
+
+| Módulo | Bloco | O que entra no Capstone |
+|---|---|---|
+| **0** | Setup | Você usa as ferramentas que instalou (R, Python, Quarto, Positron, Git, Zotero) |
+| **1** | Conceitos Fundamentais (B1) | LGPD para dados sensíveis; documentar uso de IA conforme ICMJE |
+| **1** | Agentes de IA (B2) | Claude Cowork ou Code para escrever a análise via vibe coding; AGENTS.md no projeto |
+| **1** | Terminal (B3) | Comandos básicos para inicializar projeto, rodar `git`, `quarto render` |
+| **1** | Ambientes (B4) | Positron como IDE principal |
+| **1** | Convenções técnicas (B5) | Nomeação kebab-case/snake_case; YAML em `_quarto.yml`; encoding UTF-8 |
+| **2** | Markdown e Quarto (B1) | Documento `.qmd` com texto + código + citações + LaTeX para fórmulas |
+| **2** | Dados (B2) | Formato apropriado (CSV/Parquet); tidy data; estrutura `dados/raw/processed` |
+| **2** | Python e R (B3) | Análise via vibe coding; ambientes isolados (`renv` ou `uv`); Quarto integrado |
+| **3** | Git e GitHub (B1) | Repositório versionado; site via GitHub Pages |
+| **3** | Reprodutibilidade (B2) | FAIR; compêndio; Zenodo + DOI |
+
+Note que o Capstone pratica **simultaneamente coisas de todos os módulos**. Não é exercício isolado. É a costura que torna explícita a coerência do que você aprendeu.
+
+## A dimensão didática
+
+O ponto que diferencia este Capstone de um trabalho final tradicional é a **ênfase deliberada em docência**. Você não está produzindo apenas para si — está produzindo **algo que vai usar com seus alunos**.
+
+Isso muda decisões em cada etapa:
+
+- **Tema:** escolha algo que sirva de exemplo em sala de aula, não só seu projeto pessoal.
+- **Dataset:** prefira **dado público brasileiro** (DataSUS, IBGE, gov.br) sempre que possível — alunos podem refazer.
+- **Documentação:** seja generoso em comentários e explicações inline. Pense no aluno futuro lendo o código.
+- **Plano didático:** o último capítulo pede que você descreva como vai usar o material — qual aula, qual exercício, qual avaliação.
+
+Isso é o que torna o Capstone parte do **ciclo amplo de impacto** do curso. Você aprende e replica. Seus alunos veem trabalho real, não tutorial. Em alguns deles, o exemplo dispara vontade de fazer o próprio. **A multiplicação acontece**.
+
+## Pré-requisitos
+
+Antes de começar o Capstone, certifique-se de que você tem:
+
+- [x] Ambiente de desenvolvimento funcional (R, Python, Quarto, Positron — Módulo 0).
+- [x] Conta no GitHub configurada com SSH ou GitHub Desktop (Manual de Git/GitHub do autor [@alvarenga2025github]).
+- [x] Conta no Zotero com biblioteca minimamente populada (M0-B1-04 + M3-B1-03).
+- [x] Conta no Zenodo conectada ao GitHub (M4-B2-04).
+- [x] Familiaridade básica com Git/commit/push.
+- [x] Familiaridade básica com vibe coding via Claude Cowork ou Code (M1-B2 + M3-B3-14).
+
+Se algum desses pontos está fraco, pause e revisite o Módulo correspondente antes de seguir.
+
+## Trabalho individual ou em grupo?
+
+A maioria dos pesquisadores fará o Capstone **individualmente** — é seu projeto, sua docência, seu portfólio. Mas há cenários onde **trabalho em dupla ou pequeno grupo** funciona bem:
+
+- **Pares co-orientadores** que querem material conjunto para um curso compartilhado.
+- **Equipe de laboratório** desenvolvendo material que vai virar compêndio do grupo.
+- **Departamento que adota o curso institucionalmente** — vários professores produzindo Capstones que se complementam (cada um cobre uma área da disciplina).
+
+Em grupo, o desafio extra é Git colaborativo (PRs, *merge conflicts*) — mas isso é benefício didático extra: você ensina aos alunos depois.
+
+## Conexão com IA — uso pesado e documentado
+
+Vibe coding é **central no Capstone**, não opcional. A expectativa é que você use Claude Cowork, Claude Code, Gemini CLI ou Codex CLI **continuamente** ao longo do projeto — para escrever scripts, gerar tabelas, propor figuras, redigir Métodos, sugerir mensagens de commit.
+
+Como o curso defende ciência aberta e transparência conforme ICMJE, **documente o uso**. No relatório técnico final, inclua seção curta sobre "Uso de IA neste projeto" descrevendo:
+
+- Quais agentes foram usados (e versões dos modelos).
+- Em que etapas a IA contribuiu mais.
+- Que decisões foram humanas (escolha do tema, decisão metodológica, validação de resultados).
+
+Esse hábito é o que separa pesquisa séria de pesquisa que apenas "deixou a IA fazer". A IA fez muito; **você decidiu o quê e validou**.
+
+## O que vem a seguir
+
+A primeira etapa, no próximo capítulo, é a **escolha do tema e do dataset** — provavelmente a decisão mais importante do Capstone. Sem tema bem escolhido, o resto fica mecânico. Com tema bem escolhido, todo o trabalho ganha sentido.
+
+→ [02 · Escolha do tema e do dataset](02-tema-dataset.qmd)

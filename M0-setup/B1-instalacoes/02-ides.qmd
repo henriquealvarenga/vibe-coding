@@ -1,0 +1,282 @@
+---
+title: "Instalando Positron, RStudio e VS Code"
+---
+
+No capítulo anterior você instalou as **linguagens** (R e Python). Agora vamos instalar o **lugar onde o trabalho acontece**: a IDE.
+
+## O que é uma IDE
+
+**IDE** é a sigla em inglês para *Integrated Development Environment* — em português, **ambiente integrado de desenvolvimento**. Na prática, é um aplicativo que reúne em uma só janela tudo o que se precisa para escrever e executar código:
+
+- um **editor** de texto especializado (com cores diferentes para cada tipo de palavra do código, autocompletar, identação automática);
+- um **console** para executar o código e ver os resultados;
+- um painel de **arquivos** do projeto;
+- um painel para visualizar **dados** e **gráficos** gerados pelas análises;
+- ferramentas de **depuração** (encontrar e corrigir erros).
+
+Sem uma IDE, é possível programar — mas você teria que abrir um editor de texto comum (como o Bloco de Notas), salvar o código, abrir o terminal, executar manualmente, voltar ao editor para corrigir, e assim por diante. A IDE encurta esse ciclo: você escreve, executa e vê o resultado **na mesma janela**, em segundos.
+
+## As três IDEs deste curso
+
+Há dezenas de IDEs no mercado. Para este curso vamos focar em três, todas **gratuitas** e disponíveis para macOS, Windows e Linux:
+
+| IDE | Quem mantém | Foco | Recomendação |
+|---|---|---|---|
+| **Positron** | Posit PBC | R + Python + Quarto, ciência de dados | **Recomendada** ⭐ |
+| **RStudio** | Posit PBC | R (suporte limitado a Python) | Opcional |
+| **VS Code** | Microsoft | Propósito geral, qualquer linguagem | Opcional |
+
+::: {.callout-tip}
+## Recomendação direta: instale apenas o Positron
+Para a maior parte dos alunos do curso, **instalar somente o Positron já é o bastante**. Ele cobre R, Python e Quarto em uma única interface, e foi desenhado para o tipo de trabalho que faremos aqui.
+
+RStudio e VS Code estão neste capítulo como **opcionais**, para casos específicos descritos mais adiante. Se você tem dúvida sobre instalar ou não, **pule** essas duas seções por agora — você pode voltar e instalar depois, quando sentir necessidade.
+:::
+
+## Positron (recomendado)
+
+### O que é o Positron
+
+**Positron** é uma IDE de "ciência de dados" lançada pela [Posit PBC](https://posit.co) — a mesma empresa que criou o **RStudio**. Ele combina duas linhagens importantes:
+
+- **A base técnica vem do VS Code.** Mais precisamente, do **Code OSS** (a versão de código aberto sobre a qual a Microsoft constrói o VS Code). Isso significa que se você já viu alguém usando o VS Code, o Positron vai parecer **muito familiar**: a mesma estrutura de menus, atalhos, paleta de comandos e suporte a extensões.
+
+- **A experiência de uso herda do RStudio.** Painéis dedicados para visualizar dados, plots e o ambiente de variáveis; suporte profundo a Quarto; foco em fluxos científicos. É como se a Posit tivesse pegado o que o RStudio fazia bem e reconstruído por cima de uma base mais moderna.
+
+```
+                                  ┌──────────────────┐
+                                  │  Positron        │
+                                  │  (Posit PBC)     │
+                                  └────────▲─────────┘
+                                           │ herda foco em ciência de dados
+                                           │ do RStudio
+   ┌──────────────┐    base       ┌────────┴─────────┐
+   │  Code OSS    │ ────────────▶ │  VS Code         │
+   │  (open       │   da própria  │  (Microsoft)     │
+   │   source)    │   Microsoft   └──────────────────┘
+   └──────────────┘
+```
+
+A grande diferença prática para o VS Code é que o Positron **já vem pronto para R e Python sem instalar nada extra**. No VS Code, você precisaria adicionar manualmente a extensão de R, a extensão de Python, configurar interpretadores, etc. No Positron, você abre e os dois consoles já estão lá.
+
+### Por que recomendamos para este curso
+
+- **R e Python lado a lado** sem precisar configurar nada.
+- **Quarto integrado** — quando chegarmos no Módulo 2, tudo o que envolve relatórios e publicação reprodutível funciona por padrão.
+- **Visualizador de dados** (Data Explorer) embutido — abre uma planilha interativa com filtros e estatísticas para qualquer tabela carregada na sessão.
+- Por ser baseado no VS Code, **aceita milhares de extensões** já existentes (via [Open VSX](https://open-vsx.org), um repositório aberto de extensões).
+
+### Instalando o Positron
+
+::: {.panel-tabset group="os"}
+
+#### macOS
+
+**Passo 1. Confira o chip do seu Mac.**
+
+Como no capítulo anterior: menu Apple ( ) → **Sobre Este Mac**. Se aparecer "Chip Apple M1/M2/M3/M4...", você tem **Apple Silicon**. Se aparecer "Processador Intel...", você tem um **Mac Intel**.
+
+**Passo 2. Baixe o instalador.**
+
+1. Acesse [positron.posit.co/download.html](https://positron.posit.co/download.html).
+2. Na seção **macOS**, baixe o arquivo `.dmg` correspondente:
+   - **Apple Silicon:** arquivo com `arm64` no nome (ex.: `Positron-2026.04.1-10-arm64.dmg`).
+   - **Intel:** arquivo com `x64` no nome.
+
+**Passo 3. Instale.**
+
+1. Na pasta Downloads, dê duplo-clique no arquivo `.dmg`.
+2. Abre uma janela com o ícone do Positron e um atalho para a pasta **Applications**.
+3. **Arraste o ícone do Positron** para cima do ícone da pasta Applications. (Esse é o gesto-padrão de instalação no Mac — você está copiando o app para a pasta de aplicativos.)
+4. Feche a janela e ejete o `.dmg` (clique com o botão direito no ícone do disco no Finder e escolha **Ejetar**).
+
+**Passo 4. Abra o Positron.**
+
+1. Vá em **Aplicativos → Positron**.
+2. Na primeira execução, o macOS pode mostrar um aviso ("Positron foi baixado da internet, deseja realmente abrir?"). Clique em **Abrir**.
+3. Aguarde alguns segundos. O Positron abre com uma tela de boas-vindas.
+
+#### Windows
+
+**Passo 1. Baixe o instalador.**
+
+1. Acesse [positron.posit.co/download.html](https://positron.posit.co/download.html).
+2. Na seção **Windows**, baixe a versão **User Installer x64** (`Positron-...-UserSetup-x64.exe`). Essa versão é instalada na sua pasta pessoal e **não exige privilégios de administrador** — recomendada para a maior parte dos usuários.
+
+::: {.callout-tip collapse="true"}
+## Diferença entre User Installer e System Installer
+- **User Installer**: instala somente para o seu usuário. Não pede senha de administrador. **Recomendado** para uso pessoal.
+- **System Installer**: instala para todos os usuários do computador. Pede senha de administrador. Útil em laboratórios e computadores compartilhados.
+
+Se seu computador é só seu, use sempre o User Installer.
+:::
+
+**Passo 2. Instale.**
+
+1. Na pasta Downloads, dê duplo-clique no `.exe`.
+2. Se o Windows mostrar um aviso ("O Windows protegeu o computador"), clique em **Mais informações** e depois em **Executar mesmo assim**.
+3. Aceite o contrato de licença (**I Agree** / **Concordo**).
+4. Mantenha o caminho de instalação padrão e clique **Next** / **Avançar**.
+5. Mantenha as opções padrão de atalhos e clique **Next** / **Avançar**.
+6. Clique em **Install** / **Instalar**.
+7. Quando concluído, deixe marcada a caixa **Launch Positron** / **Abrir Positron** e clique em **Finish** / **Concluir**.
+
+#### Linux
+
+A Posit fornece pacotes nativos `.deb` (Debian/Ubuntu) e `.rpm` (Fedora/Red Hat). O caminho varia conforme sua distribuição.
+
+**Passo 1. Baixe o pacote correto.**
+
+1. Acesse [positron.posit.co/download.html](https://positron.posit.co/download.html).
+2. Na seção **Linux**:
+   - **Ubuntu / Debian / Linux Mint / Pop!_OS:** baixe o arquivo `.deb` (versão `x64` para máquinas comuns; `arm64` para máquinas ARM).
+   - **Fedora / RHEL / Rocky / CentOS:** baixe o arquivo `.rpm`.
+
+**Passo 2. Instale.**
+
+Abra o terminal, navegue até a pasta de Downloads e execute o comando da sua distribuição (ajuste o nome do arquivo para o que foi baixado):
+
+**Ubuntu / Debian e derivadas:**
+
+```bash
+cd ~/Downloads
+sudo apt install ./Positron-2026.04.1-10-x64.deb
+```
+
+**Fedora e derivadas:**
+
+```bash
+cd ~/Downloads
+sudo dnf install ./Positron-2026.04.1-10-x64.rpm
+```
+
+**Passo 3. Abra o Positron.**
+
+Procure por **Positron** no menu de aplicativos do seu ambiente gráfico, ou execute no terminal:
+
+```bash
+positron
+```
+
+:::
+
+### Primeira abertura do Positron
+
+Quando o Positron abre pela primeira vez, você vê uma janela em três regiões principais:
+
+- **À esquerda**, um painel com **arquivos** do projeto (vazio ainda).
+- **No centro**, a área de **edição** (vazia até você abrir um arquivo).
+- **À direita e embaixo**, painéis de **console** (R e Python), **plots**, **variáveis** e **ajuda**.
+
+Você não precisa fazer nada agora — só conferir que abriu. Vamos aprender a usar o Positron de fato no Módulo 1, capítulo de **Ambientes de trabalho**, e a partir do Módulo 2 ele será nossa ferramenta principal.
+
+## RStudio (opcional)
+
+::: {.callout-note}
+## Esta seção é opcional
+Você **não precisa** instalar o RStudio se já instalou o Positron. Pule diretamente para o capítulo seguinte. Esta seção fica disponível para quem se enquadra em um dos casos abaixo.
+:::
+
+### Quando o RStudio faz sentido
+
+- Você **já usa RStudio** há anos e não quer trocar de ambiente agora — RStudio continua funcional e plenamente suportado pela Posit.
+- Sua **instituição padronizou RStudio** (algumas universidades e laboratórios têm o **Posit Workbench**, versão corporativa, e exigem que todo material didático rode lá).
+- Você só vai usar **R**, sem nenhuma necessidade de Python ou Quarto avançado.
+
+Para todos os outros casos, **prefira o Positron** — ele é o "RStudio do futuro" feito pela mesma empresa.
+
+### Instalando o RStudio
+
+::: {.panel-tabset group="os"}
+
+#### macOS
+
+1. Acesse [posit.co/download/rstudio-desktop](https://posit.co/download/rstudio-desktop).
+2. A página detecta seu sistema automaticamente e mostra o botão de download para macOS.
+3. Baixe o arquivo `.dmg`.
+4. Duplo-clique no `.dmg`, arraste o ícone do RStudio para a pasta **Applications**, ejete o disco.
+5. Abra **Aplicativos → RStudio**.
+
+#### Windows
+
+1. Acesse [posit.co/download/rstudio-desktop](https://posit.co/download/rstudio-desktop).
+2. A página detecta o Windows e mostra o botão de download.
+3. Baixe o `.exe` e execute (clique em **Sim** se o Windows pedir confirmação).
+4. Avance pelo assistente mantendo as opções padrão.
+5. Abra pelo **Menu Iniciar → RStudio**.
+
+#### Linux
+
+1. Acesse [posit.co/download/rstudio-desktop](https://posit.co/download/rstudio-desktop).
+2. A página lista pacotes `.deb` e `.rpm` para diferentes distribuições.
+3. Baixe o pacote correspondente à sua distro e instale com `sudo apt install ./<arquivo>.deb` (Ubuntu/Debian) ou `sudo dnf install ./<arquivo>.rpm` (Fedora).
+4. Abra pelo menu de aplicativos.
+
+:::
+
+## VS Code (opcional)
+
+::: {.callout-note}
+## Esta seção também é opcional
+Como o Positron já é construído sobre o VS Code, instalar o VS Code separadamente é redundante para a maior parte dos alunos. Pule esta seção, a menos que você se enquadre nos casos abaixo.
+:::
+
+### Quando o VS Code faz sentido
+
+- Você é **desenvolvedor profissional** e vai usar a mesma máquina para programar em outras linguagens (JavaScript, Java, C++, Go, Rust...) — o VS Code é mais "neutro" do que o Positron, que é otimizado para ciência de dados.
+- Você precisa de **extensões disponíveis somente no Marketplace oficial da Microsoft** (algumas extensões pagas e corporativas não estão no Open VSX, que é o repositório usado pelo Positron).
+- Você quer **comparar** os dois e decidir.
+
+Para o público deste curso (pesquisa científica em saúde, focada em R + Python + Quarto), **Positron resolve melhor**. Mas o VS Code é um excelente segundo IDE para ter à mão.
+
+### Instalando o VS Code
+
+::: {.panel-tabset group="os"}
+
+#### macOS
+
+1. Acesse [code.visualstudio.com](https://code.visualstudio.com).
+2. Clique em **Download for macOS** (a página detecta automaticamente seu chip — Apple Silicon ou Intel).
+3. O arquivo baixado é um `.zip`. Duplo-clique para descompactar — vai aparecer o aplicativo **Visual Studio Code**.
+4. Arraste o aplicativo para a pasta **Aplicativos**.
+5. Abra pelo Launchpad ou pela pasta Aplicativos.
+
+#### Windows
+
+1. Acesse [code.visualstudio.com](https://code.visualstudio.com).
+2. Clique em **Download for Windows**.
+3. Execute o `.exe` baixado. Aceite o contrato de licença e mantenha as opções padrão.
+4. Recomendamos **deixar marcada** a opção *"Add to PATH"* na tela de "Tarefas Adicionais" — facilita usar o VS Code a partir do terminal mais adiante.
+5. Abra pelo **Menu Iniciar → Visual Studio Code**.
+
+#### Linux
+
+A Microsoft fornece repositórios oficiais para Linux. O caminho mais simples por distribuição:
+
+**Ubuntu / Debian:**
+
+```bash
+sudo apt update
+sudo apt install wget gpg
+wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
+echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list > /dev/null
+sudo apt update
+sudo apt install code
+```
+
+**Fedora / RHEL:**
+
+```bash
+sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
+sudo sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
+sudo dnf install code
+```
+
+Para outras distros, consulte [code.visualstudio.com/docs/setup/linux](https://code.visualstudio.com/docs/setup/linux).
+
+:::
+
+## O que vem a seguir
+
+Com R, Python e o Positron instalados, seu computador já tem o essencial para análise de dados. O próximo capítulo cobre o **Quarto** — o sistema que vamos usar para escrever relatórios, artigos e até este próprio site.
