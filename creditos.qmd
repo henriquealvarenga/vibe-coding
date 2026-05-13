@@ -14,7 +14,6 @@ Médico psiquiatra. Professor do Curso de Medicina da Universidade Federal de S�
 [🌐 Site pessoal](https://www.henriquealvarenga.com){.contact-link}
 [📧 E-mail](mailto:henrique@ufsj.edu.br){.contact-link}
 [🆔 ORCID](https://orcid.org/0000-0001-9799-5240){.contact-link}
-[📚 GitHub](https://github.com/halvarengda){.contact-link}
 :::
 
 ## Metodologia e tecnologias

@@ -55,8 +55,6 @@ Este curso foi escrito em **menos de um mês**. O tamanho do site — cinco mód
 
 A redação dos capítulos foi feita em colaboração intensa com o **Claude Cowork** e o **Claude Code**, da Anthropic. O fluxo: eu defini estrutura, escopo, sequência didática, voz, e cada decisão editorial; os agentes de IA produziram o texto sob essa direção, capítulo por capítulo, em interação contínua. Decisões controvertidas (incluir ou excluir um tema, escolher um exemplo em vez de outro, manter ou cortar uma seção, deletar oito capítulos do M3-B3 porque a tese central tornava redundantes) sempre foram humanas; a redação propriamente dita teve participação massiva de IA.
 
-Conforme as recomendações do **ICMJE** (*International Committee of Medical Journal Editors*) — e o que o próprio curso ensina no capítulo M1-B1-05 sobre documentar uso de IA em pesquisa — esse uso é declarado **explicitamente aqui no prefácio** em vez de em cada capítulo individual. Modelos utilizados: principalmente **Claude Opus 4.6** e **Claude Sonnet 4.6** (Anthropic), em sessões via Claude Cowork e Claude Code rodando no Positron.
-
 
 ## Material em construção
 
