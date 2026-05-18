@@ -45,3 +45,6 @@ __pycache__/
 /references/PDFs/
 
 **/*.quarto_ipynb
+
+# ─── Claude Code ───
+.claude/
